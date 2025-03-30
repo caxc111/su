@@ -1,0 +1,35 @@
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 96rpx;
+  background: white;
+  display: flex;
+  box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10rpx 0;
+}
+
+.tab-bar-item image {
+  width: 54rpx;
+  height: 54rpx;
+}
+
+.tab-bar-text {
+  font-size: 20rpx;
+  margin-top: 2rpx;
+  color: #7A7E83;
+}
+
+.tab-bar-item.active .tab-bar-text {
+  color: #FF9F0A;
+}

@@ -1,0 +1,71 @@
+<view class="container">
+  <view class="header">
+    <view class="title">我的成就</view>
+  </view>
+  
+  <view class="reward-card">
+    <view class="flower-count">
+      <view class="count-number">{{totalFlowers}}</view>
+      <view class="count-label">小红花总数</view>
+    </view>
+    
+    <view class="flower-display">
+      <block wx:for="{{totalFlowers > 15 ? 15 : totalFlowers}}" wx:key="index">
+        <image src="/images/flower.png" class="flower-icon"></image>
+      </block>
+      <view class="more-flowers" wx:if="{{totalFlowers > 15}}">+{{totalFlowers - 15}}</view>
+    </view>
+  </view>
+  
+  <view class="stats-section">
+    <view class="stats-title">朗读统计</view>
+    
+    <view class="stats-grid">
+      <view class="stats-item">
+        <view class="stats-value">{{readingStats.totalCount || 0}}</view>
+        <view class="stats-label">总朗读次数</view>
+      </view>
+      <view class="stats-item">
+        <view class="stats-value">{{readingStats.perfectCount || 0}}</view>
+        <view class="stats-label">满分次数</view>
+      </view>
+      <view class="stats-item">
+        <view class="stats-value">{{readingStats.averageScore || 0}}</view>
+        <view class="stats-label">平均分数</view>
+      </view>
+      <view class="stats-item">
+        <view class="stats-value">{{readingStats.articleCount || 0}}</view>
+        <view class="stats-label">已读文章</view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="history-section">
+    <view class="section-title">最近朗读</view>
+    
+    <view class="history-list">
+      <block wx:for="{{recentReadings}}" wx:key="_id">
+        <view class="history-item">
+          <view class="history-info">
+            <view class="history-title">{{item.title}}</view>
+            <view class="history-date">{{item.createTime}}</view>
+          </view>
+          
+          <view class="history-score">
+            <text class="score-number">{{item.score}}</text>
+            <text class="score-unit">分</text>
+            <view class="mini-flowers">
+              <block wx:for="{{item.flowerCount}}" wx:key="index" wx:for-item="flower">
+                <image src="/images/flower.png" class="mini-flower"></image>
+              </block>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <view class="empty-tip" wx:if="{{recentReadings.length === 0}}">
+      还没有朗读记录，去读一篇文章吧！
+    </view>
+  </view>
+</view>

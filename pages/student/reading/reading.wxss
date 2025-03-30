@@ -1,0 +1,151 @@
+.article-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.article-title {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.article-content {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  line-height: 1.8;
+  font-size: 16px;
+  min-height: 50vh;
+}
+
+.reading-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.record-hint {
+  margin-bottom: 16px;
+  color: #666;
+}
+
+.record-hint.recording {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.record-button {
+  width: 60px;
+  height: 60px;
+  background-color: #aff157;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.record-button.recording {
+  background-color: #ff4d4f;
+}
+
+.record-button image {
+  width: 30px;
+  height: 30px;
+}
+
+/* 结果弹窗 */
+.result-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.result-content {
+  width: 80%;
+  max-width: 300px;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.result-title {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.score-display {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  margin-bottom: 15px;
+}
+
+.score-number {
+  font-size: 36px;
+  font-weight: bold;
+  color: #ff9500;
+}
+
+.score-unit {
+  font-size: 16px;
+  color: #666;
+  margin-left: 5px;
+}
+
+.result-flowers {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.result-feedback {
+  text-align: center;
+  color: #666;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+}
+
+.result-detail {
+  margin-bottom: 20px;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.detail-label {
+  color: #666;
+}
+
+.detail-value {
+  font-weight: 500;
+}
+
+.result-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.result-actions button {
+  flex: 1;
+  margin: 0 5px;
+  font-size: 14px;
+}

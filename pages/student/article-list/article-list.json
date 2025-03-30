@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "阅读练习",
+  "usingComponents": {
+    "article-card": "/components/article-card/article-card"
+  }
+}

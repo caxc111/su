@@ -1,0 +1,18 @@
+/**app.wxss**/
+@import './styles/common.wxss';
+
+/* 全局基础样式 */
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+  font-size: 28rpx;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f8f8f8;
+  box-sizing: border-box;
+}
+
+view, text, scroll-view, swiper, button, image, textarea, input {
+  box-sizing: border-box;
+}

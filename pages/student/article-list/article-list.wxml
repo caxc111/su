@@ -1,0 +1,59 @@
+<view class="container">
+  <view class="header">
+    <view class="user-info">
+      <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}"></image>
+      <view class="welcome">你好，{{userInfo.nickName || '同学'}}</view>
+    </view>
+    <view class="flower-count">
+      <image src="/images/flower.png" mode="aspectFit"></image>
+      <text>{{flowerCount || 0}}</text>
+    </view>
+  </view>
+  
+  <view class="filter-bar">
+    <view class="filter-item {{selectedLanguage === 'all' ? 'active' : ''}}" data-language="all" bindtap="onLanguageChange">全部</view>
+    <view class="filter-item {{selectedLanguage === 'zh' ? 'active' : ''}}" data-language="zh" bindtap="onLanguageChange">中文</view>
+    <view class="filter-item {{selectedLanguage === 'en' ? 'active' : ''}}" data-language="en" bindtap="onLanguageChange">英文</view>
+  </view>
+  
+  <view class="article-list">
+    <block wx:for="{{articles}}" wx:key="id">
+      <view class="article-card" bindtap="goToReading" data-id="{{item.id}}">
+        <view class="article-header">
+          <view class="lang-tag {{item.language === 'zh' ? 'zh' : 'en'}}">
+            {{item.language === 'zh' ? '中文' : '英文'}}
+          </view>
+          <view class="article-title">{{item.title}}</view>
+        </view>
+        
+        <view class="article-preview-section">
+          <view class="article-preview-label">预览内容：</view>
+          <view class="article-preview">
+            <text decode="true" user-select="true">{{item.content}}</text>
+          </view>
+        </view>
+        
+        <view class="article-footer">
+          <view class="article-info">
+            <text>{{item.wordCount || 0}}字</text>
+            <text>难度：{{item.level || '适中'}}</text>
+          </view>
+          
+          <view class="read-status">
+            <block wx:if="{{item.hasRead}}">
+              <view class="read-tag">已读</view>
+              <view class="score-tag">{{item.lastScore || 0}}分</view>
+            </block>
+            <block wx:else>
+              <view class="unread-tag">未读</view>
+            </block>
+          </view>
+        </view>
+      </view>
+    </block>
+  </view>
+  
+  <view class="empty-tip" wx:if="{{articles.length === 0}}">
+    暂时没有{{selectedLanguage === 'zh' ? '中文' : selectedLanguage === 'en' ? '英文' : ''}}文章，请等待家长添加
+  </view>
+</view>

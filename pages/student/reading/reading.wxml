@@ -1,0 +1,70 @@
+<view class="container">
+  <view class="article-header">
+    <view class="article-title">{{article.title}}</view>
+    <view class="lang-tag {{article.language === 'zh' ? 'zh' : 'en'}}">
+      {{article.language === 'zh' ? '中文' : '英文'}}
+    </view>
+  </view>
+  
+  <view class="article-content">
+    <text user-select="true">{{article.content}}</text>
+  </view>
+  
+  <view class="reading-controls">
+    <view class="record-hint" wx:if="{{recordStatus === 'idle'}}">
+      点击下方按钮开始朗读
+    </view>
+    <view class="record-hint recording" wx:if="{{recordStatus === 'recording'}}">
+      正在录音...{{recordTime}}秒
+    </view>
+    <view class="record-hint" wx:if="{{recordStatus === 'processing'}}">
+      正在识别并评分...
+    </view>
+    
+    <view class="record-button {{recordStatus === 'recording' ? 'recording' : ''}}" bindtap="toggleRecording">
+      <image src="{{recordStatus === 'recording' ? '/images/stop.png' : '/images/mic.png'}}"></image>
+    </view>
+  </view>
+  
+  <!-- 评分结果弹窗 -->
+  <view class="result-modal" wx:if="{{showResult}}">
+    <view class="result-content">
+      <view class="result-title">朗读评分</view>
+      
+      <view class="score-display">
+        <view class="score-number">{{readingResult.score}}</view>
+        <view class="score-unit">分</view>
+      </view>
+      
+      <view class="result-flowers">
+        <block wx:for="{{readingResult.flowers}}" wx:key="index">
+          <image src="/images/flower.png" class="flower-icon"></image>
+        </block>
+      </view>
+      
+      <view class="result-feedback">
+        <text>{{readingResult.feedback}}</text>
+      </view>
+      
+      <view class="result-detail">
+        <view class="detail-item">
+          <text class="detail-label">正确字数：</text>
+          <text class="detail-value">{{readingResult.correctWords}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">总字数：</text>
+          <text class="detail-value">{{readingResult.totalWords}}</text>
+        </view>
+        <view class="detail-item">
+          <text class="detail-label">正确率：</text>
+          <text class="detail-value">{{readingResult.accuracy}}%</text>
+        </view>
+      </view>
+      
+      <view class="result-actions">
+        <button class="btn-secondary" bindtap="tryAgain">再试一次</button>
+        <button class="btn-primary" bindtap="finishReading">完成</button>
+      </view>
+    </view>
+  </view>
+</view>

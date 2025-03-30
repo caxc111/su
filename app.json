@@ -1,0 +1,44 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/register/register",
+    "pages/role-select/role-select",
+    "pages/student/article-list/article-list",
+    "pages/student/reading/reading",
+    "pages/student/reward-wall/reward-wall",
+    "pages/parent/article-manage/article-manage",
+    "pages/parent/student-progress/student-progress"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#fff",
+    "navigationBarTitleText": "顺口成章",
+    "navigationBarTextStyle": "black"
+  },
+  "tabBar": {
+    "color": "#7A7E83",
+    "selectedColor": "#FF9F0A",
+    "backgroundColor": "#ffffff",
+    "list": [
+      {
+        "pagePath": "pages/student/article-list/article-list",
+        "text": "阅读练习"
+      },
+      {
+        "pagePath": "pages/student/reward-wall/reward-wall",
+        "text": "奖励墙"
+      },
+      {
+        "pagePath": "pages/parent/article-manage/article-manage",
+        "text": "文章管理"
+      },
+      {
+        "pagePath": "pages/parent/student-progress/student-progress",
+        "text": "学习进度"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

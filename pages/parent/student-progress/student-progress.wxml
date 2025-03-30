@@ -1,0 +1,67 @@
+<view class="container">
+  <view class="header">
+    <view class="title">学习进度</view>
+  </view>
+  
+  <view class="student-selector" wx:if="{{students.length > 1}}">
+    <picker bindchange="onStudentChange" value="{{currentStudentIndex}}" range="{{students}}" range-key="nickName">
+      <view class="picker">
+        当前学生：{{students[currentStudentIndex].nickName}} <text class="arrow-down">▼</text>
+      </view>
+    </picker>
+  </view>
+  
+  <view class="overview-card">
+    <view class="overview-title">学习概览</view>
+    
+    <view class="overview-grid">
+      <view class="overview-item">
+        <view class="overview-value">{{progressData.totalReadings || 0}}</view>
+        <view class="overview-label">总朗读次数</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">{{progressData.articlesRead || 0}}</view>
+        <view class="overview-label">已读文章</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">{{progressData.averageScore || 0}}</view>
+        <view class="overview-label">平均分数</view>
+      </view>
+      <view class="overview-item">
+        <view class="overview-value">{{progressData.totalFlowers || 0}}</view>
+        <view class="overview-label">小红花</view>
+      </view>
+    </view>
+  </view>
+  
+  <view class="recent-activity">
+    <view class="section-title">最近活动</view>
+    
+    <view class="timeline">
+      <block wx:for="{{recentActivities}}" wx:key="_id">
+        <view class="timeline-item">
+          <view class="timeline-date">{{item.dateStr}}</view>
+          <view class="timeline-content">
+            <view class="timeline-title">{{item.title}}</view>
+            <view class="timeline-detail">
+              得分: <text class="highlight">{{item.score}}分</text> | 
+              小红花: <text class="highlight">{{item.flowerCount}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+    
+    <view class="empty-tip" wx:if="{{recentActivities.length === 0}}">
+      暂无活动记录
+    </view>
+  </view>
+  
+  <view class="performance-chart">
+    <view class="section-title">学习表现</view>
+    
+    <view class="chart-container">
+      <view class="placeholder-chart">图表区域（实际项目中可集成图表组件）</view>
+    </view>
+  </view>
+</view>

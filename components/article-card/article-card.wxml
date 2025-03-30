@@ -1,0 +1,19 @@
+<view class="article-card">
+  <view class="article-header">
+    <view class="lang-tag {{article.language === 'zh' ? 'zh' : 'en'}}">
+      {{article.language === 'zh' ? '中文' : '英文'}}
+    </view>
+    <view class="article-title">{{article.title}}</view>
+  </view>
+  
+  <view class="article-preview">{{article.content.substring(0, 50)}}...</view>
+  
+  <view class="article-footer">
+    <view class="article-info">
+      <slot name="info"></slot>
+    </view>
+    <view class="article-actions">
+      <slot name="actions"></slot>
+    </view>
+  </view>
+</view>
