@@ -6,16 +6,39 @@
     </view>
   </view>
   
+  <!-- 添加测试模式开关 -->
+  <view class="test-mode-switch">
+    <switch checked="{{testMode}}" bindchange="toggleTestMode" color="#aff157"/>
+    <text>测试模式</text>
+    <view class="test-mode-tip" wx:if="{{testMode}}">已开启测试模式，错误检测更灵敏</view>
+  </view>
+  
   <view class="article-content">
     <text user-select="true">{{article.content}}</text>
+  </view>
+  
+  <!-- 添加文章长度信息 -->
+  <view class="article-info">
+    <view class="info-item">
+      <text class="info-label">字数：</text>
+      <text class="info-value">{{article.wordCount}}</text>
+    </view>
+    <view class="info-item">
+      <text class="info-label">预计朗读时间：</text>
+      <text class="info-value">{{article.language === 'zh' ? Math.ceil(article.wordCount / 3) : Math.ceil(article.wordCount / 2)}}秒</text>
+    </view>
   </view>
   
   <view class="reading-controls">
     <view class="record-hint" wx:if="{{recordStatus === 'idle'}}">
       点击下方按钮开始朗读
     </view>
-    <view class="record-hint recording" wx:if="{{recordStatus === 'recording'}}">
-      正在录音...{{recordTime}}秒
+    <view class="record-status" wx:if="{{recordStatus === 'recording'}}">
+      <view class="record-hint recording">正在录音...{{recordTime}}秒</view>
+      <view class="record-time-limit">最长录音时间：120秒 (剩余{{120 - recordTime}}秒)</view>
+      <view class="progress-bar-bg">
+        <view class="progress-bar" style="width: {{recordTime / 120 * 100}}%;"></view>
+      </view>
     </view>
     <view class="record-hint" wx:if="{{recordStatus === 'processing'}}">
       正在识别并评分...
@@ -44,6 +67,20 @@
       
       <view class="result-feedback">
         <text>{{readingResult.feedback}}</text>
+      </view>
+      
+      <view class="error-display">
+        <view class="error-title">朗读错误标记</view>
+        <view class="error-content">
+          <rich-text nodes="{{readingResult.contentWithErrors}}"></rich-text>
+        </view>
+        <view class="error-hint">红色标记为发音不准确部分</view>
+      </view>
+      
+      <view class="recognized-text">
+        <view class="recognized-title">识别结果</view>
+        <view class="recognized-content">{{readingResult.recognizedText}}</view>
+        <view class="recognized-hint">↑ 这是系统听到的内容，可能与原文不同</view>
       </view>
       
       <view class="result-detail">

@@ -114,11 +114,23 @@ Page({
       confirmColor: '#ff0000',
       success: res => {
         if (res.confirm) {
-          // 模拟删除操作
+          const app = getApp();
+          
+          // 更新本地数据
           const updatedArticles = this.data.articles.filter(item => item._id !== id);
           this.setData({
             articles: updatedArticles
           });
+          
+          // 同步更新全局数据
+          app.globalData.articles = app.globalData.articles.filter(item => item.id !== id);
+          
+          // 保存到本地存储，确保重启后数据保持
+          app.saveArticlesToStorage();
+          
+          // 记录删除操作
+          console.log('文章已删除，ID:', id);
+          console.log('剩余文章数:', app.globalData.articles.length);
           
           wx.showToast({
             title: '删除成功'
@@ -215,6 +227,9 @@ Page({
           level: language === 'zh' ? '初级' : 'Elementary'
         });
       }
+      
+      // 保存到本地存储，确保重启后数据保持
+      app.saveArticlesToStorage();
       
       this.setData({
         articles: updatedArticles,
