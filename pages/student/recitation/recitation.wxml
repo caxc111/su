@@ -1,4 +1,4 @@
-<!-- 背诵模式页面 -->
+<!-- 背诵模式页面 - 优化版 -->
 <view class="recitation-container">
   <!-- 调试信息 - 已隐藏 -->
   <!-- <view class="debug-info" wx:if="{{debug}}">
@@ -16,10 +16,10 @@
     <button class="primary-btn" bindtap="backToList">返回列表</button>
   </view>
 
-  <!-- 预览阶段 - 简化版 -->
+  <!-- 预览阶段 -->
   <view class="article-preview" wx:elif="{{article && recitationPhase === 'preview'}}">
-    <view class="article-title">{{article.title || '文章标题'}}</view>
-    <view class="article-content">{{article.content || '文章内容'}}</view>
+    <view class="article-title">{{article.title}}</view>
+    <view class="article-content">{{article.content}}</view>
     
     <view class="preview-controls">
       <button class="primary-btn" bindtap="startRecitation">开始背诵</button>
@@ -27,17 +27,17 @@
     </view>
   </view>
 
-  <!-- 背诵中阶段 - 简化版本，删除复杂版本 -->
+  <!-- 背诵中阶段 -->
   <view class="simplified-reciting" wx:elif="{{recitationPhase === 'reciting'}}">
     <view class="recitation-hint">
-      <text>{{recitationHint || '请开始背诵'}}</text>
+      <text>{{recitationHint}}</text>
     </view>
     
     <!-- 录音时间显示 -->
-    <view class="recording-status" wx:if="{{recordStatus === 'recording'}}">
+    <block wx:if="{{recordStatus === 'recording'}}">
       <view class="recording-time">录音中... {{recordTime}}秒</view>
       <view class="recording-limit">最长录音时间：60秒 (剩余{{60 - recordTime}}秒)</view>
-    </view>
+    </block>
     
     <view class="recording-controls">
       <button class="record-btn {{recordStatus === 'recording' ? 'recording' : ''}}" bindtap="toggleRecording">
@@ -46,7 +46,7 @@
     </view>
   </view>
   
-  <!-- 背诵结果阶段 - 新增完成界面 -->
+  <!-- 背诵结果阶段 -->
   <view class="recitation-complete" wx:elif="{{recitationPhase === 'complete'}}">
     <!-- 评分部分 -->
     <view class="result-score-section">
@@ -65,16 +65,17 @@
         准确率: {{readingResult.accuracy}}% ({{readingResult.correctWords}}/{{readingResult.totalWords}})
       </view>
       
-      <!-- 错误标记内容 -->
-      <view class="result-content-section">
-        <view class="section-title">原文内容</view>
-        <rich-text class="marked-content" nodes="{{readingResult.contentWithErrors}}"></rich-text>
-      </view>
-      
-      <!-- 识别内容 -->
-      <view class="result-content-section">
-        <view class="section-title">识别内容</view>
-        <view class="recognized-text">{{readingResult.recognizedText}}</view>
+      <!-- 内容比较 -->
+      <view class="result-contents">
+        <view class="result-content-section">
+          <view class="section-title">原文内容</view>
+          <rich-text class="marked-content" nodes="{{readingResult.contentWithErrors}}"></rich-text>
+        </view>
+        
+        <view class="result-content-section">
+          <view class="section-title">识别内容</view>
+          <view class="recognized-text">{{readingResult.recognizedText}}</view>
+        </view>
       </view>
     </view>
     

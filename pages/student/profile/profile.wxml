@@ -82,12 +82,12 @@
     <view class="loading">加载中...</view>
   </view>
   
-  <!-- 烟花动画容器 -->
-  <view class="fireworks-container" wx:if="{{showFireworks}}">
+  <!-- 金币下落动画容器 -->
+  <view class="fireworks-container" wx:if="{{showFireworks}}" catch:tap="clearFireworks">
     <image wx:for="{{fireworks}}" wx:key="id" 
            src="/images/firework{{item.type}}.png" 
-           class="firework" 
-           style="top: {{item.top}}rpx; left: {{item.left}}rpx; animation-delay: {{item.delay}}s;">
+           class="{{item.isCenter ? 'center-firework' : 'firework'}}" 
+           style="top: {{item.top}}px; left: {{item.left}}px; transform: rotate({{item.rotation}}deg) scale({{item.scale || 1}}); opacity: {{item.isCenter ? item.opacity : (item.landed && item.fallSpeed === 0 ? 0.9 : 1)}};">
     </image>
   </view>
 </view>

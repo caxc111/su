@@ -17,10 +17,13 @@ Page({
     totalFlowers: 0,     // 总的小红花数量
     showFireworks: false, // 是否显示烟花动画
     fireworks: [],       // 烟花数组
+    fireworksStopped: false, // 标记金币是否已静止
     isLoading: true,
     hasUserInfo: false,
     inviteCode: '0L3L',
-    assistValue: 0
+    assistValue: 0,
+    fadeIntervals: [],
+    lastTapTime: 0
   },
 
   /**
@@ -215,49 +218,416 @@ Page({
     }
   },
 
-  // 显示烟花动画
+  // 显示烟花动画（现在是金币下落效果）
   showFlowerAnimation() {
-    // 生成25-35个随机位置的烟花，进一步增加数量
-    const count = Math.floor(Math.random() * 11) + 25;
+    // 更多的金币，更好的视觉效果
+    const count = Math.floor(Math.random() * 30) + 80; // 80-110个金币，再次大幅增加数量
     const fireworks = [];
     
-    // 第一波烟花
+    // 获取屏幕宽度和高度，用于随机分布
+    const systemInfo = wx.getSystemInfoSync();
+    const screenWidth = systemInfo.windowWidth;
+    const screenHeight = systemInfo.windowHeight;
+    
+    // 从上方掉落的金币生成 - 确保覆盖整个屏幕宽度
     for (let i = 0; i < count; i++) {
+      // 确保金币均匀分布在整个屏幕宽度上
+      const section = screenWidth / 8;
+      const sectionIndex = i % 8;
+      const xPosMin = section * sectionIndex;
+      const xPosMax = section * (sectionIndex + 1);
+      const xPos = Math.floor(Math.random() * (xPosMax - xPosMin)) + xPosMin;
+      
       fireworks.push({
         id: i,
-        top: Math.random() * 1300, // 随机位置，覆盖全屏
-        left: Math.random() * 750, 
-        type: Math.floor(Math.random() * 3) + 1, // 1-3种烟花类型
-        delay: Math.random() * 2.0 // 更长的随机延迟，增加层次感
+        // 随机起始位置，确保高度充分错开
+        top: -Math.floor(Math.random() * 1500) - 50, // -50到-1550之间随机高度，更大的高度范围确保金币下落时间错开
+        left: xPos, // 均匀分布的水平位置
+        type: Math.floor(Math.random() * 3) + 1, // 1-3种图片类型，使用firework1.png, firework2.png, firework3.png
+        // 每个金币的自然下落参数
+        fallSpeed: Math.floor(Math.random() * 3) + 2, // 2-4的初始速度，速度更多样化
+        rotation: Math.floor(Math.random() * 360), // 初始旋转角度
+        rotationSpeed: (Math.random() * 2 - 1) * 3, // 旋转速度，可正可负
+        horizontalMove: (Math.random() * 6 - 3), // 横向漂移范围，-3到3之间
+        horizontalWave: {
+          amplitude: Math.random() * 2 + 0.5, // 横向波动幅度
+          frequency: Math.random() * 0.05 + 0.01, // 横向波动频率
+          phase: Math.random() * Math.PI * 2 // 随机相位
+        },
+        scale: 0.7 + Math.random() * 0.5, // 调整随机大小，0.7-1.2，提高最小尺寸
+        landed: false, // 是否已经落地
+        landingPosition: screenHeight - 20 - Math.random() * 50, // 落地位置在屏幕底部20-70像素范围内，形成堆叠效果
+        hasBounced: false // 新增金币是否已弹跳
       });
     }
+    
+    // 添加中央烟花效果
+    const centerFirework = {
+      id: 'center-firework',
+      top: screenHeight / 2 - 80, // 调整居中位置
+      left: screenWidth / 2 - 80, // 调整居中位置
+      type: 0, // 使用firework0.png作为中央烟花
+      rotation: 0,
+      scale: 1.2, // 初始大小更小，便于平滑放大
+      isCenter: true, // 标记为中央烟花
+      opacity: 0, // 初始透明
+      animationStep: 0, // 动画步骤
+      delay: 500, // 延迟时间
+      maxScale: 2.0 // 最大缩放比例
+    };
+    
+    // 添加第二朵烟花，位置和大小不同
+    const centerFirework2 = {
+      id: 'center-firework-2',
+      top: screenHeight / 2 - 150, // 靠屏幕上方
+      left: screenWidth / 3 - 60, // 靠屏幕左侧
+      type: 0, // 使用firework0.png
+      rotation: 15, // 略微旋转
+      scale: 1.0, // 初始更小
+      isCenter: true, // 标记为中央烟花
+      opacity: 0, // 初始透明
+      animationStep: 0, // 动画步骤
+      delay: 800, // 延迟出现
+      maxScale: 1.8 // 最大缩放比例
+    };
+    
+    // 添加第三朵烟花，位置和大小不同
+    const centerFirework3 = {
+      id: 'center-firework-3',
+      top: screenHeight / 3 * 2 - 70, // 靠屏幕下方
+      left: screenWidth / 3 * 2 - 60, // 靠屏幕右侧
+      type: 0, // 使用firework0.png
+      rotation: -10, // 略微旋转
+      scale: 0.8, // 初始更小
+      isCenter: true, // 标记为中央烟花
+      opacity: 0, // 初始透明
+      animationStep: 0, // 动画步骤
+      delay: 1100, // 延迟出现
+      maxScale: 1.6 // 最大缩放比例
+    };
+    
+    fireworks.push(centerFirework);
+    fireworks.push(centerFirework2);
+    fireworks.push(centerFirework3);
     
     this.setData({
       showFireworks: true,
       fireworks: fireworks
     });
     
-    // 播放音效 - 可以多次播放形成连续爆炸声
-    const playSound = () => {
-      const innerAudioContext = wx.createInnerAudioContext();
-      innerAudioContext.src = '/audio/firework.mp3';
-      innerAudioContext.play();
+    // 播放烟花音效 (mp3)
+    const fireworkSound = wx.createInnerAudioContext();
+    fireworkSound.src = '/audio/firework.mp3';
+    fireworkSound.play();
+    this.fireworkSound = fireworkSound;
+    
+    // 播放金币音效 (wav)
+    const coinSound = wx.createInnerAudioContext();
+    coinSound.src = '/audio/firework.wav';
+    coinSound.play();
+    this.coinSound = coinSound;
+    
+    // 金币下落动画
+    let animationFrameId;
+    let animationTime = 0;
+    
+    // 中央烟花效果初始化 - 使用已有变量避免重复声明
+    this.fadeIntervals = this.fadeIntervals || [];
+    
+    for (let i = 0; i < fireworks.length; i++) {
+      const fireObj = fireworks[i];
+      
+      if (fireObj && fireObj.isCenter) {
+        // 初始设置为透明
+        fireObj.opacity = 0;
+        
+        // 为每朵烟花创建独立的动画
+        ((firework) => {
+          const delayTimer = setTimeout(() => {
+            // 逐步显示并放大
+            let growStep = 0;
+            const growInterval = setInterval(() => {
+              growStep += 1;
+              firework.opacity = Math.min(1, growStep / 5); // 5步完成淡入
+              
+              // 根据烟花的maxScale属性决定最大放大比例，默认为2.0
+              const maxScale = firework.maxScale || 2.0;
+              firework.scale = firework.scale + (growStep * (maxScale - firework.scale) / 5);
+              
+              this.setData({
+                fireworks
+              });
+              
+              if (growStep >= 5) {
+                clearInterval(growInterval);
+              }
+            }, 100);
+            
+            // 将淡入定时器保存到fadeIntervals数组中
+            this.fadeIntervals.push(growInterval);
+            
+            // 淡出效果
+            const fadeOutTimer = setTimeout(() => {
+              // 创建渐变消失效果，每100ms更新一次透明度
+              let fadeOutStep = 10; // 10步完成淡出
+              const fadeInterval = setInterval(() => {
+                fadeOutStep -= 1;
+                firework.opacity = fadeOutStep / 10; // 将步骤转换为0-1之间的透明度
+                
+                this.setData({
+                  fireworks
+                });
+                
+                if (fadeOutStep <= 0) {
+                  clearInterval(fadeInterval);
+                  // 从fadeIntervals中移除该计时器
+                  if (this.fadeIntervals) {
+                    const index = this.fadeIntervals.indexOf(fadeInterval);
+                    if (index > -1) {
+                      this.fadeIntervals.splice(index, 1);
+                    }
+                  }
+                }
+              }, 100);
+              
+              // 将淡出定时器保存到fadeIntervals数组中
+              this.fadeIntervals.push(fadeInterval);
+            }, 1000);
+            
+            // 保存淡出定时器
+            this.fadeIntervals.push(fadeOutTimer);
+          }, firework.delay || 500);  // 使用烟花自定义的延迟时间
+          
+          // 保存延迟定时器
+          this.fadeIntervals.push(delayTimer);
+        })(fireObj);
+      }
+    }
+    
+    // 使用requestAnimationFrame API代替setTimeout
+    const animateFireworks = () => {
+      const movingFireworks = [...this.data.fireworks];
+      let anyActive = false;
+      
+      // 每帧增加动画时间
+      animationTime += 16;
+      
+      for (let i = 0; i < movingFireworks.length; i++) {
+        const coin = movingFireworks[i];
+        
+        // 跳过中央烟花的更新，由animation实例处理
+        if (coin.isCenter) continue;
+        
+        if (!coin.landed) {
+          // 更新位置
+          coin.top += coin.fallSpeed;
+          coin.fallSpeed += 0.1; // 重力加速度
+          
+          // 旋转更新
+          coin.rotation += coin.rotationSpeed;
+          
+          // 横向移动 - 包括横向漂移和波动效果
+          const waveOffset = coin.horizontalWave.amplitude * 
+                            Math.sin(animationTime * coin.horizontalWave.frequency + coin.horizontalWave.phase);
+          coin.left += coin.horizontalMove + waveOffset;
+          
+          // 检查是否落地
+          if (coin.top > coin.landingPosition) {
+            coin.landed = true;
+            
+            // 根据不同的金币类型给予不同的弹跳效果，让场景更生动
+            if (!coin.hasBounced) {
+              coin.hasBounced = true;
+              
+              // 反向弹起，弹跳幅度随机（15%-35%）
+              const bounceStrength = 0.15 + Math.random() * 0.2;
+              coin.fallSpeed = -coin.fallSpeed * bounceStrength;
+              
+              // 保持一部分水平移动，减少但不完全消除
+              coin.horizontalMove = coin.horizontalMove * 0.5;
+              coin.rotationSpeed = coin.rotationSpeed * 0.7;
+            } else {
+              // 第二次及以后的落地，停止所有动作
+              coin.fallSpeed = 0;
+              coin.horizontalMove = 0;
+              coin.rotationSpeed = 0;
+            }
+            
+            // 确保金币不会超出底部
+            coin.top = coin.landingPosition;
+          }
+          
+          anyActive = true;
+        }
+      }
+      
+      // 每3帧才更新一次setData，减少消息处理时间
+      if (animationTime % 80 === 0) { // 增加更新间隔，从48ms到80ms
+        this.setData({
+          fireworks: movingFireworks
+        });
+      }
+      
+      // 如果还有活动的金币，继续动画
+      if (anyActive) {
+        this.animationFrameId = setTimeout(() => {
+          animateFireworks();
+        }, 16);
+      } else {
+        // 所有金币都停止了，保持显示直到用户点击
+        // 过滤掉中央烟花和任何具有.type属性的小烟花，只保留金币（type为1,2,3）
+        const newFireworks = this.data.fireworks.filter(f => {
+          // 保留所有type为1,2,3的金币，移除type为0的烟花
+          return !f.isCenter && f.type > 0;
+        });
+        
+        this.setData({
+          fireworks: newFireworks,
+          fireworksStopped: true // 标记金币已停止
+        });
+        
+        // 显示提示，告知用户可以点击清除
+        wx.showToast({
+          title: '点击屏幕继续',
+          icon: 'none',
+          duration: 1500
+        });
+        
+        // 只释放音频资源，保留金币显示
+        if (this.coinSound) this.coinSound.destroy();
+        if (this.fireworkSound) this.fireworkSound.destroy();
+      }
     };
     
-    // 初始播放
-    playSound();
+    // 使用requestAnimationFrame开始动画
+    this.animationFrameId = setTimeout(() => {
+      animateFireworks();
+    }, 16);
     
-    // 1秒后再播放一次
-    setTimeout(playSound, 1000);
-    
-    // 2秒后再播放一次
-    setTimeout(playSound, 2000);
-    
-    // 延长显示时间至6.5秒
-    setTimeout(() => {
-      this.setData({
-        showFireworks: false
+    // 设置清理函数
+    const clearAnimations = () => {
+      if (animationFrameId) {
+        clearTimeout(animationFrameId);
+      }
+      
+      // 清理所有可能存在的定时器
+      const fadeIntervals = this.fadeIntervals || [];
+      fadeIntervals.forEach(intervalId => {
+        clearInterval(intervalId);
       });
-    }, 6500);
+      this.fadeIntervals = [];
+      
+      // 释放音频资源
+      if (this.coinSound) this.coinSound.destroy();
+      if (this.fireworkSound) this.fireworkSound.destroy();
+    };
+    
+    // 用户不点击的情况下金币最长保留60秒
+    setTimeout(() => {
+      // 只在金币已停止且仍在显示时清理
+      if (this.data.fireworksStopped && this.data.showFireworks) {
+        this.clearFireworks();
+      }
+    }, 60000); // 60秒
   },
+
+  // requestAnimationFrame polyfill for 微信小程序
+  requestAnimationFrame: function(callback) {
+    const systemInfo = wx.getSystemInfoSync();
+    const fps = 60;
+    const frameDuration = 1000 / fps;  // 假设60fps
+    
+    return setTimeout(function() {
+      const timestamp = Date.now();
+      callback(timestamp);
+    }, frameDuration);
+  },
+  
+  // cancelAnimationFrame polyfill for 微信小程序
+  cancelAnimationFrame: function(id) {
+    clearTimeout(id);
+  },
+
+  // 清理烟花效果 - 当用户点击停止的金币时触发
+  clearFireworks() {
+    console.log('尝试清理烟花效果', this.data.fireworksStopped, this.data.showFireworks);
+    
+    // 无论金币是否静止，都允许清理
+    this.setData({
+      showFireworks: false,
+      fireworks: [],
+      fireworksStopped: false
+    });
+    
+    // 清理所有可能存在的定时器
+    const fadeIntervals = this.fadeIntervals || [];
+    fadeIntervals.forEach(intervalId => {
+      clearInterval(intervalId);
+    });
+    this.fadeIntervals = [];
+    
+    // 清理任何可能的setTimeout
+    if (this.animationFrameId) {
+      clearTimeout(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    
+    // 检查并清理任何可能存在的音频实例
+    if (this.coinSound) {
+      this.coinSound.destroy();
+      this.coinSound = null;
+    }
+    
+    if (this.fireworkSound) {
+      this.fireworkSound.destroy();
+      this.fireworkSound = null;
+    }
+    
+    console.log('烟花效果已清理');
+  },
+
+  // 只是为了确保点击按钮肯定能清理
+  onClearButtonTap(e) {
+    console.log('清除按钮被点击');
+    
+    // 阻止事件冒泡，避免触发容器的点击事件
+    if (e && e.stopPropagation) {
+      e.stopPropagation();
+    }
+    
+    // 直接重置所有状态，不经过清理逻辑
+    this.setData({
+      showFireworks: false,
+      fireworks: [],
+      fireworksStopped: false
+    });
+    
+    // 清理计时器和音频资源
+    if (this.animationFrameId) {
+      clearTimeout(this.animationFrameId);
+      this.animationFrameId = null;
+    }
+    
+    const fadeIntervals = this.fadeIntervals || [];
+    fadeIntervals.forEach(intervalId => {
+      clearInterval(intervalId);
+    });
+    this.fadeIntervals = [];
+    
+    if (this.coinSound) {
+      this.coinSound.destroy();
+      this.coinSound = null;
+    }
+    
+    if (this.fireworkSound) {
+      this.fireworkSound.destroy();
+      this.fireworkSound = null;
+    }
+    
+    wx.showToast({
+      title: '清除成功',
+      icon: 'success',
+      duration: 1500
+    });
+  }
 })

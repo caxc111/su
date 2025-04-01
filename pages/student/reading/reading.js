@@ -134,11 +134,11 @@ Page({
       };
       
       // 更新状态
-      this.setData({
-        recordStatus: 'recording',
-        recordTime: 0
-      });
-      
+    this.setData({
+      recordStatus: 'recording',
+      recordTime: 0
+    });
+    
       // 开始录音
       this.recorderManager.start(options);
       console.log('开始录音，参数:', options);

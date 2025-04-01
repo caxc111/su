@@ -1,11 +1,10 @@
-// 背诵模式页面 - 完整版
+// 背诵模式页面 - 优化版
 Page({
   data: {
     article: null,
     recitationPhase: 'preview',
     isLoading: true,
     error: null,
-    debug: '页面初始化中...',
     recordStatus: 'idle', // 'idle', 'recording'
     recordTime: 0,
     recordTimer: null,
@@ -16,37 +15,31 @@ Page({
       correctWords: 0,
       totalWords: 0,
       accuracy: 0,
-      contentWithErrors: '', // 带错误标记的内容
-      recognizedText: '' // 识别出的文本
+      contentWithErrors: '',
+      recognizedText: ''
     }
   },
   
   onLoad: function(options) {
-    // 添加调试信息
-    this.setData({
-      debug: '页面加载中...\n参数: ' + JSON.stringify(options)
-    });
-    
     // 获取文章ID
     const articleId = options.id;
     if (!articleId) {
       this.setData({
         error: '未指定文章ID',
-        isLoading: false,
-        debug: this.data.debug + '\n错误: 未指定文章ID'
+        isLoading: false
       });
       return;
     }
     
-    // 尝试加载文章
-    this.loadArticleSimple(articleId);
+    // 加载文章
+    this.loadArticle(articleId);
   },
   
-  // 简化版加载文章
-  loadArticleSimple: function(articleId) {
+  // 加载文章数据
+  loadArticle: function(articleId) {
     try {
-      // 直接使用示例数据
-      const articles = [
+      // 基础示例数据
+      const defaultArticles = [
         {
           id: '1',
           title: '静夜思',
@@ -61,28 +54,15 @@ Page({
         }
       ];
       
-      // 尝试从应用程序全局状态获取文章
-      let appArticles = [];
-      try {
-        const app = getApp();
-        if (app && app.globalData && app.globalData.articles) {
-          appArticles = app.globalData.articles;
-        }
-      } catch (err) {
-        console.error('获取全局文章数据失败', err);
-      }
+      // 尝试从全局状态获取文章
+      const app = getApp();
+      const appArticles = (app && app.globalData && app.globalData.articles) || [];
       
       // 合并文章数据
-      const allArticles = appArticles.length > 0 ? appArticles : articles;
+      const allArticles = appArticles.length > 0 ? appArticles : defaultArticles;
       
-      // 查找文章或使用第一篇
-      let article = null;
-      for (let i = 0; i < allArticles.length; i++) {
-        if (String(allArticles[i].id) === String(articleId)) {
-          article = allArticles[i];
-          break;
-        }
-      }
+      // 查找文章
+      let article = allArticles.find(a => String(a.id) === String(articleId));
       
       // 如果找不到指定文章，使用第一篇
       if (!article && allArticles.length > 0) {
@@ -92,21 +72,18 @@ Page({
       if (article) {
         this.setData({
           article: article,
-          isLoading: false,
-          debug: this.data.debug + '\n文章加载成功: ' + article.title
+          isLoading: false
         });
       } else {
         this.setData({
           error: '找不到指定文章',
-          isLoading: false,
-          debug: this.data.debug + '\n错误: 找不到指定文章'
+          isLoading: false
         });
       }
     } catch (error) {
       this.setData({
         error: '加载文章失败: ' + error.message,
-        isLoading: false,
-        debug: this.data.debug + '\n错误: ' + error.message
+        isLoading: false
       });
     }
   },
@@ -116,8 +93,7 @@ Page({
     this.setData({
       recitationPhase: 'reciting',
       recitationHint: '请开始背诵此文章',
-      recordStatus: 'idle',
-      debug: this.data.debug + '\n开始背诵: ' + this.data.article.title
+      recordStatus: 'idle'
     });
   },
   
@@ -126,13 +102,11 @@ Page({
     wx.navigateBack();
   },
   
-  // 录音控制 - 修改为开始/停止录音切换
+  // 录音控制 - 开始/停止录音切换
   toggleRecording: function() {
     if (this.data.recordStatus === 'idle') {
-      // 开始录音
       this.startRecording();
     } else {
-      // 停止录音
       this.stopRecording();
     }
   },
@@ -177,8 +151,6 @@ Page({
     });
     
     recorderManager.onStop((res) => {
-      console.log('停止录音', res);
-      
       // 清除计时器
       if (this.data.recordTimer) {
         clearInterval(this.data.recordTimer);
@@ -189,7 +161,7 @@ Page({
         recordTimer: null
       });
       
-      // 调用真实的语音识别
+      // 处理录音文件
       if (res.tempFilePath) {
         this.processAudioFile(res.tempFilePath);
       } else {
@@ -217,7 +189,6 @@ Page({
   
   // 停止录音
   stopRecording: function() {
-    // 获取录音管理器并停止录音
     wx.getRecorderManager().stop();
   },
   
@@ -229,7 +200,7 @@ Page({
       mask: true
     });
     
-    // 模拟背诵评分过程，不依赖外部服务
+    // 模拟背诵评分过程
     setTimeout(() => {
       wx.hideLoading();
       
@@ -314,7 +285,6 @@ Page({
     
     // 计算错字数
     const missingCount = originalWords.length - minLength;
-    const extraCount = recognizedWords.length - minLength;
     const errorCount = errorPositions.length + missingCount;
     
     // 计算准确率和分数
@@ -335,7 +305,7 @@ Page({
     const contentWithErrors = this.generateContentWithErrors(original, errorPositions, language);
     
     // 生成评价反馈
-    const feedback = this.generateFeedback(score, accuracy, language);
+    const feedback = this.generateFeedback(score, language);
     
     return {
       score,
@@ -368,7 +338,7 @@ Page({
   },
   
   // 生成评价反馈
-  generateFeedback(score, accuracy, language) {
+  generateFeedback(score, language) {
     if (score >= 95) {
       return language === 'zh' ? 
         '太棒了！您的背诵几乎完美！继续保持！' : 
@@ -420,8 +390,6 @@ Page({
         key: 'readingRecords',
         data: app.globalData.readingRecords
       });
-      
-      console.log('背诵记录已保存:', record);
     } catch (error) {
       console.error('保存背诵记录失败:', error);
     }
@@ -429,13 +397,6 @@ Page({
   
   // 显示结果页面
   showResultPage(result) {
-    // 更新阶段状态
-    this.setData({
-      recitationPhase: 'complete',
-      readingResult: result
-    });
-    
-    // 显示成功提示
     wx.showToast({
       title: '背诵完成！',
       icon: 'success',
@@ -443,11 +404,20 @@ Page({
     });
   },
   
-  // 重新背诵
-  restartRecitation: function() {
-    this.setData({
-      recitationPhase: 'preview',
-      debug: this.data.debug + '\n重新背诵'
-    });
+  // requestAnimationFrame polyfill for 微信小程序
+  requestAnimationFrame: function(callback) {
+    const systemInfo = wx.getSystemInfoSync();
+    const fps = 60;
+    const frameDuration = 1000 / fps;  // 假设60fps
+    
+    return setTimeout(function() {
+      const timestamp = Date.now();
+      callback(timestamp);
+    }, frameDuration);
+  },
+  
+  // cancelAnimationFrame polyfill for 微信小程序
+  cancelAnimationFrame: function(id) {
+    clearTimeout(id);
   }
 });

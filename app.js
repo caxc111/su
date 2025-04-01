@@ -235,7 +235,7 @@ App({
       },
       {
         id: '2',
-        type: 'star',
+        type: 'flower',
         count: 3,
         title: '连续学习三天',
         date: '2023-05-18'
