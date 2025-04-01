@@ -1,0 +1,389 @@
+/* pages/article-list/article-list.wxss */
+/* 文章列表页面样式 */
+.container {
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+}
+
+/* 头部样式 */
+.header {
+  margin-bottom: 30rpx;
+  padding: 20rpx 0;
+}
+
+.title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.add-btn-small {
+  width: auto;
+  height: 60rpx;
+  background-color: #92e242;
+  color: white;
+  border-radius: 30rpx;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  padding: 0 20rpx;
+  margin-right: 10rpx;
+}
+
+.subtitle {
+  font-size: 26rpx;
+  color: #666;
+}
+
+/* 语言筛选栏样式 */
+.language-filter {
+  display: flex;
+  background-color: #fff;
+  border-radius: 10rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.filter-item {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.filter-item.active {
+  color: #92e242;
+  font-weight: bold;
+}
+
+.filter-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 25%;
+  width: 50%;
+  height: 6rpx;
+  background-color: #92e242;
+  border-radius: 3rpx;
+}
+
+/* 文章列表样式 */
+.article-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.article-item {
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.article-info {
+  flex: 1;
+  margin-bottom: 20rpx;
+}
+
+.article-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.article-meta {
+  display: flex;
+  gap: 12rpx;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 12rpx;
+}
+
+.language-tag, .level, .word-count {
+  height: 36rpx;
+  line-height: 36rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+}
+
+.language-tag {
+  padding: 0 16rpx;
+  border-radius: 18rpx;
+}
+
+.language-tag.zh {
+  background-color: #f2ffe9;
+  color: #92e242;
+}
+
+.language-tag.en {
+  background-color: #f2ffe9;
+  color: #92e242;
+}
+
+.level {
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 0 12rpx;
+  border-radius: 6rpx;
+}
+
+.word-count {
+  color: #999;
+}
+
+.article-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20rpx;
+}
+
+.action-btn {
+  padding: 12rpx 30rpx;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  font-weight: bold;
+}
+
+.reading {
+  background-color: #92e242;
+  color: #fff;
+}
+
+.recitation {
+  background-color: #f2ffe9;
+  color: #92e242;
+  border: 1px solid #e1fac1;
+}
+
+.action-btn.delete {
+  background-color: #ff4d4f;
+  margin-left: 10rpx;
+}
+
+.action-btn.delete:active {
+  background-color: #d93134;
+}
+
+.action-btn.more {
+  background-color: #f0f0f0;
+  color: #666;
+  border: 1px solid #e0e0e0;
+  padding: 12rpx 20rpx;
+  font-weight: bold;
+}
+
+.action-btn.more:active {
+  background-color: #e0e0e0;
+}
+
+/* 空状态提示 */
+.empty-tip {
+  text-align: center;
+  padding: 60rpx 0;
+  color: #999;
+  font-size: 28rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 刷新按钮 */
+.refresh-btn {
+  margin-top: 30rpx;
+  background-color: #92e242;
+  color: white;
+  font-size: 28rpx;
+  padding: 12rpx 40rpx;
+  border-radius: 30rpx;
+}
+
+/* 重启按钮 */
+.restart-btn {
+  margin-top: 20rpx;
+  background-color: #ff4d4f;
+  color: white;
+  font-size: 28rpx;
+  padding: 12rpx 40rpx;
+  border-radius: 30rpx;
+}
+
+/* 加载状态 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 60rpx 0;
+}
+
+.loading {
+  color: #999;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  background-color: #f8f8f8;
+  padding: 10rpx 20rpx;
+  border-radius: 10rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 加载效果静态类，通过JS添加和移除实现动画效果 */
+.loading-rotate::before {
+  transform: rotate(360deg);
+}
+
+/* 调试信息 */
+.debug-info {
+  background-color: #fff8e6;
+  border: 1px solid #ffe7ba;
+  padding: 20rpx;
+  margin-bottom: 30rpx;
+  border-radius: 10rpx;
+  font-size: 24rpx;
+  color: #875800;
+}
+
+/* 调试按钮组 */
+.debug-buttons {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 15rpx;
+}
+
+.debug-button {
+  margin-top: 10rpx;
+  background-color: #92e242;
+  color: white;
+  text-align: center;
+  padding: 10rpx;
+  border-radius: 10rpx;
+  flex: 1;
+}
+
+.debug-button.restart {
+  background-color: #ff4d4f;
+}
+
+.article-preview {
+  font-size: 28rpx;
+  color: #444;
+  margin: 16rpx 0;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  background-color: #f5f9f0;
+  padding: 16rpx 20rpx;
+  border-radius: 8rpx;
+  border-left: 6rpx solid #92e242;
+  display: block;
+  box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 操作面板样式 */
+.action-panel-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-panel {
+  width: 80%;
+  background-color: #fff;
+  border-radius: 12rpx;
+  padding: 30rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.action-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+  padding-bottom: 20rpx;
+  border-bottom: 1px solid #eee;
+}
+
+.action-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.action-panel-btn {
+  border: none;
+  border-radius: 40rpx;
+  font-size: 30rpx;
+  font-weight: bold;
+  padding: 20rpx 0;
+  text-align: center;
+  width: 100%;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
+}
+
+.delete-btn {
+  background-color: #ff4d4f;
+  color: white;
+}
+
+.delete-btn:active {
+  background-color: #d93134;
+}
+
+.share-btn {
+  background-color: #92e242;
+  color: white;
+}
+
+.share-btn:active {
+  background-color: #72b234;
+}
+
+.collect-btn {
+  background-color: #ffcc00;
+  color: white;
+}
+
+.collect-btn:active {
+  background-color: #d9ad00;
+}
+
+.cancel-btn {
+  background-color: #f0f0f0;
+  color: #666;
+  margin-top: 10rpx;
+}
+
+.cancel-btn:active {
+  background-color: #e0e0e0;
+}

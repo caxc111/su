@@ -1,44 +1,54 @@
 {
   "pages": [
-    "pages/login/login",
-    "pages/register/register",
-    "pages/role-select/role-select",
-    "pages/student/article-list/article-list",
+    "pages/index/index",
+    "pages/article-list/article-list",
     "pages/student/reading/reading",
-    "pages/student/reward-wall/reward-wall",
-    "pages/parent/article-manage/article-manage",
-    "pages/parent/student-progress/student-progress"
+    "pages/student/recitation/recitation",
+    "pages/student/history/history",
+    "pages/student/profile/profile",
+    "pages/article-input/article-input"
   ],
   "window": {
-    "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#fff",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#92e242",
     "navigationBarTitleText": "顺口成章",
-    "navigationBarTextStyle": "black"
+    "navigationBarTextStyle": "white"
   },
   "tabBar": {
-    "color": "#7A7E83",
-    "selectedColor": "#FF9F0A",
+    "color": "#999999",
+    "selectedColor": "#92e242",
     "backgroundColor": "#ffffff",
+    "borderStyle": "black",
     "list": [
       {
-        "pagePath": "pages/student/article-list/article-list",
-        "text": "阅读练习"
+        "pagePath": "pages/article-list/article-list",
+        "text": "练习",
+        "iconPath": "images/tab-practice.png",
+        "selectedIconPath": "images/tab-practice-active.png"
       },
       {
-        "pagePath": "pages/student/reward-wall/reward-wall",
-        "text": "奖励墙"
+        "pagePath": "pages/student/history/history",
+        "text": "记录",
+        "iconPath": "images/tab-history.png",
+        "selectedIconPath": "images/tab-history-active.png"
       },
       {
-        "pagePath": "pages/parent/article-manage/article-manage",
-        "text": "文章管理"
-      },
-      {
-        "pagePath": "pages/parent/student-progress/student-progress",
-        "text": "学习进度"
+        "pagePath": "pages/student/profile/profile",
+        "text": "我的",
+        "iconPath": "images/tab-profile.png",
+        "selectedIconPath": "images/tab-profile-active.png"
       }
     ]
   },
   "style": "v2",
+  "debug": true,
   "sitemapLocation": "sitemap.json",
-  "lazyCodeLoading": "requiredComponents"
+  "lazyCodeLoading": "requiredComponents",
+  "plugins": {
+    "WechatSI": {
+      "version": "0.3.6",
+      "provider": "wx069ba97219f66d99"
+    }
+  },
+  "requiredBackgroundModes": ["audio"]
 }

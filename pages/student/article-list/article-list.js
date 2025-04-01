@@ -90,5 +90,36 @@ Page({
     wx.navigateTo({
       url: '../reading/reading?id=' + articleId
     });
+  },
+
+  // 跳转到历史记录页面
+  goToHistory: function() {
+    wx.navigateTo({
+      url: '../history/history'
+    });
+  },
+
+  // 开始朗读练习
+  startReading(e) {
+    const articleId = e.currentTarget.dataset.id;
+    wx.navigateTo({
+      url: `/pages/student/reading/reading?id=${articleId}`
+    });
+  },
+  
+  // 开始背诵练习
+  startRecitation(e) {
+    const articleId = e.currentTarget.dataset.id;
+    console.log('开始背诵练习，文章ID:', articleId);
+    
+    wx.navigateTo({
+      url: `/pages/student/recitation/recitation?id=${articleId}`,
+      success: function(res) {
+        console.log('成功跳转到背诵页面', res);
+      },
+      fail: function(err) {
+        console.error('跳转到背诵页面失败', err);
+      }
+    });
   }
 })

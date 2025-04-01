@@ -23,6 +23,31 @@
   font-weight: 500;
 }
 
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.history-btn {
+  display: flex;
+  align-items: center;
+  background-color: #f0f8ff;
+  padding: 6px 12px;
+  border-radius: 16px;
+}
+
+.history-btn image {
+  width: 20px;
+  height: 20px;
+  margin-right: 5px;
+}
+
+.history-btn text {
+  font-size: 12px;
+  color: #4a6fa5;
+}
+
 .flower-count {
   display: flex;
   align-items: center;
@@ -162,4 +187,32 @@
 .lang-tag.en {
   background-color: #57b2ff;
   color: #ffffff;
+}
+
+.article-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.action-btn {
+  width: 48%;
+  padding: 14rpx 0;
+  border-radius: 40rpx;
+  font-size: 28rpx;
+  text-align: center;
+  background-color: #f0f0f0;
+  color: #666;
+  border: none;
+  line-height: 1.5;
+}
+
+.action-btn.reading {
+  background-color: #FF9F0A;
+  color: #fff;
+}
+
+.action-btn.recitation {
+  background-color: #007AFF;
+  color: #fff;
 }

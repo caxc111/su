@@ -1,0 +1,48 @@
+<!--pages/article-input/article-input.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">添加文章</view>
+    <view class="subtitle">添加新的练习文章</view>
+  </view>
+  
+  <view class="form-container">
+    <!-- 文章标题 -->
+    <view class="form-item">
+      <view class="label">文章标题</view>
+      <input class="input" value="{{article.title}}" placeholder="请输入文章标题" bindinput="onTitleInput" adjust-position maxlength="100" />
+    </view>
+    
+    <!-- 语言选择 -->
+    <view class="form-item">
+      <view class="label">语言</view>
+      <radio-group class="radio-group" bindchange="onLanguageChange">
+        <label class="radio-label {{article.language === 'zh' ? 'active' : ''}}" wx:for="{{languages}}" wx:key="value">
+          <radio value="{{item.value}}" checked="{{article.language === item.value}}" color="#92e242" />
+          <text>{{item.text}}</text>
+        </label>
+      </radio-group>
+    </view>
+    
+    <!-- 难度选择 -->
+    <view class="form-item">
+      <view class="label">难度</view>
+      <radio-group class="radio-group" bindchange="onLevelChange">
+        <label class="radio-label {{article.level === item.value ? 'active' : ''}}" wx:for="{{levels}}" wx:key="value">
+          <radio value="{{item.value}}" checked="{{article.level === item.value}}" color="#92e242" />
+          <text>{{item.text}}</text>
+        </label>
+      </radio-group>
+    </view>
+    
+    <!-- 文章内容 -->
+    <view class="form-item">
+      <view class="label">文章内容</view>
+      <textarea class="textarea" value="{{article.content}}" placeholder="请输入文章内容" bindinput="onContentInput" maxlength="-1" adjust-position auto-height />
+    </view>
+    
+    <!-- 提交按钮 -->
+    <view class="btn-container">
+      <button class="btn-submit" bindtap="saveArticle">保存文章</button>
+    </view>
+  </view>
+</view> 

@@ -1,7 +1,10 @@
 <view class="container">
   <view class="header">
     <view class="title">文章管理</view>
-    <view class="btn-add" bindtap="showAddArticleModal">+ 添加文章</view>
+    <view class="action-buttons">
+      <view class="btn-import" bindtap="importSampleArticles">导入示例文章</view>
+      <view class="btn-add" bindtap="showAddArticleModal">+ 添加文章</view>
+    </view>
   </view>
   
   <view class="filter-bar">
@@ -11,7 +14,7 @@
   </view>
   
   <view class="article-list">
-    <block wx:for="{{articles}}" wx:key="_id">
+    <block wx:for="{{filteredArticles}}" wx:key="_id">
       <view class="article-card">
         <view class="article-header">
           <view class="lang-tag {{item.language === 'zh' ? 'zh' : 'en'}}">
@@ -38,7 +41,7 @@
     </block>
   </view>
   
-  <view class="empty-tip" wx:if="{{articles.length === 0}}">
+  <view class="empty-tip" wx:if="{{filteredArticles.length === 0}}">
     暂时没有{{currentLang === 'zh' ? '中文' : currentLang === 'en' ? '英文' : ''}}文章，点击"添加文章"开始创建
   </view>
   

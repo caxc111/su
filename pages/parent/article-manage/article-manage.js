@@ -1,6 +1,7 @@
 Page({
   data: {
     articles: [],
+    filteredArticles: [],
     currentLang: 'all',
     showAddModal: false,
     isEditing: false,
@@ -47,19 +48,30 @@ Page({
     
     console.log('处理后的文章数据:', JSON.stringify(articles));
     
-    // 根据语言筛选
-    if (this.data.currentLang !== 'all') {
-      articles = articles.filter(article => 
-        article.language === this.data.currentLang
-      );
-    }
-    
+    // 先保存全部文章
     this.setData({
       articles
     });
     
-    // 打印设置后的数据以检查
-    console.log('页面数据中的文章:', JSON.stringify(this.data.articles));
+    // 然后根据语言筛选
+    this.filterArticles();
+  },
+  
+  filterArticles() {
+    let filteredArticles = this.data.articles;
+    
+    // 根据语言筛选
+    if (this.data.currentLang !== 'all') {
+      filteredArticles = filteredArticles.filter(article => 
+        article.language === this.data.currentLang
+      );
+    }
+    
+    console.log(`筛选后的${this.data.currentLang}文章:`, filteredArticles.length);
+    
+    this.setData({
+      filteredArticles
+    });
   },
   
   filterByLang(e) {
@@ -67,7 +79,7 @@ Page({
     this.setData({
       currentLang: lang
     }, () => {
-      this.loadArticles();
+      this.filterArticles();
     });
   },
   
@@ -120,6 +132,9 @@ Page({
           const updatedArticles = this.data.articles.filter(item => item._id !== id);
           this.setData({
             articles: updatedArticles
+          }, () => {
+            // 刷新筛选的文章列表
+            this.filterArticles();
           });
           
           // 同步更新全局数据
@@ -234,11 +249,114 @@ Page({
       this.setData({
         articles: updatedArticles,
         showAddModal: false
+      }, () => {
+        // 更新筛选文章列表
+        this.filterArticles();
       });
       
       wx.showToast({
         title: this.data.isEditing ? '更新成功' : '添加成功'
       });
     }, 1000);
+  },
+
+  // 导入示例文章
+  importSampleArticles() {
+    wx.showModal({
+      title: '导入示例文章',
+      content: '确定要导入示例中英文文章吗？',
+      success: (res) => {
+        if (res.confirm) {
+          // 执行导入操作
+          this.performImport();
+        }
+      }
+    });
+  },
+  
+  performImport() {
+    wx.showLoading({ title: '导入中' });
+    
+    // 示例中文文章
+    const chineseArticles = [
+      {
+        title: '春望',
+        language: 'zh',
+        content: '国破山河在，城春草木深。感时花溅泪，恨别鸟惊心。烽火连三月，家书抵万金。白头搔更短，浑欲不胜簪。',
+        level: '初级'
+      },
+      {
+        title: '登鹳雀楼',
+        language: 'zh',
+        content: '白日依山尽，黄河入海流。欲穷千里目，更上一层楼。',
+        level: '初级'
+      },
+      {
+        title: '乡村四月',
+        language: 'zh',
+        content: '绿遍山原白满川，子规声里雨如烟。乡村四月闲人少，才了蚕桑又插田。',
+        level: '中级'
+      }
+    ];
+    
+    // 示例英文文章
+    const englishArticles = [
+      {
+        title: 'The Road Not Taken',
+        language: 'en',
+        content: 'Two roads diverged in a yellow wood,\nAnd sorry I could not travel both\nAnd be one traveler, long I stood\nAnd looked down one as far as I could\nTo where it bent in the undergrowth;',
+        level: 'Intermediate'
+      },
+      {
+        title: 'Hope is the Thing with Feathers',
+        language: 'en',
+        content: 'Hope is the thing with feathers\nThat perches in the soul,\nAnd sings the tune without the words,\nAnd never stops at all,',
+        level: 'Elementary'
+      },
+      {
+        title: 'The Lamb',
+        language: 'en',
+        content: 'Little Lamb, who made thee?\nDost thou know who made thee?\nGave thee life, and bid thee feed\nBy the stream and o\'er the mead;',
+        level: 'Elementary'
+      }
+    ];
+    
+    // 合并所有示例文章
+    const sampleArticles = [...chineseArticles, ...englishArticles];
+    
+    // 获取全局数据
+    const app = getApp();
+    let existingArticles = app.globalData.articles || [];
+    
+    // 为新文章生成唯一ID和创建日期
+    const articlesToAdd = sampleArticles.map(article => {
+      const newId = `sample_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+      return {
+        id: newId,
+        title: article.title,
+        language: article.language,
+        content: article.content,
+        level: article.level,
+        createdAt: new Date().toISOString().split('T')[0]
+      };
+    });
+    
+    // 添加新文章到全局数据
+    app.globalData.articles = [...articlesToAdd, ...existingArticles];
+    
+    // 保存到本地存储
+    app.saveArticlesToStorage();
+    
+    // 刷新本页面数据
+    this.loadArticles();
+    
+    setTimeout(() => {
+      wx.hideLoading();
+      wx.showToast({
+        title: `成功导入${articlesToAdd.length}篇文章`,
+        icon: 'success',
+        duration: 2000
+      });
+    }, 500);
   }
 });

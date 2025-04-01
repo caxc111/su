@@ -1,0 +1,48 @@
+<view class="container">
+  <!-- 标题区域 -->
+  <view class="header">
+    <view class="title-container">
+      <view class="title">朗读历史</view>
+    </view>
+  </view>
+  
+  <view class="filter-tabs">
+    <view class="tab {{filterType === 'all' ? 'active' : ''}}" 
+          bindtap="changeFilterType" data-type="all">全部</view>
+    <view class="tab {{filterType === 'high' ? 'active' : ''}}" 
+          bindtap="changeFilterType" data-type="high">高分</view>
+    <view class="tab {{filterType === 'low' ? 'active' : ''}}" 
+          bindtap="changeFilterType" data-type="low">需提高</view>
+  </view>
+  
+  <view class="history-list">
+    <block wx:if="{{records.length > 0}}">
+      <view class="record-item" wx:for="{{records}}" wx:key="id" bindtap="viewRecordDetail" data-id="{{item.id}}">
+        <view class="record-title">{{item.articleTitle}}</view>
+        
+        <view class="record-details">
+          <view class="record-date">{{item.formattedDate}}</view>
+          <view class="record-duration">{{item.duration}}秒</view>
+        </view>
+        
+        <view class="record-score">
+          <text class="score-value">{{item.score}}</text>
+          <text class="score-unit">分</text>
+          
+          <view class="flowers">
+            <image src="/images/flower.png" wx:for="{{item.flowers}}" wx:key="*this" class="flower-icon"></image>
+          </view>
+        </view>
+      </view>
+      
+      <view class="load-more" wx:if="{{hasMore}}" bindtap="loadMore">
+        <text wx:if="{{!loading}}">加载更多</text>
+        <view wx:else class="loading">加载中...</view>
+      </view>
+    </block>
+    
+    <view wx:else class="empty-tip">
+      <text>暂无朗读记录</text>
+    </view>
+  </view>
+</view> 

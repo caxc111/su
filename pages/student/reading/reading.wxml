@@ -44,6 +44,11 @@
       正在识别并评分...
     </view>
     
+    <!-- 声浪动画 - 始终显示 -->
+    <view class="wave-container">
+      <view class="wave-item" wx:for="{{8}}" wx:key="index" style="height: {{waveHeights[index] || 20}}px;"></view>
+    </view>
+    
     <view class="record-button {{recordStatus === 'recording' ? 'recording' : ''}}" bindtap="toggleRecording">
       <image src="{{recordStatus === 'recording' ? '/images/stop.png' : '/images/mic.png'}}"></image>
     </view>
@@ -99,8 +104,8 @@
       </view>
       
       <view class="result-actions">
-        <button class="btn-secondary" bindtap="tryAgain">再试一次</button>
-        <button class="btn-primary" bindtap="finishReading">完成</button>
+        <view class="btn-secondary" bindtap="tryAgain">再试一次</view>
+        <view class="btn-primary" bindtap="finishReading">完成</view>
       </view>
     </view>
   </view>

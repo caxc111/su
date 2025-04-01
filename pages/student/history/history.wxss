@@ -1,0 +1,118 @@
+.container {
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.title-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.filter-tabs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  background-color: #f5f5f5;
+  border-radius: 10px;
+  padding: 4px;
+}
+
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 8px 0;
+  font-size: 14px;
+  color: #666;
+  border-radius: 8px;
+}
+
+.tab.active {
+  background-color: #aff157;
+  color: #333;
+  font-weight: 500;
+}
+
+.history-list {
+  padding-bottom: 20px;
+}
+
+.record-item {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.record-title {
+  font-size: 16px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.record-details {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 10px;
+}
+
+.record-score {
+  display: flex;
+  align-items: center;
+}
+
+.score-value {
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff9500;
+}
+
+.score-unit {
+  margin-left: 2px;
+  font-size: 14px;
+  color: #666;
+}
+
+.flowers {
+  display: flex;
+  margin-left: auto;
+}
+
+.flower-icon {
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+}
+
+.load-more {
+  text-align: center;
+  padding: 12px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.loading {
+  color: #999;
+  font-size: 13px;
+}
+
+.empty-tip {
+  padding: 40px 0;
+  text-align: center;
+  color: #999;
+  font-size: 14px;
+} 

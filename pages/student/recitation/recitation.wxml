@@ -1,0 +1,87 @@
+<!-- 背诵模式页面 -->
+<view class="recitation-container">
+  <!-- 调试信息 - 已隐藏 -->
+  <!-- <view class="debug-info" wx:if="{{debug}}">
+    <text>{{debug}}</text>
+  </view> -->
+
+  <!-- 加载状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 错误状态 -->
+  <view class="error-container" wx:elif="{{error}}">
+    <view class="error-text">{{error}}</view>
+    <button class="primary-btn" bindtap="backToList">返回列表</button>
+  </view>
+
+  <!-- 预览阶段 - 简化版 -->
+  <view class="article-preview" wx:elif="{{article && recitationPhase === 'preview'}}">
+    <view class="article-title">{{article.title || '文章标题'}}</view>
+    <view class="article-content">{{article.content || '文章内容'}}</view>
+    
+    <view class="preview-controls">
+      <button class="primary-btn" bindtap="startRecitation">开始背诵</button>
+      <button class="secondary-btn" bindtap="backToList">返回列表</button>
+    </view>
+  </view>
+
+  <!-- 背诵中阶段 - 简化版本，删除复杂版本 -->
+  <view class="simplified-reciting" wx:elif="{{recitationPhase === 'reciting'}}">
+    <view class="recitation-hint">
+      <text>{{recitationHint || '请开始背诵'}}</text>
+    </view>
+    
+    <!-- 录音时间显示 -->
+    <view class="recording-status" wx:if="{{recordStatus === 'recording'}}">
+      <view class="recording-time">录音中... {{recordTime}}秒</view>
+      <view class="recording-limit">最长录音时间：60秒 (剩余{{60 - recordTime}}秒)</view>
+    </view>
+    
+    <view class="recording-controls">
+      <button class="record-btn {{recordStatus === 'recording' ? 'recording' : ''}}" bindtap="toggleRecording">
+        {{recordStatus === 'recording' ? '停止录音' : '开始录音'}}
+      </button>
+    </view>
+  </view>
+  
+  <!-- 背诵结果阶段 - 新增完成界面 -->
+  <view class="recitation-complete" wx:elif="{{recitationPhase === 'complete'}}">
+    <!-- 评分部分 -->
+    <view class="result-score-section">
+      <view class="result-score">{{readingResult.score}}<text class="score-unit">分</text></view>
+      
+      <view class="result-flowers">
+        <image wx:for="{{readingResult.flowers}}" wx:key="index" src="/images/flower.png" mode="aspectFit" class="flower-img"></image>
+      </view>
+      
+      <view class="result-feedback">{{readingResult.feedback}}</view>
+    </view>
+    
+    <!-- 详细评估结果 -->
+    <view class="result-details">
+      <view class="result-accuracy">
+        准确率: {{readingResult.accuracy}}% ({{readingResult.correctWords}}/{{readingResult.totalWords}})
+      </view>
+      
+      <!-- 错误标记内容 -->
+      <view class="result-content-section">
+        <view class="section-title">原文内容</view>
+        <rich-text class="marked-content" nodes="{{readingResult.contentWithErrors}}"></rich-text>
+      </view>
+      
+      <!-- 识别内容 -->
+      <view class="result-content-section">
+        <view class="section-title">识别内容</view>
+        <view class="recognized-text">{{readingResult.recognizedText}}</view>
+      </view>
+    </view>
+    
+    <!-- 操作按钮 -->
+    <view class="result-actions">
+      <button class="primary-btn" bindtap="startRecitation">重新背诵</button>
+      <button class="secondary-btn" bindtap="backToList">返回列表</button>
+    </view>
+  </view>
+</view> 

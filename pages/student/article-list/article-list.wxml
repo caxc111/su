@@ -4,9 +4,15 @@
       <image class="avatar" src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}"></image>
       <view class="welcome">你好，{{userInfo.nickName || '同学'}}</view>
     </view>
-    <view class="flower-count">
-      <image src="/images/flower.png" mode="aspectFit"></image>
-      <text>{{flowerCount || 0}}</text>
+    <view class="actions">
+      <view class="history-btn" bindtap="goToHistory">
+        <image src="/images/history.png" mode="aspectFit"></image>
+        <text>朗读历史</text>
+      </view>
+      <view class="flower-count">
+        <image src="/images/flower.png" mode="aspectFit"></image>
+        <text>{{flowerCount || 0}}</text>
+      </view>
     </view>
   </view>
   
@@ -18,7 +24,7 @@
   
   <view class="article-list">
     <block wx:for="{{articles}}" wx:key="id">
-      <view class="article-card" bindtap="goToReading" data-id="{{item.id}}">
+      <view class="article-card">
         <view class="article-header">
           <view class="lang-tag {{item.language === 'zh' ? 'zh' : 'en'}}">
             {{item.language === 'zh' ? '中文' : '英文'}}
@@ -48,6 +54,15 @@
               <view class="unread-tag">未读</view>
             </block>
           </view>
+        </view>
+        
+        <view class="article-actions">
+          <button class="action-btn reading" bindtap="startReading" data-id="{{item.id}}">
+            朗读练习
+          </button>
+          <button class="action-btn recitation" bindtap="startRecitation" data-id="{{item.id}}">
+            背诵模式
+          </button>
         </view>
       </view>
     </block>

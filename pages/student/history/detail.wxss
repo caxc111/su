@@ -1,0 +1,143 @@
+.container {
+  padding: 16px;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.back-button {
+  width: 36px;
+  height: 36px;
+  border-radius: 18px;
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-right: 12px;
+}
+
+.back-button .icon {
+  font-size: 20px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.detail-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.article-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.score-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.score-display {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.score-number {
+  font-size: 36px;
+  font-weight: bold;
+  color: #ff9500;
+}
+
+.score-unit {
+  font-size: 16px;
+  color: #666;
+  margin-left: 5px;
+}
+
+.flower-display {
+  display: flex;
+}
+
+.flower-icon {
+  width: 24px;
+  height: 24px;
+  margin: 0 2px;
+}
+
+.info-section {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.info-label {
+  width: 60px;
+  color: #666;
+}
+
+.info-value {
+  font-weight: 500;
+}
+
+.section-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+
+.content-text {
+  line-height: 1.8;
+  color: #333;
+  white-space: pre-wrap;
+}
+
+.missing-article {
+  padding: 20px;
+  text-align: center;
+}
+
+.warning-text {
+  color: #ff4d4f;
+  font-size: 14px;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-around;
+}
+
+.btn-primary {
+  background-color: #aff157;
+  color: #333;
+  font-weight: 500;
+  border-radius: 30px;
+  padding: 0 30px;
+}
+
+.btn-secondary {
+  background-color: #f0f0f0;
+  color: #666;
+  border-radius: 30px;
+  padding: 0 30px;
+} 

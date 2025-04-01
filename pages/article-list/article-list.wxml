@@ -1,0 +1,89 @@
+<!--pages/article-list/article-list.wxml-->
+<!--文章列表页面-->
+<view class="container">
+  <!-- 标题区域 -->
+  <view class="header">
+    <view class="title-container">
+      <view class="title">阅读练习</view>
+      <view class="add-btn-small" bindtap="navigateToArticleInput">添加文章</view>
+    </view>
+    <view class="subtitle">请选择您想要练习的文章</view>
+  </view>
+  
+  <!-- 语言筛选栏 -->
+  <view class="language-filter">
+    <view class="filter-item {{selectedLanguage === 'all' ? 'active' : ''}}" 
+          bindtap="switchLanguage" 
+          data-lang="all">
+      全部
+    </view>
+    <view class="filter-item {{selectedLanguage === 'zh' ? 'active' : ''}}" 
+          bindtap="switchLanguage" 
+          data-lang="zh">
+      中文
+    </view>
+    <view class="filter-item {{selectedLanguage === 'en' ? 'active' : ''}}" 
+          bindtap="switchLanguage" 
+          data-lang="en">
+      英文
+    </view>
+  </view>
+  
+  <!-- 调试信息 -->
+  <view class="debug-info" wx:if="{{articles && articles.length > 0 && filteredArticles.length === 0}}">
+    <view>原始文章数量: {{articles.length}}</view>
+    <view>筛选后文章数量: {{filteredArticles.length}}</view>
+    <view>当前语言筛选: {{selectedLanguage}}</view>
+    <view class="debug-buttons">
+      <view bindtap="resetAndRefresh" class="debug-button">重置并刷新</view>
+      <view bindtap="restartApp" class="debug-button restart">重启小程序</view>
+    </view>
+  </view>
+  
+  <!-- 文章列表 -->
+  <view class="article-list" wx:if="{{filteredArticles && filteredArticles.length > 0}}">
+    <view class="article-item" wx:for="{{filteredArticles}}" wx:key="id" bindtap="goToArticleDetail" data-id="{{item.id}}" data-title="{{item.title}}">
+      <view class="article-info">
+        <view class="article-title">{{item.title}}</view>
+        <text class="article-preview">{{item.previewContent}}</text>
+        <view class="article-meta">
+          <view class="language-tag {{item.language === 'zh' ? 'zh' : 'en'}}">
+            {{item.language === 'zh' ? '中文' : '英文'}}
+          </view>
+          <view class="level">{{item.level}}</view>
+          <view class="word-count">{{item.wordCount}}{{item.language === 'zh' ? '字' : '词'}}</view>
+        </view>
+      </view>
+      <view class="article-actions">
+        <view class="action-btn reading" catchtap="startReading" data-id="{{item.id}}">朗读</view>
+        <view class="action-btn recitation" catchtap="startRecitation" data-id="{{item.id}}">背诵</view>
+        <view class="action-btn more" catchtap="showArticleOptions" data-id="{{item.id}}" data-title="{{item.title}}">•••</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 加载中状态 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading">加载中{{loadingDotCount || '...'}}</view>
+  </view>
+
+  <!-- 如果没有文章显示提示 -->
+  <view class="empty-tip" wx:if="{{!isLoading && (!filteredArticles || filteredArticles.length === 0)}}">
+    <view>暂无{{selectedLanguage === 'zh' ? '中文' : selectedLanguage === 'en' ? '英文' : ''}}文章，请下拉刷新重试</view>
+    <view class="refresh-btn" bindtap="loadArticles">点击刷新</view>
+    <view class="restart-btn" bindtap="restartApp">重启小程序</view>
+  </view>
+  
+  <!-- 操作面板 -->
+  <view class="action-panel-container" wx:if="{{showActionPanel}}" bindtap="hideActionPanel">
+    <view class="action-panel" catchtap="catchPanelTap">
+      <view class="action-title">{{currentArticle.title}}</view>
+      <view class="action-btns">
+        <button class="action-panel-btn delete-btn" bindtap="handleDeleteArticle">删除文章</button>
+        <button class="action-panel-btn share-btn" bindtap="handleShareArticle">分享文章</button>
+        <button class="action-panel-btn collect-btn" bindtap="handleCollectArticle">添加到收藏</button>
+      </view>
+      <button class="action-panel-btn cancel-btn" bindtap="hideActionPanel">取消</button>
+    </view>
+  </view>
+</view>
