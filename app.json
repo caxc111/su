@@ -3,10 +3,11 @@
     "pages/index/index",
     "pages/article-list/article-list",
     "pages/student/reading/reading",
-    "pages/student/recitation/recitation",
+    "pages/student/recite_practice/recite_practice",
     "pages/student/history/history",
     "pages/student/profile/profile",
-    "pages/article-input/article-input"
+    "pages/article-input/article-input",
+    "pages/voice-test/voice-test"
   ],
   "window": {
     "backgroundTextStyle": "dark",

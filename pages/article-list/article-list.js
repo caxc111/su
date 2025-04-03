@@ -375,29 +375,32 @@ Page({
   startReading(e) {
     const articleId = e.currentTarget.dataset.id;
     console.log('开始朗读练习，文章ID:', articleId);
+    // 添加 fail 回调以捕获导航错误
     wx.navigateTo({
       url: `/pages/student/reading/reading?id=${articleId}`,
       fail: (err) => {
         console.error('跳转到朗读页面失败:', err);
-        wx.showToast({
-          title: '跳转失败，请重试',
-          icon: 'none'
-        });
       }
     });
   },
   
-  // 开始背诵
-  startRecitation(e) {
-    // 因为使用catchtap，无需调用stopPropagation
+  // 添加：开始背诵练习函数
+  startRecitePractice(e) {
     const articleId = e.currentTarget.dataset.id;
-    console.log('开始背诵文章:', articleId);
+    console.log('[ArticleList] Starting recite practice for article ID:', articleId);
     wx.navigateTo({
-      url: `/pages/recitation/recitation?id=${articleId}`
+      url: `/pages/student/recite_practice/recite_practice?id=${articleId}`,
+      success: function(res) {
+        console.log('[ArticleList] Navigation to recite_practice successful:', res);
+      },
+      fail: function(err) {
+        console.error('[ArticleList] Navigation to recite_practice failed:', err);
+        wx.showToast({ title: '无法打开背诵页面', icon: 'none' });
+      }
     });
   },
   
-  // 查看文章详情
+  // 跳转到文章详情 (此函数可能已废弃，因为通常列表直接操作)
   goToArticleDetail(e) {
     const articleId = e.currentTarget.dataset.id;
     const title = e.currentTarget.dataset.title;
@@ -410,18 +413,11 @@ Page({
   
   // 显示文章操作选项
   showArticleOptions(e) {
-    // 不使用stopPropagation，catchtap已经阻止了事件冒泡
-    
-    const articleId = e.currentTarget.dataset.id;
+    const id = e.currentTarget.dataset.id;
     const title = e.currentTarget.dataset.title;
-    console.log('点击更多按钮，显示操作菜单:', articleId, title);
-    
     this.setData({
       showActionPanel: true,
-      currentArticle: {
-        id: articleId,
-        title: title
-      }
+      currentArticle: { id, title }
     });
   },
   
@@ -482,6 +478,20 @@ Page({
       url: '/pages/article-input/article-input',
       fail: (err) => {
         console.error('跳转到文章输入页面失败:', err);
+        wx.showToast({
+          title: '跳转失败，请重试',
+          icon: 'none'
+        });
+      }
+    });
+  },
+  
+  // 跳转到语音测试页面
+  navigateToVoiceTest() {
+    wx.navigateTo({
+      url: '/pages/voice-test/voice-test',
+      fail: (err) => {
+        console.error('跳转到语音测试页面失败:', err);
         wx.showToast({
           title: '跳转失败，请重试',
           icon: 'none'

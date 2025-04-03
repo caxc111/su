@@ -60,8 +60,8 @@
           <button class="action-btn reading" bindtap="startReading" data-id="{{item.id}}">
             朗读练习
           </button>
-          <button class="action-btn recitation" bindtap="startRecitation" data-id="{{item.id}}">
-            背诵模式
+          <button class="action-btn recitation" bindtap="startRecitePractice" data-id="{{item.id}}">
+            背诵练习
           </button>
         </view>
       </view>

@@ -1,0 +1,63 @@
+<!--pages/voice-test/voice-test.wxml-->
+<view class="container">
+  <view class="header">
+    <view class="title">语音测试</view>
+    <view class="subtitle">测试语音识别功能</view>
+    <view class="language-switcher">
+      <view class="lang-btn {{currentLang === 'zh_CN' ? 'active' : ''}}" data-lang="zh_CN" bindtap="switchLanguage">中文</view>
+      <view class="lang-btn {{currentLang === 'en_US' ? 'active' : ''}}" data-lang="en_US" bindtap="switchLanguage">English</view>
+    </view>
+  </view>
+  
+  <view class="content-area">
+    <!-- 录音按钮区域 -->
+    <view class="record-area">
+      <view class="record-status-text">
+        <block wx:if="{{recordStatus === 'ready'}}">
+          点击开始录音
+        </block>
+        <block wx:elif="{{recordStatus === 'recording'}}">
+          正在录音: {{recordTimeCount}}s / {{maxRecordTime}}s
+        </block>
+        <block wx:elif="{{recordStatus === 'processing'}}">
+          正在处理录音...
+        </block>
+      </view>
+      
+      <view class="record-button {{isRecording ? 'recording' : ''}}" bindtap="toggleRecording">
+        <image class="record-icon" src="/images/{{isRecording ? 'stop' : 'mic'}}.png" mode="aspectFit"></image>
+      </view>
+      
+      <view class="record-tip">
+        <block wx:if="{{isRecording}}">
+          点击停止录音
+        </block>
+        <block wx:else>
+          最长可录制{{maxRecordTime}}秒
+        </block>
+      </view>
+    </view>
+    
+    <!-- 识别结果区域 -->
+    <view class="result-area" wx:if="{{recognizedText}}">
+      <view class="result-title">识别结果：</view>
+      <view class="result-text">{{recognizedText}}</view>
+      <view class="clear-result" bindtap="clearResult">清空结果</view>
+    </view>
+    
+    <!-- 提示区域 -->
+    <view class="tip-area" wx:if="{{!recognizedText}}">
+      <view class="tip-text">
+        语音识别提示:
+        <view>1. 请在安静环境下进行录音</view>
+        <view>2. 语速保持正常，发音清晰</view>
+        <view>3. 尽量避免背景噪音</view>
+      </view>
+    </view>
+  </view>
+  
+  <!-- 底部按钮区域 -->
+  <view class="footer">
+    <button class="back-button" bindtap="goBack">返回</button>
+  </view>
+</view> 

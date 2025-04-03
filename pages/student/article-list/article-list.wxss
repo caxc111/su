@@ -191,28 +191,20 @@
 
 .article-actions {
   display: flex;
-  justify-content: space-between;
   margin-top: 20rpx;
+  border: 1px dashed red;
 }
 
 .action-btn {
-  width: 48%;
-  padding: 14rpx 0;
-  border-radius: 40rpx;
   font-size: 28rpx;
   text-align: center;
-  background-color: #f0f0f0;
-  color: #666;
-  border: none;
+  color: blue;
+  border: 1px solid blue;
   line-height: 1.5;
 }
 
 .action-btn.reading {
-  background-color: #FF9F0A;
-  color: #fff;
 }
 
 .action-btn.recitation {
-  background-color: #007AFF;
-  color: #fff;
 }

@@ -5,7 +5,10 @@
   <view class="header">
     <view class="title-container">
       <view class="title">阅读练习</view>
-      <view class="add-btn-small" bindtap="navigateToArticleInput">添加文章</view>
+      <view class="header-actions">
+        <view class="add-btn-small" bindtap="navigateToArticleInput">添加文章</view>
+        <view class="add-btn-small voice-test-btn" bindtap="navigateToVoiceTest">语音测试</view>
+      </view>
     </view>
     <view class="subtitle">请选择您想要练习的文章</view>
   </view>
@@ -56,7 +59,7 @@
       </view>
       <view class="article-actions">
         <view class="action-btn reading" catchtap="startReading" data-id="{{item.id}}">朗读</view>
-        <view class="action-btn recitation" catchtap="startRecitation" data-id="{{item.id}}">背诵</view>
+        <view class="action-btn recitation" catchtap="startRecitePractice" data-id="{{item.id}}">背诵</view>
         <view class="action-btn more" catchtap="showArticleOptions" data-id="{{item.id}}" data-title="{{item.title}}">•••</view>
       </view>
     </view>

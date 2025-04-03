@@ -96,9 +96,9 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   line-height: 1.6;
   font-size: 16px;
-  min-height: 30vh;
-  max-height: 38vh;
-  overflow-y: auto;
+  /* min-height: 30vh; */ /* 移除最小高度限制 */
+  /* max-height: 38vh; */ /* 移除最大高度限制 */
+  /* overflow-y: auto; */ /* 移除滚动 */
 }
 
 /* 文章信息样式 */
@@ -172,6 +172,48 @@
   transition: width 0.3s linear;
 }
 
+/* 声浪动画样式 */
+.wave-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  height: 40px;
+  margin: 5px 0;
+  gap: 5px;
+}
+
+.wave-item {
+  width: 8px;
+  background-color: #aaa; /* 默认颜色为灰色 */
+  border-radius: 4px;
+  transition: height 0.1s ease, background-color 0.3s ease;
+}
+
+/* 录音状态下声浪颜色 */
+.reading-controls .recording ~ .wave-container .wave-item { /* 修正选择器 */
+  background-color: #ff4d4f; /* 录音时为红色 */
+}
+
+.record-button {
+  width: 54px;
+  height: 54px;
+  background-color: #aff157;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.record-button.recording {
+  background-color: #ff4d4f;
+}
+
+.record-button image {
+  width: 28px;
+  height: 28px;
+}
+
 /* 结果弹窗 */
 .result-modal {
   position: fixed;
@@ -206,19 +248,19 @@
   display: flex;
   justify-content: center;
   align-items: baseline;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .score-number {
   font-size: 36px;
   font-weight: bold;
-  color: #ff9500;
+  color: #ff4d4f;
 }
 
 .score-unit {
   font-size: 16px;
-  color: #666;
   margin-left: 5px;
+  color: #666;
 }
 
 .result-flowers {
@@ -230,93 +272,66 @@
 .flower-icon {
   width: 24px;
   height: 24px;
-  margin: 2px;
+  margin: 0 3px;
 }
 
 .result-feedback {
   text-align: center;
-  color: #666;
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f8f8f8;
-  border-radius: 8px;
-}
-
-/* 错误显示样式 */
-.error-display {
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f8f8f8;
-  border-radius: 8px;
-}
-
-.error-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.error-content {
-  max-height: 150px;
-  overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 5px;
-  margin-bottom: 8px;
-}
-
-.error-hint {
-  font-size: 12px;
-  color: #999;
-  text-align: center;
-}
-
-/* 识别文本显示样式 */
-.recognized-text {
-  margin-bottom: 15px;
-  padding: 10px;
-  background-color: #f8f8f8;
-  border-radius: 8px;
-}
-
-.recognized-title {
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
-  margin-bottom: 8px;
-  text-align: center;
-}
-
-.recognized-content {
-  max-height: 120px;
-  overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 5px;
+  margin-bottom: 20px;
   color: #333;
-  font-style: italic;
+  font-size: 14px;
+  min-height: 20px;
 }
 
+.error-display,
+.recognized-text,
+.result-detail {
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  border-radius: 8px;
+}
+
+.error-title,
+.recognized-title,
+.detail-label {
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.error-content,
+.recognized-content {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.error-content .correct {
+  color: #4CAF50; /* 正确发音颜色 */
+}
+
+.error-content .error {
+  color: #ff4d4f; /* 错误发音颜色 */
+  text-decoration: underline;
+  font-weight: bold;
+}
+
+.error-hint,
 .recognized-hint {
   font-size: 12px;
   color: #999;
-  text-align: center;
   margin-top: 5px;
-}
-
-/* rich-text样式通过JS内联方式设置 */
-
-.result-detail {
-  margin-bottom: 20px;
 }
 
 .detail-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
   font-size: 14px;
+  margin-bottom: 5px;
 }
 
 .detail-label {
@@ -324,139 +339,96 @@
 }
 
 .detail-value {
+  color: #333;
   font-weight: 500;
 }
 
 .result-actions {
   display: flex;
-  justify-content: space-between;
-  margin-top: 20rpx;
+  justify-content: space-around;
+  margin-top: 25px;
 }
 
-.result-actions .btn-primary,
-.result-actions .btn-secondary {
-  flex: 1;
-  margin: 0 10rpx;
-  font-size: 32rpx;
-  font-weight: bold;
-  padding: 24rpx 0;
-  border-radius: 12rpx;
+.btn-primary,
+.btn-secondary {
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  cursor: pointer;
+  min-width: 100px;
   text-align: center;
-  box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary {
-  background-color: #ffaa00;
-  color: white;
-}
-
-.btn-primary:active {
-  background-color: #e09600;
+  background-color: #aff157;
+  color: #333;
 }
 
 .btn-secondary {
-  background-color: #50a8ff;
-  color: white;
+  background-color: #f0f0f0;
+  color: #666;
 }
 
-.btn-secondary:active {
-  background-color: #3d86cc;
+
+/* 标签样式 */
+.lang-tag {
+  padding: 2px 8px;
+  font-size: 12px;
+  border-radius: 4px;
+  margin-left: 8px;
+  color: #fff;
 }
 
-/* 修正其他选择器问题 */
-.error-display .error-content rich-text {
-  display: block;
-  width: 100%;
+.lang-tag.zh {
+  background-color: #ff9500; /* 橙色 */
 }
 
-.recognized-text .recognized-content {
-  max-height: 120px;
-  overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.6;
-  padding: 5px;
+.lang-tag.en {
+  background-color: #007aff; /* 蓝色 */
+}
+
+
+/* 通用按钮样式 */
+.primary-btn {
+  background-color: #aff157;
   color: #333;
-  font-style: italic;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
 }
 
-/* 控制按钮行样式 */
-.control-buttons-row {
+.secondary-btn {
+  background-color: #f0f0f0;
+  color: #666;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+/* 文章动作按钮调整 */
+.article-actions {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 100%;
-  margin-top: 20px;
+  justify-content: flex-end; /* 将按钮推到右侧 */
+  margin-top: 10px;
 }
 
-/* 通用 action-btn 样式调整 (如果需要覆盖全局或默认button样式) */
 .action-btn {
-  border: none;
-  line-height: 1.5;
-  margin: 0;
-  padding: 0;
-  display: inline-block;
-  vertical-align: middle;
-  box-sizing: border-box;
+  margin-left: 10px; /* 按钮间距 */
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 15px;
 }
 
-/* 播放范读按钮样式 */
-.action-btn.standard-audio {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #aff157;
-  color: #333;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-size: 14px;
-  flex: 1;
-  margin: 0 10px;
-  height: 40px;
+.action-btn.reading {
+  background-color: #e0f7fa; /* 淡蓝色背景 */
+  color: #007aff;
 }
 
-.action-btn.standard-audio[disabled] {
-  background-color: #e0e0e0;
-  color: #999;
+.action-btn.recitation {
+  background-color: #fff3e0; /* 淡橙色背景 */
+  color: #ff9500;
 }
 
-/* 朗读录音/停止录音按钮样式 */
-.action-btn.record-self {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #aff157;
-  color: #333;
-  padding: 10px 20px;
-  border-radius: 25px;
-  font-size: 14px;
-  flex: 1;
-  margin: 0 10px;
-  height: 40px;
-}
 
-.action-btn.record-self.recording {
-  background-color: #ff4d4f;
-  color: white;
-}
 
-.action-btn.record-self[disabled] {
-  background-color: #e0e0e0;
-  color: #999;
-}
-
-/* --- 添加评分结果错误标记样式 --- */
-/* 错误文本样式 */
-.error-content .error {
-  color: red; /* 设置为红色 */
-  /* 可以根据需要取消注释或添加其他样式 */
-  /* text-decoration: underline; */
-  /* font-weight: bold; */
-}
-
-/* 正确文本样式 (可选) */
-.error-content .correct {
-  /* color: inherit; */ /* 保持默认颜色 */
-  /* 或者设置为绿色： */
-   color: green; 
-}
-/* ------------------------------ */
