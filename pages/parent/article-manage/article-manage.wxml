@@ -1,3 +1,7 @@
+<view style="color: blue; font-size: 20px; text-align: center; padding: 10px; border: 2px solid red; background-color: lightgreen;">
+  !!! PARENT MANAGE DEBUG !!!
+</view>
+
 <view class="container">
   <view class="header">
     <view class="title">文章管理</view>

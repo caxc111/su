@@ -1,3 +1,7 @@
+<view style="color: red; font-size: 20px; text-align: center; padding: 10px; border: 2px solid blue; background-color: yellow;">
+  !!! DEBUG TEST VISIBLE !!!
+</view>
+
 <view class="container">
   <view class="header">
     <view class="user-info">

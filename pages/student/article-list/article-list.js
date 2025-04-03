@@ -67,12 +67,26 @@ Page({
         hasRead: false // 默认未读
       });
     }
-    
+
+    // ---> 调试代码和 setData 移到函数内部正确位置 <---
+    console.log('[loadArticles DEBUG] 渲染前 processedArticles 顺序:', JSON.stringify(processedArticles.map(a => a.id))); 
+
+    // ---> 添加调试：按 ID 降序排序 <---
+    processedArticles.sort((a, b) => {
+      // 假设 ID 是时间戳或自增数字，尝试将其转为数字比较
+      // 如果 ID 不是纯数字，需要调整比较逻辑
+      const idA = parseInt(a.id) || 0; 
+      const idB = parseInt(b.id) || 0;
+      return idB - idA; // 降序排列，ID 大的在前
+    });
+    console.log('[loadArticles DEBUG] 按 ID 降序排序后 processedArticles 顺序:', JSON.stringify(processedArticles.map(a => a.id))); // 打印排序后ID顺序
+
+    // ---> 将 setData 移动到排序之后 <---
     this.setData({
       articles: processedArticles
     });
     
-    console.log('阅读练习页面 - 处理后文章数据:', processedArticles);
+    console.log('[loadArticles DEBUG] 最终 setData 的文章数据:', JSON.stringify(processedArticles.map(a => a.id))); 
   },
 
   // 语言筛选切换
@@ -106,4 +120,19 @@ Page({
       url: `/pages/student/reading/reading?id=${articleId}`
     });
   },
+
+  // 添加开始背诵练习函数 (确保位置正确)
+  startRecitePractice(e) {
+    const articleId = e.currentTarget.dataset.id;
+    console.log('尝试跳转到背诵页面，文章ID:', articleId); // 修改日志
+    wx.navigateTo({
+      url: `/pages/student/recite_practice/recite_practice?id=${articleId}`,
+      success: function(res) {
+        console.log('成功跳转到 recite_practice 页面', res);
+      },
+      fail: function(err) {
+        console.error('跳转到 recite_practice 页面失败', err);
+      }
+    });
+  }
 })

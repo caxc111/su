@@ -164,7 +164,7 @@ Page({
       // 添加新文章
       const articles = app.globalData.articles || [];
       article.id = Date.now().toString();
-      articles.push(article);
+      articles.unshift(article);
       app.globalData.articles = articles;
     }
     
