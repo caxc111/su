@@ -159,7 +159,7 @@ App({
     }
     
     console.log('添加新的朗读记录:', record);
-    this.globalData.readingRecords.push(record);
+    this.globalData.readingRecords.unshift(record);
     this.saveReadingRecordsToStorage();
     return record;
   },

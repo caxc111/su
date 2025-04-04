@@ -5,6 +5,7 @@
     "pages/student/reading/reading",
     "pages/student/recite_practice/recite_practice",
     "pages/student/history/history",
+    "pages/student/history/detail",
     "pages/student/profile/profile",
     "pages/article-input/article-input",
     "pages/voice-test/voice-test"

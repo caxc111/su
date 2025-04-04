@@ -1,51 +1,40 @@
-<view class="container">
-  <view class="header">
-    <view class="back-button" bindtap="goBack">
-      <text class="icon">←</text>
-    </view>
-    <view class="title">朗读记录</view>
-  </view>
+    <!-- pages/student/history/detail.wxml -->
+    <view class="container">
+      <!-- 简化后的信息区域：只显示得分和准确率 -->
+      <view class="record-info" wx:if="{{record}}">
+        <view class="info-item">
+          <text class="label">背诵得分:</text>
+          <text class="value score">{{record.score}} 分</text>
+        </view>
+        <view class="info-item">
+          <text class="label">准确率:</text>
+          <text class="value">{{record.accuracy || 0}}%</text>
+        </view>
+      </view>
 
-  <view class="detail-card" wx:if="{{record}}">
-    <view class="article-title">{{record.articleTitle}}</view>
-    
-    <view class="score-section">
-      <view class="score-display">
-        <text class="score-number">{{record.score}}</text>
-        <text class="score-unit">分</text>
+      <!-- 红绿对比反馈区域 -->
+      <view class="feedback-section" wx:if="{{record && record.feedbackHtml}}">
+        <view class="section-title">背诵详情 (红字为错误部分):</view>
+        <view class="feedback-content">
+          <rich-text nodes="{{record.feedbackHtml}}"></rich-text>
+        </view>
       </view>
-      <view class="flower-display">
-        <image src="/images/flower.png" wx:for="{{record.flowers}}" wx:key="*this" class="flower-icon"></image>
+
+      <!-- 新增：显示识别出的原始文本区域 -->
+      <view class="recognition-section" wx:if="{{record && record.recognizedText}}">
+        <view class="section-title">识别结果:</view>
+        <view class="recognition-content">
+          <text>{{record.recognizedText}}</text>
+        </view>
+      </view>
+
+      <!-- 暂无反馈的提示 -->
+      <view class="no-feedback" wx:if="{{record && (!record.feedbackHtml || record.feedbackHtml === '')}}">
+        <text>暂无详细的对错反馈信息。</text>
+      </view>
+
+      <!-- 加载提示或错误 -->
+      <view class="loading-error" wx:if="{{!record}}">
+        <text>正在加载记录详情...</text>
       </view>
     </view>
-    
-    <view class="info-section">
-      <view class="info-item">
-        <text class="info-label">日期</text>
-        <text class="info-value">{{record.formattedDate}}</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">时长</text>
-        <text class="info-value">{{record.duration}}秒</text>
-      </view>
-      <view class="info-item">
-        <text class="info-label">语言</text>
-        <text class="info-value">{{record.language === 'zh' ? '中文' : '英文'}}</text>
-      </view>
-    </view>
-    
-    <block wx:if="{{article}}">
-      <view class="section-title">文章内容</view>
-      <text class="content-text">{{article.content}}</text>
-    </block>
-    
-    <view wx:else class="missing-article">
-      <text class="warning-text">此文章已不存在或已被删除</text>
-    </view>
-    
-    <view class="actions">
-      <button class="btn-primary" bindtap="practiceAgain" wx:if="{{article}}">再次练习</button>
-      <button class="btn-secondary" bindtap="goBack">返回</button>
-    </view>
-  </view>
-</view> 

@@ -390,8 +390,9 @@ Page({
     // const feedback = this.generateRecitationFeedback(score, accuracy);
     // const flowers = this.generateFlowers(score);
     const score = accuracy; // 临时使用准确率作为分数
-    const feedback = `准确率 ${accuracy}% (更多反馈待实现)`; // 修改临时反馈
-    const flowers = score >= 90 ? [1,1,1,1,1] : score >= 80 ? [1,1,1,1,0] : score >= 70 ? [1,1,1,0,0] : score >= 60 ? [1,1,0,0,0] : [1,0,0,0,0]; // 临时小红花逻辑
+    const feedback = `准确率 ${accuracy}%`; 
+    // ---> 修改：只有 score === 100 时才返回 [1] (代表1朵花)，否则返回 [] <--- 
+    const flowers = score === 100 ? [1] : [];
     
     const result = {
       score: score, flowers: flowers, feedback: feedback,
@@ -408,8 +409,34 @@ Page({
     });
     
     this.stopWaveAnimation();
-    // TODO: 实现保存背诵记录的逻辑
-    // this.saveRecitationRecord(result);
+    
+    // ---> 添加：调用 app.js 中的函数保存记录 <--- 
+    // 移除 TODO 注释: // TODO: 实现保存背诵记录的逻辑
+    // 移除 TODO 注释: // this.saveRecitationRecord(result);
+    const app = getApp();
+    if (app && typeof app.addReadingRecord === 'function') {
+      // 准备传递给 addReadingRecord 的数据
+      const recordData = {
+        articleId: this.data.article.id,      // 文章 ID
+        articleTitle: this.data.article.title, // 文章标题
+        score: result.score,                // 本次得分
+        accuracy: result.accuracy,            // 准确率 (可选)
+        type: 'recitation',                  // 记录类型 (背诵)
+        feedbackHtml: result.contentWithErrors, // 红绿对比 HTML
+        // ---> 添加：保存识别出的原始文本 <--- 
+        recognizedText: result.recognizedText 
+      };
+      
+      // ---> 更新日志检查 <--- 
+      console.log('[evaluateRecitation] Preparing to save record. Checking values:');
+      console.log('[evaluateRecitation] result.contentWithErrors:', result.contentWithErrors);
+      console.log('[evaluateRecitation] result.recognizedText:', result.recognizedText); // 添加日志
+      console.log('[evaluateRecitation] recordData to be saved:', JSON.stringify(recordData));
+
+      app.addReadingRecord(recordData);
+    } else {
+      console.error('[evaluateRecitation]无法找到 app.addReadingRecord 函数!');
+    }
   },
   
   // --- 背诵相关的辅助函数 (需要实现或引入) ---

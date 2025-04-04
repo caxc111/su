@@ -2,7 +2,7 @@
   <!-- 标题区域 -->
   <view class="header">
     <view class="title-container">
-      <view class="title">朗读历史</view>
+      <view class="title">背诵历史</view>
     </view>
   </view>
   
@@ -18,17 +18,19 @@
   <view class="history-list">
     <block wx:if="{{records.length > 0}}">
       <view class="record-item" wx:for="{{records}}" wx:key="id" bindtap="viewRecordDetail" data-id="{{item.id}}">
-        <view class="record-title">{{item.articleTitle}}</view>
-        
-        <view class="record-details">
-          <view class="record-date">{{item.formattedDate}}</view>
-          <view class="record-duration">{{item.duration}}秒</view>
+        <!-- 左侧内容容器 -->
+        <view class="record-left">
+          <view class="record-title">{{item.articleTitle}}</view>
+          <view class="record-details">
+            <view class="record-date">{{item.formattedDate}}</view>
+            <!-- 时长已移除 -->
+          </view>
         </view>
         
+        <!-- 右侧分数容器 (移到这里) -->
         <view class="record-score">
           <text class="score-value">{{item.score}}</text>
           <text class="score-unit">分</text>
-          
           <view class="flowers">
             <image src="/images/flower.png" wx:for="{{item.flowers}}" wx:key="*this" class="flower-icon"></image>
           </view>
@@ -42,7 +44,7 @@
     </block>
     
     <view wx:else class="empty-tip">
-      <text>暂无朗读记录</text>
+      <text>暂无背诵记录</text>
     </view>
   </view>
 </view> 

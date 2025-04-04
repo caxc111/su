@@ -1,143 +1,97 @@
-.container {
-  padding: 16px;
-}
+    /* pages/student/history/detail.wxss */
+    .container {
+      padding: 20rpx;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #f8f8f8; /* 淡灰色背景 */
+      min-height: 100vh;
+      box-sizing: border-box; /* 确保 padding 不会撑大元素 */
+    }
 
-.header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-}
+    /* 通用卡片样式 */
+    .record-info,
+    .feedback-section,
+    .recognition-section {
+      background-color: #ffffff;
+      border-radius: 16rpx;
+      padding: 30rpx;
+      margin-bottom: 30rpx;
+      box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+    }
 
-.back-button {
-  width: 36px;
-  height: 36px;
-  border-radius: 18px;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 12px;
-}
+    /* 记录信息区域 */
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15rpx 0;
+      border-bottom: 1rpx solid #f0f0f0;
+    }
 
-.back-button .icon {
-  font-size: 20px;
-}
+    .info-item:last-child {
+      border-bottom: none;
+    }
 
-.title {
-  font-size: 18px;
-  font-weight: bold;
-}
+    .label {
+      font-size: 28rpx;
+      color: #666666;
+    }
 
-.detail-card {
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-}
+    .value {
+      font-size: 28rpx;
+      color: #333333;
+      font-weight: 500;
+    }
 
-.article-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-bottom: 16px;
-  text-align: center;
-}
+    .value.score {
+      font-size: 32rpx;
+      color: #ff5c5c; /* 突出显示分数 */
+      font-weight: bold;
+    }
 
-.score-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
+    /* 通用标题样式 */
+    .feedback-section .section-title,
+    .recognition-section .section-title {
+      font-size: 30rpx;
+      color: #333333;
+      font-weight: bold;
+      margin-bottom: 20rpx;
+      padding-bottom: 10rpx;
+      border-bottom: 1rpx solid #eee;
+    }
 
-.score-display {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 8px;
-}
+    /* 红绿对比内容区域 */
+    .feedback-content {
+      font-size: 30rpx;
+      line-height: 1.8;
+      color: #333; /* 默认文字颜色，会被 span 覆盖 */
+      white-space: pre-wrap; /* 保留换行和空格 */
+      word-break: break-all; /* 允许单词内换行 */
+    }
 
-.score-number {
-  font-size: 36px;
-  font-weight: bold;
-  color: #ff9500;
-}
+    /* 正确/错误文本样式 */
+    .feedback-content .correct {
+      color: #28a745; /* 绿色 */
+    }
 
-.score-unit {
-  font-size: 16px;
-  color: #666;
-  margin-left: 5px;
-}
+    .feedback-content .error {
+      color: #dc3545; /* 红色 */
+      font-weight: bold; /* 加粗错误部分 */
+    }
 
-.flower-display {
-  display: flex;
-}
+    /* 识别结果内容区域 */
+    .recognition-content {
+      font-size: 30rpx;
+      line-height: 1.8;
+      color: #555; /* 识别结果用稍浅的颜色区分 */
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
 
-.flower-icon {
-  width: 24px;
-  height: 24px;
-  margin: 0 2px;
-}
-
-.info-section {
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.info-item {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-.info-label {
-  width: 60px;
-  color: #666;
-}
-
-.info-value {
-  font-weight: 500;
-}
-
-.section-title {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 10px;
-}
-
-.content-text {
-  line-height: 1.8;
-  color: #333;
-  white-space: pre-wrap;
-}
-
-.missing-article {
-  padding: 20px;
-  text-align: center;
-}
-
-.warning-text {
-  color: #ff4d4f;
-  font-size: 14px;
-}
-
-.actions {
-  display: flex;
-  justify-content: space-around;
-}
-
-.btn-primary {
-  background-color: #aff157;
-  color: #333;
-  font-weight: 500;
-  border-radius: 30px;
-  padding: 0 30px;
-}
-
-.btn-secondary {
-  background-color: #f0f0f0;
-  color: #666;
-  border-radius: 30px;
-  padding: 0 30px;
-} 
+    /* 暂无反馈或加载提示 */
+    .no-feedback,
+    .loading-error {
+      text-align: center;
+      color: #999999;
+      font-size: 28rpx;
+      padding: 40rpx 0;
+    }

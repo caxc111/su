@@ -74,11 +74,14 @@
         <view class="score-unit">分</view>
       </view>
       
+      <!-- 注释掉小红花显示区域 -->
+      <!-- 
       <view class="result-flowers">
         <block wx:for="{{readingResult.flowers}}" wx:key="index">
           <image src="/images/flower.png" class="flower-icon"></image>
         </block>
       </view>
+      -->
       
       <view class="result-feedback">
         <text>{{readingResult.feedback}}</text>

@@ -49,6 +49,9 @@
 }
 
 .record-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   background-color: #ffffff;
   border-radius: 12px;
   padding: 16px;
@@ -56,18 +59,21 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+.record-left {
+  flex: 1;
+  margin-right: 10px;
+}
+
 .record-title {
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 10px;
+  margin-bottom: 4px;
 }
 
 .record-details {
   display: flex;
-  justify-content: space-between;
   font-size: 12px;
   color: #666;
-  margin-bottom: 10px;
 }
 
 .record-score {
@@ -89,7 +95,7 @@
 
 .flowers {
   display: flex;
-  margin-left: auto;
+  margin-left: 8px;
 }
 
 .flower-icon {

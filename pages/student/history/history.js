@@ -44,18 +44,18 @@ Page({
     }
     
     // 分页处理
-    const page = append ? this.data.page : 1;
+    const page = append ? this.data.page + 1 : 1;
     const pageSize = this.data.pageSize;
     const startIndex = (page - 1) * pageSize;
     const endIndex = page * pageSize;
-    const recordsToShow = records.slice(0, endIndex);
+    const recordsToShow = records.slice(startIndex, endIndex);
     
     // 为每条记录添加花朵数量和格式化日期
     const enhancedRecords = recordsToShow.map(record => {
       return {
         ...record,
         flowers: this.calculateFlowers(record.score),
-        formattedDate: this.formatDate(record.date)
+        formattedDate: this.formatDate(record.timestamp)
       };
     });
     
@@ -69,37 +69,30 @@ Page({
   
   // 根据分数计算花朵数量
   calculateFlowers(score) {
-    if (score >= 95) {
-      return 3;
-    } else if (score >= 85) {
-      return 2;
-    } else if (score >= 75) {
-      return 1;
+    const numericScore = Number(score);
+    if (isNaN(numericScore)) {
+      return 0;
     }
-    return 0;
+    // 只有得分等于 100 时才返回 1 朵花，否则返回 0
+    return numericScore === 100 ? 1 : 0;
   },
   
-  // 格式化日期
-  formatDate(dateString) {
-    if (!dateString) return '未知日期';
-    
-    // 如果是时间戳，转换为日期字符串
-    if (typeof dateString === 'number') {
-      const date = new Date(dateString);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  // 格式化日期和时间为 YYYY-MM-DD HH:mm
+  formatDate(timestamp) {
+    if (!timestamp || typeof timestamp !== 'number') {
+        return '未知时间';
     }
-    
-    // 如果已经是YYYY-MM-DD格式，直接返回
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
-      return dateString;
-    }
-    
-    // 尝试解析其他格式
     try {
-      const date = new Date(dateString);
-      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}`;
     } catch (e) {
-      return '未知日期';
+        console.error('[history.js formatDate] Error formatting timestamp:', timestamp, e);
+        return '时间格式错误';
     }
   },
   

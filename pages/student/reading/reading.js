@@ -233,7 +233,7 @@ Page({
         this.setData({ recordTimer: null }); 
       }
     
-      this.setData({
+    this.setData({
           recordStatus: 'processing' 
       });
       
@@ -267,9 +267,17 @@ Page({
   // 录音管理
   toggleRecording() {
     const currentStatus = this.data.recordStatus;
-    console.log(`[reading.js toggleRecording] Button clicked. Current status: ${currentStatus}`); // Log status
+    console.log(`[reading.js toggleRecording] Button clicked. Current status: ${currentStatus}`); 
 
     if (currentStatus === 'idle') {
+      // ---> 添加检查：是否正在播放范读 <---
+      if (this.data.isPlayingFanDu) {
+        wx.showToast({ title: '请先停止播放范读', icon: 'none' });
+        console.log('[reading.js toggleRecording] Prevented starting recording because FanDu is playing.');
+        return;
+      }
+      // -----------------------------------
+
       console.log('[reading.js toggleRecording] Status is idle, attempting to start recording...');
       // 检查权限，以防用户中途取消
       wx.getSetting({
@@ -279,7 +287,7 @@ Page({
             this.checkRecordPermission(); // 引导用户重新授权
           } else {
             console.log('[reading.js toggleRecording] Permission granted, calling startRecording()');
-            this.startRecording();
+      this.startRecording();
           }
         },
         fail: (err) => {
@@ -322,8 +330,8 @@ Page({
     console.log('[startRecording] Starting manager with simplified options:', simplifiedOptions);
 
     try {
-        this.setData({
-            recordStatus: 'recording',
+    this.setData({
+      recordStatus: 'recording',
             recordTime: 0,
             recognizedText: '' 
         });
@@ -429,6 +437,29 @@ Page({
       showResult: true,
       recordStatus: 'idle' // 评分结束，状态改为空闲
     });
+
+    // ---> 添加：调用 app.js 中的函数保存记录 <--- 
+    const app = getApp();
+    if (app && typeof app.addReadingRecord === 'function') {
+      // 准备传递给 addReadingRecord 的数据
+      const recordData = {
+        articleId: this.data.article.id,      // 文章 ID
+        articleTitle: this.data.article.title, // 文章标题
+        score: result.score,                // 本次得分
+        accuracy: result.accuracy,            // 准确率 (可选)
+        type: 'recitation',                 
+        feedbackHtml: result.contentWithErrors 
+      };
+      
+      // ---> 添加详细日志：检查要保存的数据 <--- 
+      console.log('[evaluateReading] Preparing to save record. Checking values:');
+      console.log('[evaluateReading] result.contentWithErrors:', result.contentWithErrors); // 检查 HTML 内容
+      console.log('[evaluateReading] recordData to be saved:', JSON.stringify(recordData)); // 检查最终对象
+
+      app.addReadingRecord(recordData); // 调用保存
+    } else {
+      console.error('[evaluateReading]无法找到 app.addReadingRecord 函数!');
+    }
   },
   
   // 比较文本（核心比较逻辑，需要保留并可能优化）
@@ -565,6 +596,14 @@ Page({
 
   // 点击"播放范读"按钮
   playStandardAudio() {
+    // ---> 添加检查：是否正在录音 <---
+    if (this.data.recordStatus === 'recording') {
+      wx.showToast({ title: '请先停止录音', icon: 'none' });
+      console.log('[reading.js playStandardAudio] Prevented playing FanDu because recording is active.');
+      return;
+    }
+    // -------------------------------
+
     if (!this.data.article || !this.data.article.content) {
       wx.showToast({ title: '文章内容为空', icon: 'none' });
       return;
@@ -583,11 +622,14 @@ Page({
     wx.showLoading({ title: '正在合成语音...' }); // 显示加载提示
 
     const contentToRead = this.data.article.content;
-    const languageCode = this.data.article.language === 'zh' ? 'zh_CN' : 'en_US'; // 插件需要的语言代码
+    // ---> 修改：始终将 languageCode 设置为中文 <---
+    // const languageCode = this.data.article.language === 'zh' ? 'zh_CN' : 'en_US'; // 移除原来的判断
+    const languageCode = 'zh_CN'; 
+    console.log(`[reading.js playStandardAudio] 强制使用语言代码: ${languageCode} (即使文章语言是 ${this.data.article.language})`);
 
-    // ---> 修改：直接使用全局 plugin 对象调用 TTS <--- 
-    plugin.textToSpeech({ // 不再是 this.manager.textToSpeech
-      lang: languageCode,
+    // 调用 TTS 接口
+    plugin.textToSpeech({ 
+      lang: languageCode, // <--- 始终传递 'zh_CN'
       content: contentToRead,
       success: (res) => {
         console.log('[reading.js playStandardAudio] TTS 成功:', res);
