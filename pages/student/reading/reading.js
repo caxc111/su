@@ -25,7 +25,7 @@ Page({
       recognizedText: '' // 识别出的文本
     },
     isPlayingFanDu: false, // 是否正在播放范读
-    // fanDuAudioUrl: '', // 可以移除或注释掉，因为我们将直接使用 TTS 返回的临时路径
+    playbackState: 'idle', // idle, playingTitle, pausedAfterTitle, playingContent
   },
   
   fanDuPlayer: null, // 在 Page 实例上保存播放器引用
@@ -46,28 +46,38 @@ Page({
 
     // --- 监听音频播放事件 ---
     this.audioContext.onPlay(() => {
-      console.log('[reading.js audioContext] 开始播放');
-      // 可以在这里更新按钮文本为"停止播放"等
+      console.log('[reading.js audioContext] 开始播放 (当前状态:' + this.data.playbackState + ')');
+      // 不再在这里设置 isPlayingFanDu，由调用 play 的地方设置
     });
 
     this.audioContext.onStop(() => {
-      console.log('[reading.js audioContext] 播放停止');
-      this.setData({ isPlayingFanDu: false });
-      // 可以在这里更新按钮文本为"播放范读"
+      console.log('[reading.js audioContext] 播放停止 (手动或出错)');
+      // 统一重置状态
+      this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
     });
 
     this.audioContext.onEnded(() => {
-      console.log('[reading.js audioContext] 播放自然结束');
-      this.setData({ isPlayingFanDu: false });
-      // 可以在这里更新按钮文本为"播放范读"
-       // 如果需要循环播放或播放下一段（如果分段的话），在这里处理
+      console.log('[reading.js audioContext] 播放自然结束 (当前状态:' + this.data.playbackState + ')');
+      if (this.data.playbackState === 'playingTitle') {
+        // 标题播放完成，立即播放内容，移除暂停
+        console.log('[reading.js onEnded] 标题播放完毕，立即开始播放内容');
+        this.playContentAudio(); 
+      } else if (this.data.playbackState === 'playingContent') {
+        // 内容播放完成，结束流程
+        console.log('[reading.js onEnded] 内容播放完毕，流程结束');
+        this.setData({ isPlayingFanDu: false, playbackState: 'idle' });
+      } else {
+        // 其他状态下自然结束，可能是异常情况，直接重置
+        console.warn('[reading.js onEnded] 在非预期状态下结束:', this.data.playbackState, ', 重置状态。');
+        this.setData({ isPlayingFanDu: false, playbackState: 'idle' });
+      }
     });
 
     this.audioContext.onError((res) => {
       console.error('[reading.js audioContext] 播放错误:', res.errMsg, res.errCode);
       wx.showToast({ title: `播放错误: ${res.errCode}`, icon: 'none' });
-      this.setData({ isPlayingFanDu: false });
-       // 可以在这里更新按钮文本为"播放范读"
+      // 统一重置状态
+      this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
     });
     // -------------------------
 
@@ -426,8 +436,8 @@ Page({
       correctWords: correctWords,
       totalWords: totalWords,
       accuracy: accuracy,
-      contentWithErrors: comparisonResult.diffHtml, // 使用比较结果中的 diff HTML
-      recognizedText: recognizedText // 保存真实的识别文本
+      contentWithErrors: comparisonResult.diffHtml,
+      recognizedText: recognizedText
     };
     
     console.log("评分结果:", result);
@@ -435,7 +445,7 @@ Page({
     this.setData({
       readingResult: result,
       showResult: true,
-      recordStatus: 'idle' // 评分结束，状态改为空闲
+      recordStatus: 'idle'
     });
 
     // ---> 添加：调用 app.js 中的函数保存记录 <--- 
@@ -447,16 +457,17 @@ Page({
         articleTitle: this.data.article.title, // 文章标题
         score: result.score,                // 本次得分
         accuracy: result.accuracy,            // 准确率 (可选)
-        type: 'recitation',                 
-        feedbackHtml: result.contentWithErrors 
+        type: 'reading',                     
+        feedbackHtml: result.contentWithErrors, // 红绿对比 HTML（朗读也保存了）
+        recognizedText: result.recognizedText  // 识别文本（朗读也保存了）
       };
       
-      // ---> 添加详细日志：检查要保存的数据 <--- 
       console.log('[evaluateReading] Preparing to save record. Checking values:');
-      console.log('[evaluateReading] result.contentWithErrors:', result.contentWithErrors); // 检查 HTML 内容
-      console.log('[evaluateReading] recordData to be saved:', JSON.stringify(recordData)); // 检查最终对象
+      console.log('[evaluateReading] result.contentWithErrors:', result.contentWithErrors);
+      console.log('[evaluateReading] result.recognizedText:', result.recognizedText);
+      console.log('[evaluateReading] recordData to be saved:', JSON.stringify(recordData));
 
-      app.addReadingRecord(recordData); // 调用保存
+      app.addReadingRecord(recordData);
     } else {
       console.error('[evaluateReading]无法找到 app.addReadingRecord 函数!');
     }
@@ -558,8 +569,9 @@ Page({
     return "继续努力！熟能生巧。";
   },
 
-  // 生成小红花
+  // 生成花朵
   generateFlowers(score) {
+    // 这个是朗读评分的原始逻辑，可能与背诵不同，按原样恢复
     if (score >= 95) return [1, 1, 1, 1, 1];
     if (score >= 90) return [1, 1, 1, 1, 0];
     if (score >= 80) return [1, 1, 1, 0, 0];
@@ -567,7 +579,7 @@ Page({
     if (score >= 60) return [1, 0, 0, 0, 0];
     return [];
   },
-  
+
   // 显示错误结果的模态框
   showErrorResult(message) {
       this.setData({
@@ -596,88 +608,112 @@ Page({
 
   // 点击"播放范读"按钮
   playStandardAudio() {
-    // ---> 添加检查：是否正在录音 <---
+    // 检查是否正在录音
     if (this.data.recordStatus === 'recording') {
       wx.showToast({ title: '请先停止录音', icon: 'none' });
-      console.log('[reading.js playStandardAudio] Prevented playing FanDu because recording is active.');
-      return;
-    }
-    // -------------------------------
-
-    if (!this.data.article || !this.data.article.content) {
-      wx.showToast({ title: '文章内容为空', icon: 'none' });
       return;
     }
 
-    // 如果当前正在播放，则停止
+    if (!this.data.article || !this.data.article.content || !this.data.article.title) {
+      wx.showToast({ title: '文章信息不完整', icon: 'none' });
+      return;
+    }
+
+    // 如果当前正在播放（任何阶段），则停止
     if (this.data.isPlayingFanDu) {
-      console.log('[reading.js playStandardAudio] 停止播放范读');
-      this.audioContext.stop(); // stop 会触发 onStop 回调来重置状态
-      this.setData({ isPlayingFanDu: false }); // 立即更新状态，避免重复点击问题
+      console.log('[reading.js playStandardAudio] 停止播放范读 (当前状态: ' + this.data.playbackState + ')');
+      this.audioContext.stop(); 
+      this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
+      wx.hideLoading(); 
       return;
     }
 
-    // 如果没有在播放，则开始合成并播放
-    console.log('[reading.js playStandardAudio] 开始请求 TTS');
-    wx.showLoading({ title: '正在合成语音...' }); // 显示加载提示
+    // ---> 如果是 idle 状态，开始播放流程：先播放标题 <--- 
+    if (this.data.playbackState === 'idle') {
+        console.log('[reading.js playStandardAudio] 开始播放流程：请求标题 TTS');
+        wx.showLoading({ title: '正在合成标题...' });
 
-    const contentToRead = this.data.article.content;
-    // ---> 修改：始终将 languageCode 设置为中文 <---
-    // const languageCode = this.data.article.language === 'zh' ? 'zh_CN' : 'en_US'; // 移除原来的判断
-    const languageCode = 'zh_CN'; 
-    console.log(`[reading.js playStandardAudio] 强制使用语言代码: ${languageCode} (即使文章语言是 ${this.data.article.language})`);
+        const title = this.data.article.title;
+        const languageCode = 'zh_CN'; // 保持强制中文
 
-    // 调用 TTS 接口
-    plugin.textToSpeech({ 
-      lang: languageCode, // <--- 始终传递 'zh_CN'
-      content: contentToRead,
+        plugin.textToSpeech({
+            lang: languageCode,
+            content: title,
+            success: (res) => {
+                console.log('[reading.js playStandardAudio] 标题 TTS 成功:', res);
+                if (res.filename) {
+                    this.audioContext.src = res.filename;
+                    this.audioContext.playbackRate = 0.8; // 保持统一语速
+                    this.audioContext.play();
+                    // 更新状态，标记为正在播放标题
+                    this.setData({
+                        isPlayingFanDu: true,
+                        playbackState: 'playingTitle'
+                    });
+                } else {
+                    console.error('[reading.js playStandardAudio] 标题 TTS 成功但未返回音频文件');
+                    wx.showToast({ title: '未能获取标题音频', icon: 'none' });
+                    this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); // 重置状态
+                }
+            },
+            fail: (err) => {
+                console.error('[reading.js playStandardAudio] 标题 TTS 失败:', err);
+                wx.showToast({ title: `标题合成失败: ${err.msg || ''}`, icon: 'none' });
+                this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); // 重置状态
+            },
+            complete: () => {
+                wx.hideLoading(); 
+            }
+        });
+    } else {
+        console.warn('[reading.js playStandardAudio] 非 idle 状态下被调用，当前状态:', this.data.playbackState);
+    }
+  },
+
+  // ---> 添加播放内容音频的函数 <--- 
+  playContentAudio() {
+    if (!this.data.article || !this.data.article.content) {
+      console.error('[playContentAudio] 文章内容为空，无法播放');
+      this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); // 出错重置状态
+      return;
+    }
+
+    console.log('[playContentAudio] 请求正文 TTS');
+    wx.showLoading({ title: '正在合成正文...' });
+
+    const content = this.data.article.content;
+    const languageCode = 'zh_CN'; // 保持强制中文
+
+    plugin.textToSpeech({
+      lang: languageCode,
+      content: content,
       success: (res) => {
-        console.log('[reading.js playStandardAudio] TTS 成功:', res);
+        console.log('[playContentAudio] 正文 TTS 成功:', res);
         if (res.filename) {
-          console.log('[reading.js playStandardAudio] 音频文件路径:', res.filename);
-          // 设置音频源
           this.audioContext.src = res.filename;
-          
-          // ---> 修改：将播放速度统一设置为 0.8 <---
-          // 移除之前的语言判断逻辑
-          /*
-          const currentLanguage = this.data.article.language;
-          if (currentLanguage === 'en') {
-            this.audioContext.playbackRate = 0.7; // 英文设置为 0.7 倍速
-            console.log('[reading.js playStandardAudio] 设置英文播放速度为 0.7');
-          } else { // 默认或中文 'zh'
-            this.audioContext.playbackRate = 1.0; // 中文设置为 1.0 倍速 (正常速度)
-            console.log('[reading.js playStandardAudio] 设置中文播放速度为 1.0');
-          }
-          */
-          this.audioContext.playbackRate = 0.8;
-          console.log('[reading.js playStandardAudio] 设置播放速度为 0.8');
-          
-          // 然后开始播放
-          this.audioContext.play(); // play 会触发 onPlay 回调
-          
-          // 更新状态，标记为正在播放
+          this.audioContext.playbackRate = 0.8; // 保持统一语速
+          this.audioContext.play();
+          // 更新状态，标记为正在播放内容
           this.setData({
-            isPlayingFanDu: true,
-            // 可以在 onPlay 回调中更新按钮文本为"停止播放"
+            // isPlayingFanDu 应该已经是 true
+            playbackState: 'playingContent'
           });
         } else {
-          console.error('[reading.js playStandardAudio] TTS 成功但未返回音频文件');
-          wx.showToast({ title: '未能获取音频', icon: 'none' });
-          this.setData({ isPlayingFanDu: false }); // 重置状态
+          console.error('[playContentAudio] 正文 TTS 成功但未返回音频文件');
+          wx.showToast({ title: '未能获取正文音频', icon: 'none' });
+          this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); // 重置状态
         }
       },
       fail: (err) => {
-        console.error('[reading.js playStandardAudio] TTS 失败:', err);
-        wx.showToast({ title: `语音合成失败: ${err.retcode || ''} ${err.msg || ''}`, icon: 'none' });
-        this.setData({ isPlayingFanDu: false }); // 重置状态
+        console.error('[playContentAudio] 正文 TTS 失败:', err);
+        wx.showToast({ title: `正文合成失败: ${err.msg || ''}`, icon: 'none' });
+        this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); // 重置状态
       },
       complete: () => {
-        wx.hideLoading(); // 无论成功失败，隐藏加载提示
+        wx.hideLoading();
       }
     });
   },
-
 
   // ... (splitTextIntoChunks 函数，暂时不用，先注释掉或保留)
   /*

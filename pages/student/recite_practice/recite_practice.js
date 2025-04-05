@@ -439,6 +439,7 @@ Page({
     }
   },
   
+  // ---> 恢复辅助函数存根 <--- 
   // --- 背诵相关的辅助函数 (需要实现或引入) ---
   // compareTextsForRecitation(original, recognized, language) { /* ... */ },
   // calculateRecitationScore(accuracy, totalWords, language) { /* ... */ },

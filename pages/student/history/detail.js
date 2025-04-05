@@ -48,7 +48,7 @@ Page({
 
       // 设置导航栏标题
       wx.setNavigationBarTitle({
-        title: recordDetail.articleTitle ? `“${recordDetail.articleTitle}”背诵详情` : '背诵详情'
+        title: recordDetail.articleTitle ? `"${recordDetail.articleTitle}"背诵详情` : '背诵详情'
       });
 
     } else {
