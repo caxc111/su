@@ -11,7 +11,7 @@
       <text class="userinfo-nickname">{{userInfo.nickName || '微信用户'}}</text>
       <!-- 使用flower-display组件 -->
       <view class="flower-area">
-        <flower-display count="{{totalFlowers}}" bindanimationStart="onAnimationStart" bindanimationEnd="onAnimationEnd"></flower-display>
+        <flower-display count="{{totalFlowers}}" showFireworks="{{true}}" showCoins="{{true}}" bindanimationStart="onAnimationStart" bindanimationEnd="onAnimationEnd"></flower-display>
       </view>
     </view>
 

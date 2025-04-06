@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "flower-display": "../flower-display/flower-display"
+  }
+} 

@@ -6,6 +6,18 @@ Component({
     count: {
       type: Number,
       value: 0
+    },
+    showFireworks: {
+      type: Boolean,
+      value: false
+    },
+    showCoins: {
+      type: Boolean,
+      value: false
+    },
+    autoPlay: {
+      type: Boolean,
+      value: false
     }
   },
 
@@ -13,7 +25,7 @@ Component({
    * 组件的初始数据
    */
   data: {
-    showFireworks: false,
+    showFireworksEffect: false,
     fallingCoins: [],  // 存储金币元素
     centerFireworks: [] // 存储烟花元素
   },
@@ -24,6 +36,12 @@ Component({
   lifetimes: {
     attached() {
       // 在组件实例进入页面节点树时执行
+      if (this.properties.autoPlay) {
+        // 延迟一小段时间自动触发动画
+        setTimeout(() => {
+          this.handleFlowerTap();
+        }, 500);
+      }
     },
     detached() {
       // 在组件实例被从页面节点树移除时执行
@@ -63,7 +81,7 @@ Component({
       console.log('[flower-display.js] handleFlowerTap triggered.');
       
       // 防止快速点击导致的多重动画
-      if (this.data.showFireworks) {
+      if (this.data.showFireworksEffect) {
         console.log('[flower-display.js] Animation already in progress, ignoring click');
         return;
       }
@@ -90,73 +108,80 @@ Component({
       // 创建金币数组
       const fallingCoins = [];
       
-      // 创建40-60个金币（原来是20-30个，翻倍）
-      const coinCount = Math.floor(Math.random() * 20) + 40;
-      
-      for (let i = 0; i < coinCount; i++) {
-        // 随机生成金币位置 - 从顶部开始
-        const angle = Math.random() * Math.PI * 0.8 + Math.PI * 0.1; // 限制在上方区域
-        const distance = 50 + Math.random() * 200; // 增大距离范围
-        const left = centerX + Math.cos(angle) * distance;
-        const top = centerY - 350 - Math.random() * 100; // 从更高的位置开始
+      // 只有启用showCoins时才创建金币
+      if (this.properties.showCoins) {
+        // 创建40-60个金币（原来是20-30个，翻倍）
+        const coinCount = Math.floor(Math.random() * 20) + 40;
         
-        // 随机放大金币，保持合理大小
-        const coinScale = 0.5 + Math.random() * 0.8;
-        
-        // 随机选择金币图片类型 (1-3，对应firework1.png到firework3.png)
-        const coinType = Math.floor(Math.random() * 3) + 1; // 1, 2, 或 3
-        
-        // 添加随机延迟以及各种随机效果
-        fallingCoins.push({
-          id: `coin_${i}`,
-          left,
-          top,
-          scale: coinScale,
-          rotation: Math.random() * 360,
-          type: coinType, // 随机金币类型
-          endY: screenBottom - Math.random() * 100, // 确保金币落到屏幕底部附近
-          fallDelay: Math.floor(Math.random() * 1000), // 随机下落延迟0-1000毫秒
-          flipSpeed: Math.random() > 0.5 ? 'fast' : 'slow', // 随机翻转速度
-          flipDirection: Math.random() > 0.5 ? 'clockwise' : 'counterclockwise' // 随机翻转方向
-        });
+        for (let i = 0; i < coinCount; i++) {
+          // 随机生成金币位置 - 从顶部开始
+          const angle = Math.random() * Math.PI * 0.8 + Math.PI * 0.1; // 限制在上方区域
+          const distance = 50 + Math.random() * 200; // 增大距离范围
+          const left = centerX + Math.cos(angle) * distance;
+          const top = centerY - 350 - Math.random() * 100; // 从更高的位置开始
+          
+          // 随机放大金币，保持合理大小
+          const coinScale = 0.5 + Math.random() * 0.8;
+          
+          // 随机选择金币图片类型 (1-3，对应firework1.png到firework3.png)
+          const coinType = Math.floor(Math.random() * 3) + 1; // 1, 2, 或 3
+          
+          // 添加随机延迟以及各种随机效果
+          fallingCoins.push({
+            id: `coin_${i}`,
+            left,
+            top,
+            scale: coinScale,
+            rotation: Math.random() * 360,
+            type: coinType, // 随机金币类型
+            endY: screenBottom - Math.random() * 100, // 确保金币落到屏幕底部附近
+            fallDelay: Math.floor(Math.random() * 1000), // 随机下落延迟0-1000毫秒
+            flipSpeed: Math.random() > 0.5 ? 'fast' : 'slow', // 随机翻转速度
+            flipDirection: Math.random() > 0.5 ? 'clockwise' : 'counterclockwise' // 随机翻转方向
+          });
+        }
       }
       
       // 设置数据，启动动画
       this.setData({
         fallingCoins,
         centerFireworks: [], // 初始没有烟花
-        showFireworks: true
+        showFireworksEffect: true
       }, () => {
         // 金币随机落下
         let maxFallDelay = 0;
         
-        fallingCoins.forEach((coin) => {
-          // 计算最长的金币落下延迟
-          const totalFallTime = coin.fallDelay + 2800; // fallDelay + transition时间(2.8s)
-          maxFallDelay = Math.max(maxFallDelay, totalFallTime);
-          
-          setTimeout(() => {
-            if (!this.data.showFireworks) return; // 如果用户已清除动画，则不再执行
+        if (this.properties.showCoins) {
+          fallingCoins.forEach((coin) => {
+            // 计算最长的金币落下延迟
+            const totalFallTime = coin.fallDelay + 2800; // fallDelay + transition时间(2.8s)
+            maxFallDelay = Math.max(maxFallDelay, totalFallTime);
             
-            const updatedCoins = [...this.data.fallingCoins];
-            const coinIndex = updatedCoins.findIndex(f => f.id === coin.id);
-            
-            if (coinIndex !== -1) {
-              updatedCoins[coinIndex].top = coin.endY;
-              updatedCoins[coinIndex].flipClass = `flip-${coin.flipSpeed}-${coin.flipDirection}`;
+            setTimeout(() => {
+              if (!this.data.showFireworksEffect) return; // 如果用户已清除动画，则不再执行
               
-              this.setData({
-                fallingCoins: updatedCoins
-              });
-            }
-          }, coin.fallDelay);
-        });
-        
-        // 播放金币落下的声音
-        this.playFallingCoinsSound(maxFallDelay);
+              const updatedCoins = [...this.data.fallingCoins];
+              const coinIndex = updatedCoins.findIndex(f => f.id === coin.id);
+              
+              if (coinIndex !== -1) {
+                updatedCoins[coinIndex].top = coin.endY;
+                updatedCoins[coinIndex].flipClass = `flip-${coin.flipSpeed}-${coin.flipDirection}`;
+                
+                this.setData({
+                  fallingCoins: updatedCoins
+                });
+              }
+            }, coin.fallDelay);
+          });
+          
+          // 播放金币落下的声音
+          this.playFallingCoinsSound(maxFallDelay);
+        }
         
         // 添加中央烟花
-        this.addCenterFireworks(centerX, centerY);
+        if (this.properties.showFireworks) {
+          this.addCenterFireworks(centerX, centerY);
+        }
       });
       
       // 触发自定义事件，让父组件知道动画已开始
@@ -232,7 +257,7 @@ Component({
       // 逐个添加烟花，随机出现，使用透明度渐变
       fireworkConfigs.forEach((config) => {
         setTimeout(() => {
-          if (!this.data.showFireworks) return;
+          if (!this.data.showFireworksEffect) return;
           
           // 添加烟花，初始透明度为0
           const newFirework = {
@@ -247,7 +272,7 @@ Component({
           }, () => {
             // 淡入动画
             setTimeout(() => {
-              if (!this.data.showFireworks) return;
+              if (!this.data.showFireworksEffect) return;
               const fadeInFireworks = [...this.data.centerFireworks];
               const index = fadeInFireworks.findIndex(f => f.id === config.id);
               if (index !== -1) {
@@ -268,7 +293,7 @@ Component({
             
             // 修改烟花淡出动画逻辑
             setTimeout(() => {
-              if (!this.data.showFireworks) return;
+              if (!this.data.showFireworksEffect) return;
               const fadeOutFireworks = [...this.data.centerFireworks];
               const index = fadeOutFireworks.findIndex(f => f.id === config.id);
               if (index !== -1) {
@@ -282,7 +307,7 @@ Component({
             
             // 移除烟花
             setTimeout(() => {
-              if (!this.data.showFireworks) return;
+              if (!this.data.showFireworksEffect) return;
               const remaining = this.data.centerFireworks.filter(f => f.id !== config.id);
               this.setData({
                 centerFireworks: remaining
@@ -295,7 +320,7 @@ Component({
     
     // 清除所有动画
     clearFireworks() {
-      if (this.data.showFireworks) {
+      if (this.data.showFireworksEffect) {
         console.log('[flower-display.js] Clearing fireworks...');
         
         // 停止金币落下的声音
@@ -306,7 +331,7 @@ Component({
         }
         
         this.setData({
-          showFireworks: false,
+          showFireworksEffect: false,
           fallingCoins: [],
           centerFireworks: []
         });
@@ -349,7 +374,7 @@ Component({
     // 点击背景清除动画
     handleContainerTap() {
       // 如果动画正在显示，任何点击都应该清除动画
-      if (this.data.showFireworks) {
+      if (this.data.showFireworksEffect) {
         console.log('[flower-display.js] Screen tapped, clearing fireworks');
         this.clearFireworks();
       }

@@ -7,7 +7,7 @@
   </view>
   
   <!-- 烟花特效容器 -->
-  <view wx:if="{{showFireworks}}" class="fireworks-container" catchtap="handleContainerTap">
+  <view wx:if="{{showFireworksEffect}}" class="fireworks-container" catchtap="handleContainerTap">
     <!-- 明确分开两种类型的元素 -->
     
     <!-- 烟花元素 - 使用firework0图片，在中央闪现 -->

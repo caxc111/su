@@ -115,5 +115,8 @@
     wx:if="{{reciteResult.score === 100}}"
     count="{{1}}" 
     id="flowerDisplay"
+    showFireworks="{{true}}"
+    showCoins="{{true}}"
+    autoPlay="{{true}}"
   />
 </view>
