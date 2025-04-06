@@ -1,0 +1,139 @@
+/* 文章编辑器组件样式 */
+.article-editor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 遮罩层 */
+.editor-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+/* 编辑器内容区 */
+.editor-content {
+  position: relative;
+  width: 85%;
+  max-height: 80%;
+  background-color: #fff;
+  border-radius: 12rpx;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
+}
+
+/* 编辑器标题 */
+.editor-title {
+  padding: 30rpx;
+  font-size: 36rpx;
+  font-weight: bold;
+  text-align: center;
+  border-bottom: 1rpx solid #f0f0f0;
+  color: #333;
+}
+
+/* 表单区域 */
+.editor-form {
+  flex: 1;
+  padding: 30rpx;
+  overflow-y: auto;
+}
+
+/* 表单项 */
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+/* 表单标签 */
+.form-label {
+  font-size: 30rpx;
+  margin-bottom: 16rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 文本输入框 */
+.form-input {
+  width: 100%;
+  height: 80rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 0 20rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  background-color: #f9f9f9;
+}
+
+/* 文本域 */
+.form-textarea {
+  width: 100%;
+  height: 300rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 8rpx;
+  padding: 20rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  background-color: #f9f9f9;
+}
+
+/* 语言选择 */
+.lang-radio-group {
+  display: flex;
+  align-items: center;
+}
+
+.lang-radio {
+  margin-right: 40rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+}
+
+/* 操作按钮区域 */
+.editor-actions {
+  display: flex;
+  padding: 20rpx 30rpx;
+  border-top: 1rpx solid #f0f0f0;
+  justify-content: space-between;
+}
+
+/* 取消按钮 */
+.btn-cancel {
+  flex: 1;
+  margin-right: 20rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  color: #666;
+  background-color: #f5f5f5;
+  border: 1rpx solid #ddd;
+}
+
+/* 保存按钮 */
+.btn-save {
+  flex: 1;
+  margin-left: 20rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 8rpx;
+  font-size: 30rpx;
+  color: #fff;
+  background-color: #3498db;
+  border: 1rpx solid #3498db;
+} 

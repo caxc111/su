@@ -49,38 +49,12 @@
     暂时没有{{currentLang === 'zh' ? '中文' : currentLang === 'en' ? '英文' : ''}}文章，点击"添加文章"开始创建
   </view>
   
-  <!-- 添加文章弹窗 -->
-  <view class="modal" wx:if="{{showAddModal}}">
-    <view class="modal-mask" bindtap="hideAddArticleModal"></view>
-    <view class="modal-content">
-      <view class="modal-title">{{isEditing ? '编辑文章' : '添加文章'}}</view>
-      
-      <view class="form-item">
-        <view class="form-label">标题</view>
-        <input class="form-input" placeholder="请输入文章标题" value="{{editArticle.title}}" bindinput="onInputTitle"></input>
-      </view>
-      
-      <view class="form-item">
-        <view class="form-label">语言</view>
-        <radio-group class="lang-radio-group" bindchange="onSelectLang">
-          <label class="lang-radio">
-            <radio value="zh" checked="{{editArticle.language === 'zh'}}"/>中文
-          </label>
-          <label class="lang-radio">
-            <radio value="en" checked="{{editArticle.language === 'en'}}"/>英文
-          </label>
-        </radio-group>
-      </view>
-      
-      <view class="form-item">
-        <view class="form-label">内容</view>
-        <textarea class="form-textarea" placeholder="请输入文章内容" value="{{editArticle.content}}" bindinput="onInputContent"></textarea>
-      </view>
-      
-      <view class="modal-actions">
-        <button class="btn-cancel" bindtap="hideAddArticleModal">取消</button>
-        <button class="btn-primary" bindtap="saveArticle">保存</button>
-      </view>
-    </view>
-  </view>
+  <!-- 使用封装的文章编辑器组件 -->
+  <article-editor 
+    visible="{{showAddModal}}" 
+    isEditing="{{isEditing}}" 
+    article="{{editArticle}}" 
+    bind:save="handleArticleSave" 
+    bind:cancel="hideAddArticleModal">
+  </article-editor>
 </view>

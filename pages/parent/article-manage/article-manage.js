@@ -155,34 +155,9 @@ Page({
     });
   },
   
-  onInputTitle(e) {
-    this.setData({
-      'editArticle.title': e.detail.value
-    });
-  },
-  
-  onSelectLang(e) {
-    this.setData({
-      'editArticle.language': e.detail.value
-    });
-  },
-  
-  onInputContent(e) {
-    this.setData({
-      'editArticle.content': e.detail.value
-    });
-  },
-  
-  saveArticle() {
-    const { title, language, content } = this.data.editArticle;
-    
-    if (!title || !content) {
-      wx.showToast({
-        title: '请填写完整信息',
-        icon: 'none'
-      });
-      return;
-    }
+  // 处理文章编辑器组件的保存事件
+  handleArticleSave(e) {
+    const { title, language, content } = e.detail;
     
     wx.showLoading({ title: '保存中' });
     
