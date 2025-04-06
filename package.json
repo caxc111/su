@@ -1,0 +1,17 @@
+      {
+        "name": "shunkouchengzhang",
+        "version": "1.0.0",
+        "description": "Miniprogram project",
+        "main": "app.js",
+        "scripts": {
+          "test": "echo \"Error: no test specified\" && exit 1"
+        },
+        "keywords": [
+          "miniprogram"
+        ],
+        "author": "",
+        "license": "ISC",
+        "dependencies": {
+          "@babel/runtime": "^7.0.0" 
+        }
+      }

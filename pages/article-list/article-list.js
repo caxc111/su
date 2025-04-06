@@ -17,7 +17,11 @@ Page({
     debugMode: true,  // 开启调试模式
     loadingDotCount: '...', // 加载动画点数
     showActionPanel: false,
-    currentArticle: null
+    currentArticle: null,
+    activeFilter: 'all', // 'all', 'read', 'unread'
+    error: null,
+    // 用于强制刷新
+    refreshKey: Date.now()
   },
 
   /**
@@ -65,6 +69,18 @@ Page({
         icon: 'success',
         duration: 1000
       });
+    }
+    
+    // 添加登录检查
+    if (!app.globalData.userInfo) {
+      console.log('[article-list.js onShow] 用户未登录，跳转到 profile 页面');
+      wx.switchTab({
+        url: '/pages/student/profile/profile',
+        fail: (err) => {
+          console.error('[article-list.js] 跳转到 profile 失败:', err);
+        }
+      });
+      return; // 阻止后续代码执行，因为即将跳转
     }
     
     // 每次显示页面时刷新文章列表，确保数据最新

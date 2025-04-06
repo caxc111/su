@@ -26,6 +26,8 @@ Page({
     },
     isPlayingFanDu: false, // 是否正在播放范读
     playbackState: 'idle', // idle, playingTitle, pausedAfterTitle, playingContent
+    mode: 'practice', // 'practice' 或 'review'
+    recordId: null // 如果是查看历史记录，则存储其 ID
   },
   
   fanDuPlayer: null, // 在 Page 实例上保存播放器引用
@@ -33,56 +35,41 @@ Page({
   currentChunkIndex: 0, // 当前播放的片段索引
   
   onLoad(options) {
-    console.log("朗读页面加载完成，文章ID:", options.id);
-    this.setData({ articleId: options.id });
-    this.loadArticle(options.id);
+    console.log("朗读/查看页面加载，options:", options);
+    this.initRecord(); // 初始化语音识别回调（无论哪种模式都需要）
+    this.initAudioContext(); // 初始化音频播放器
+    this.checkRecordPermission(); // 检查录音权限
 
-    // 初始化语音识别回调
-    this.initRecord();
+    // --- 新增：判断是练习模式还是查看历史记录模式 ---
+    if (options.recordId) {
+      // --- 查看历史记录模式 ---
+      console.log(`[reading.js onLoad] 进入查看历史记录模式，recordId: ${options.recordId}`);
+      this.setData({
+        mode: 'review',
+        recordId: options.recordId,
+        isLoading: true // 显示加载状态
+      });
+      this.loadRecordDetail(options.recordId);
 
-    // 初始化音频播放器实例
-    console.log('[reading.js onLoad] 初始化 InnerAudioContext');
-    this.audioContext = wx.createInnerAudioContext();
+    } else if (options.id) {
+      // --- 练习模式 --- 
+      console.log(`[reading.js onLoad] 进入练习模式，articleId: ${options.id}`);
+      this.setData({
+        mode: 'practice',
+        articleId: options.id,
+        isLoading: true
+      });
+      this.loadArticle(options.id);
+      // 对于练习模式，可能还需要加载上次的进度等（如果需要）
 
-    // --- 监听音频播放事件 ---
-    this.audioContext.onPlay(() => {
-      console.log('[reading.js audioContext] 开始播放 (当前状态:' + this.data.playbackState + ')');
-      // 不再在这里设置 isPlayingFanDu，由调用 play 的地方设置
-    });
-
-    this.audioContext.onStop(() => {
-      console.log('[reading.js audioContext] 播放停止 (手动或出错)');
-      // 统一重置状态
-      this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
-    });
-
-    this.audioContext.onEnded(() => {
-      console.log('[reading.js audioContext] 播放自然结束 (当前状态:' + this.data.playbackState + ')');
-      if (this.data.playbackState === 'playingTitle') {
-        // 标题播放完成，立即播放内容，移除暂停
-        console.log('[reading.js onEnded] 标题播放完毕，立即开始播放内容');
-        this.playContentAudio(); 
-      } else if (this.data.playbackState === 'playingContent') {
-        // 内容播放完成，结束流程
-        console.log('[reading.js onEnded] 内容播放完毕，流程结束');
-        this.setData({ isPlayingFanDu: false, playbackState: 'idle' });
-      } else {
-        // 其他状态下自然结束，可能是异常情况，直接重置
-        console.warn('[reading.js onEnded] 在非预期状态下结束:', this.data.playbackState, ', 重置状态。');
-        this.setData({ isPlayingFanDu: false, playbackState: 'idle' });
-      }
-    });
-
-    this.audioContext.onError((res) => {
-      console.error('[reading.js audioContext] 播放错误:', res.errMsg, res.errCode);
-      wx.showToast({ title: `播放错误: ${res.errCode}`, icon: 'none' });
-      // 统一重置状态
-      this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
-    });
-    // -------------------------
-
-    // 检查录音权限
-    this.checkRecordPermission();
+    } else {
+      // --- 无效参数 --- 
+      console.error('[reading.js onLoad] 缺少必要的参数 (id 或 recordId)');
+      wx.showToast({ title: '页面加载参数错误', icon: 'none' });
+      // 可以选择返回上一页
+      // wx.navigateBack(); 
+      this.setData({ isLoading: false });
+    }
   },
   
   // 添加 loadArticle 函数
@@ -266,7 +253,7 @@ Page({
        
        const recordTimer = this.data.recordTimer;
        if (recordTimer) { 
-           console.log('[onError Callback] Clearing timer from data:', recordTimer); 
+           console.log('[onError Callback] Clearing timer from data:', recordTimer);
            clearInterval(recordTimer);
            this.setData({ recordTimer: null }); 
        }
@@ -694,7 +681,7 @@ Page({
           this.audioContext.playbackRate = 0.8; // 保持统一语速
           this.audioContext.play();
           // 更新状态，标记为正在播放内容
-          this.setData({
+    this.setData({
             // isPlayingFanDu 应该已经是 true
             playbackState: 'playingContent'
           });
@@ -714,7 +701,7 @@ Page({
       }
     });
   },
-
+  
   // ... (splitTextIntoChunks 函数，暂时不用，先注释掉或保留)
   /*
   splitTextIntoChunks(text, maxLength = 100) {
@@ -722,4 +709,97 @@ Page({
       return chunks;
   }
   */
+
+  // --- 新增：加载历史记录详情的方法 ---
+  loadRecordDetail(recordId) {
+    const app = getApp();
+    const record = app.globalData.readingRecords.find(r => r.id === recordId);
+
+    if (record) {
+      console.log('[reading.js loadRecordDetail] 找到历史记录:', record);
+      // 从记录中提取所需信息
+      const articleContent = record.originalText; 
+      const recognizedText = record.recognizedText;
+      const score = record.score;
+      const language = record.language; // 确保记录中有 language 字段
+      const articleTitle = record.articleTitle; // 获取文章标题
+      
+      // --- 重要：调用 compareTexts 生成带错误标记的文本 --- 
+      // compareTexts 需要是 Page 实例的方法
+      const comparisonResult = this.compareTexts(articleContent, recognizedText, language);
+      const contentWithErrors = comparisonResult.markedOriginal;
+      const accuracy = comparisonResult.accuracy;
+      const correctWords = comparisonResult.correctWords;
+      const totalWords = comparisonResult.totalWords;
+      
+      // 设置页面数据，显示结果
+      this.setData({
+        article: { // 模拟文章对象结构
+           id: record.articleId, // 从记录中获取关联的文章ID
+           title: articleTitle,
+           content: articleContent, 
+           language: language,
+           // wordCount 和 estimatedTime 可以从原文计算，或如果记录中有就使用
+           wordCount: totalWords, // 使用比对结果的总词数
+           estimatedTime: 0 // 查看模式下通常不关心预计时间
+        },
+        readingResult: { // 设置为查看的历史结果
+          score: score,
+          flowers: this.generateFlowers(score), // 根据分数生成小红花
+          accuracy: accuracy,
+          correctWords: correctWords,
+          totalWords: totalWords,
+          contentWithErrors: contentWithErrors, // 带标记的文本
+          recognizedText: recognizedText, // 原始识别文本
+          feedback: this.generateFeedback(score, accuracy) // 生成评价
+        },
+        showResult: true, // 直接显示结果区域
+        recordStatus: 'idle', // 状态设置为空闲
+        isLoading: false // 加载完成
+      });
+      wx.setNavigationBarTitle({ title: articleTitle || '查看记录' });
+
+    } else {
+      console.error(`[reading.js loadRecordDetail] 未找到 recordId 为 ${recordId} 的历史记录`);
+      wx.showToast({ title: '加载记录详情失败', icon: 'none' });
+      this.setData({ isLoading: false });
+      // 可以考虑返回上一页
+      // wx.navigateBack();
+    }
+  },
+
+  // --- 新增：初始化音频播放器的方法，以便在 onLoad 中调用 ---
+  initAudioContext() {
+    console.log('[reading.js initAudioContext] 初始化 InnerAudioContext');
+    // 确保只初始化一次
+    if (!this.audioContext) {
+        this.audioContext = wx.createInnerAudioContext();
+        // --- 监听音频播放事件 ---
+        this.audioContext.onPlay(() => {
+          console.log('[reading.js audioContext] 开始播放 (当前状态:' + this.data.playbackState + ')');
+        });
+        this.audioContext.onStop(() => {
+          console.log('[reading.js audioContext] 播放停止 (手动或出错)');
+          this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
+        });
+        this.audioContext.onEnded(() => {
+          console.log('[reading.js audioContext] 播放自然结束 (当前状态:' + this.data.playbackState + ')');
+          if (this.data.playbackState === 'playingTitle') {
+             console.log('[reading.js onEnded] 标题播放完毕，立即开始播放内容');
+             this.playContentAudio(); 
+           } else if (this.data.playbackState === 'playingContent') {
+             console.log('[reading.js onEnded] 内容播放完毕，流程结束');
+             this.setData({ isPlayingFanDu: false, playbackState: 'idle' });
+           } else {
+             console.warn('[reading.js onEnded] 在非预期状态下结束:', this.data.playbackState, ', 重置状态。');
+             this.setData({ isPlayingFanDu: false, playbackState: 'idle' });
+           }
+        });
+        this.audioContext.onError((res) => {
+          console.error('[reading.js audioContext] 播放错误:', res.errMsg, res.errCode);
+          wx.showToast({ title: `播放错误: ${res.errCode}`, icon: 'none' });
+          this.setData({ isPlayingFanDu: false, playbackState: 'idle' }); 
+        });
+    }
+  },
 });

@@ -195,4 +195,4 @@ Page({
   onAnimationEnd() {
     console.log('[profile.js] Animation ended');
   }
-});
+}); 

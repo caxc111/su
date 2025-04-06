@@ -1,36 +1,41 @@
+// app.js
 App({
   onLaunch: function () {
     console.log('应用启动');
-    
+
     // 添加全局错误监听
     wx.onError((error) => {
       console.error('全局错误:', error);
     });
-    
+
     // 异步获取设备信息
     setTimeout(() => {
       this.getDeviceInfo();
     }, 0);
-    
+
     // 立即初始化应用数据，确保数据可用
-    this.initSampleData();
-    
+    this.initSampleData(); // 确保这里不会依赖 globalData.userInfo
+
     // 延迟加载其他数据
     setTimeout(() => {
-      // 加载其他数据
+      // 加载其他数据，如 readingRecords
       this.loadReadingRecordsFromStorage();
       console.log('应用初始化完成，文章数量:', this.globalData.articles ? this.globalData.articles.length : 0);
     }, 500);
   },
-  
+
+  onShow: function (options) {
+    console.log('App: onShow have been invoked');
+    // 这里可以添加每次进入前台需要执行的逻辑
+  },
+
   // 获取设备信息（异步）
   getDeviceInfo: function() {
     try {
-      // 使用新的API代替已弃用的wx.getSystemInfoSync
-      const deviceInfo = wx.getDeviceInfo();
-      const windowInfo = wx.getWindowInfo();
-      const appBaseInfo = wx.getAppBaseInfo();
-      
+      const deviceInfo = wx.getDeviceInfo ? wx.getDeviceInfo() : wx.getSystemInfoSync(); // 兼容旧API
+      const windowInfo = wx.getWindowInfo ? wx.getWindowInfo() : { windowWidth: deviceInfo.windowWidth, windowHeight: deviceInfo.windowHeight, pixelRatio: deviceInfo.pixelRatio };
+      const appBaseInfo = wx.getAppBaseInfo ? wx.getAppBaseInfo() : { SDKVersion: deviceInfo.SDKVersion };
+
       console.log('设备信息:', {
         brand: deviceInfo.brand,
         model: deviceInfo.model,
@@ -45,28 +50,32 @@ App({
       console.error('获取设备信息失败:', err);
     }
   },
-  
+
   // 重启小程序（用于处理严重错误）
   restartApp: function() {
     console.log('尝试重启小程序');
     try {
       // 清除所有缓存
       wx.clearStorageSync();
-      
-      // 重置全局数据
+
+      // 重置全局数据 (保留初始结构)
       this.globalData = {
+        userInfo: null, // 重置用户信息
         articles: [],
         rewards: [],
         readingRecords: [],
-        pageToShow: null
+        pageToShow: null,
+        // 保留其他可能需要的全局状态初始值
+         preventAutoRedirect: false, // 示例：如果需要保留
+         isTestPage: false         // 示例：如果需要保留
       };
-      
+
       // 重新初始化示例数据
       this.initSampleData(true);
-      
+
       // 重定向到首页
       wx.reLaunch({
-        url: '/pages/index/index',
+        url: '/pages/index/index', // 确保这是正确的首页路径
         success: () => {
           console.log('成功重启应用');
           wx.showToast({
@@ -86,7 +95,7 @@ App({
       console.error('重启过程中发生错误:', error);
     }
   },
-  
+
   // 将文章数据保存到本地存储
   saveArticlesToStorage: function() {
     console.log('保存文章数据到本地存储, 文章数量:', this.globalData.articles ? this.globalData.articles.length : 0);
@@ -97,13 +106,13 @@ App({
       console.error('保存文章数据失败:', error);
     }
   },
-  
+
   // 从本地存储加载文章数据
   loadArticlesFromStorage: function() {
     try {
       const storedArticles = wx.getStorageSync('articles');
       console.log('从本地存储加载文章数据, 发现文章数量:', storedArticles ? storedArticles.length : 0);
-      
+
       if (storedArticles && storedArticles.length > 0) {
         this.globalData.articles = storedArticles;
         console.log('使用本地存储的文章数据');
@@ -117,7 +126,7 @@ App({
       return false;
     }
   },
-  
+
   // 保存朗读记录到本地存储
   saveReadingRecordsToStorage: function() {
     console.log('保存朗读记录到本地存储:', this.globalData.readingRecords.length + '条记录');
@@ -127,39 +136,56 @@ App({
       console.error('保存朗读记录失败:', error);
     }
   },
-  
+
   // 从本地存储加载朗读记录
   loadReadingRecordsFromStorage: function() {
     try {
       const storedRecords = wx.getStorageSync('readingRecords');
       console.log('从本地存储加载朗读记录, 发现记录数量:', storedRecords ? storedRecords.length : 0);
-      
+
       if (storedRecords && storedRecords.length > 0) {
-        this.globalData.readingRecords = storedRecords;
-        console.log('使用本地存储的朗读记录');
+        // 确保加载的数据是数组
+        if (Array.isArray(storedRecords)) {
+            this.globalData.readingRecords = storedRecords;
+            console.log('使用本地存储的朗读记录');
+        } else {
+             console.warn('本地存储的朗读记录格式不正确，已忽略:', storedRecords);
+             this.globalData.readingRecords = []; // 使用空数组
+        }
       } else {
-        // 使用示例朗读记录
-        console.log('使用初始的朗读记录');
+        // 使用空数组作为初始记录
+        this.globalData.readingRecords = [];
+        console.log('本地存储无朗读记录，使用空数组');
       }
     } catch (error) {
       console.error('加载朗读记录失败:', error);
+       this.globalData.readingRecords = []; // 出错时也使用空数组
     }
   },
-  
+
   // 添加新的朗读记录
   addReadingRecord: function(record) {
+    // 确保 record 是一个对象
+    if (!record || typeof record !== 'object') {
+        console.error('[addReadingRecord] Invalid record data:', record);
+        return null;
+    }
     // 生成唯一ID
-    record.id = Date.now().toString();
+    record.id = record.id || Date.now().toString() + Math.random().toString(16).slice(2); // 更可靠的唯一ID
     // 添加时间戳
-    record.timestamp = Date.now();
-    // 格式化日期
+    record.timestamp = record.timestamp || Date.now();
+    // 格式化日期 (如果需要)
     if (!record.date) {
-      const now = new Date();
+      const now = new Date(record.timestamp);
       record.date = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     }
-    
+
     console.log('添加新的朗读记录:', record);
-    this.globalData.readingRecords.unshift(record);
+    // 确保 readingRecords 是数组
+    if (!Array.isArray(this.globalData.readingRecords)) {
+        this.globalData.readingRecords = [];
+    }
+    this.globalData.readingRecords.unshift(record); // 添加到数组开头
     this.saveReadingRecordsToStorage();
     return record;
   },
@@ -167,108 +193,75 @@ App({
   // 初始化示例数据
   initSampleData: function(forceInit = false) {
     console.log('初始化示例数据, 强制初始化:', forceInit);
-    
+
     // 如果不是强制初始化，先尝试从本地存储加载
     if (!forceInit && this.loadArticlesFromStorage()) {
       console.log('从本地存储成功加载了文章数据，无需初始化示例数据');
       return;
     }
-    
+
     console.log('开始初始化默认示例数据...');
-    
+
     // 重置全局数据
     this.globalData.articles = [];
-    
+
     // 示例文章数据
     this.globalData.articles = [
-      {
-        id: '1',
-        title: '静夜思',
-        language: 'zh',
-        level: '初级',
-        content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。',
-        createdAt: '2023-05-15',
-        wordCount: 20
-      },
-      {
-        id: '2',
-        title: 'Stopping by Woods on a Snowy Evening',
-        language: 'en',
-        level: '中级',
-        content: 'Whose woods these are I think I know.\nHis house is in the village though;\nHe will not see me stopping here\nTo watch his woods fill up with snow.',
-        createdAt: '2023-05-20',
-        wordCount: 33
-      },
-      {
-        id: '3',
-        title: '小花猫钓鱼',
-        language: 'zh',
-        level: '初级',
-        content: '有一只小花猫，它很喜欢钓鱼。一天，它带着鱼竿来到小河边，准备钓鱼。它找了一个好地方，把鱼饵放在鱼钩上，然后把鱼钩甩到水里。小花猫耐心地等待着，突然，鱼竿动了一下，小花猫赶紧提起鱼竿，一条大鱼上钩了！小花猫高兴地把鱼带回家，和家人一起分享了美味的鱼。',
-        createdAt: '2023-05-22',
-        wordCount: 97
-      },
-      {
-        id: '4',
-        title: 'The Little Red Hen',
-        language: 'en',
-        level: '中级',
-        content: 'Once upon a time, there was a little red hen who lived on a farm. She was friends with a lazy dog, a sleepy cat, and a noisy duck. One day, the little red hen found some wheat seeds. She asked her friends, "Who will help me plant these wheat seeds?" "Not I," said the dog. "Not I," said the cat. "Not I," said the duck. "Then I will do it myself," said the little red hen. And she did.',
-        createdAt: '2023-05-25',
-        wordCount: 85
-      }
+      { id: '1', title: '静夜思', language: 'zh', level: '初级', content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。', createdAt: '2023-05-15', wordCount: 20 },
+      { id: '2', title: 'Stopping by Woods on a Snowy Evening', language: 'en', level: '中级', content: 'Whose woods these are I think I know.\nHis house is in the village though;\nHe will not see me stopping here\nTo watch his woods fill up with snow.', createdAt: '2023-05-20', wordCount: 33 },
+      { id: '3', title: '小花猫钓鱼', language: 'zh', level: '初级', content: '有一只小花猫，它很喜欢钓鱼。一天，它带着鱼竿来到小河边，准备钓鱼。它找了一个好地方，把鱼饵放在鱼钩上，然后把鱼钩甩到水里。小花猫耐心地等待着，突然，鱼竿动了一下，小花猫赶紧提起鱼竿，一条大鱼上钩了！小花猫高兴地把鱼带回家，和家人一起分享了美味的鱼。', createdAt: '2023-05-22', wordCount: 97 },
+      { id: '4', title: 'The Little Red Hen', language: 'en', level: '中级', content: 'Once upon a time, there was a little red hen who lived on a farm. She was friends with a lazy dog, a sleepy cat, and a noisy duck. One day, the little red hen found some wheat seeds. She asked her friends, "Who will help me plant these wheat seeds?" "Not I," said the dog. "Not I," said the cat. "Not I," said the duck. "Then I will do it myself," said the little red hen. And she did.', createdAt: '2023-05-25', wordCount: 85 }
     ];
-    
+
     console.log('初始化了', this.globalData.articles.length, '篇文章');
-    
+
     // 保存到本地存储
     this.saveArticlesToStorage();
-    
-    // 示例奖励数据
-    this.globalData.rewards = [
-      {
-        id: '1',
-        type: 'flower',
-        count: 5,
-        title: '阅读《静夜思》',
-        date: '2023-05-16'
-      },
-      {
-        id: '2',
-        type: 'flower',
-        count: 3,
-        title: '连续学习三天',
-        date: '2023-05-18'
-      }
-    ];
-    
-    // 示例学习记录
-    this.globalData.readingRecords = [
-      {
-        id: '1',
-        articleId: '1',
-        articleTitle: '静夜思',
-        score: 92,
-        date: '2023-05-16',
-        duration: 120 // 秒
-      },
-      {
-        id: '2',
-        articleId: '2',
-        articleTitle: 'Stopping by Woods on a Snowy Evening',
-        score: 85,
-        date: '2023-05-21',
-        duration: 180 // 秒
-      }
-    ];
-    
+
+    // 示例奖励数据 (如果需要)
+    this.globalData.rewards = [];
+
+    // 示例学习记录 (通常是空的，由用户产生)
+    // this.globalData.readingRecords = []; // 确保 load 时会使用空数组
     console.log('示例数据初始化完成');
   },
-  
+
+  // --- 新增：模拟登录函数 ---
+  login: function() {
+      console.log('[app.js] Simulating login state...');
+      // 实际应用中，这里会调用 wx.login 获取 code，发送到后端换取 session 和 userId
+      // 这里我们只模拟设置一个 userId，并初始化 userInfo
+      const mockUserId = 'mockUser_' + Date.now(); // 创建一个简单的模拟用户ID
+      // 确保 globalData 存在
+      if (!this.globalData) { this.globalData = {}; }
+      this.globalData.userInfo = {
+          userId: mockUserId,
+          nickName: null, // 初始昵称为 null
+          avatarUrl: null  // 初始头像为 null
+      };
+      console.log('[app.js] Basic user state set (mock userId): ', this.globalData.userInfo);
+      // 注意：这里只是设置了基础状态，头像昵称需要 profile 页面后续获取
+  },
+
+  // --- 新增：模拟退出登录函数 ---
+  logout: function() {
+      console.log('[app.js] logout function called! Clearing user info.');
+      console.log('[app.js] Simulating logout...');
+      // 确保 globalData 存在
+      if (!this.globalData) { this.globalData = {}; }
+      this.globalData.userInfo = null; // 清除用户信息
+      console.log('[app.js] User info cleared.');
+      // 实际应用中可能还需要清除本地存储的 token 等
+  },
+
+  // 全局数据
   globalData: {
+    userInfo: null, // 初始化 userInfo 为 null
     articles: [], // 文章列表
     rewards: [],  // 奖励列表
-    readingRecords: [], // 阅读记录
-    pageToShow: null // 用于标记需要自动跳转的页面
+    readingRecords: [], // 朗读/背诵记录
+    pageToShow: null, // 示例：用于页面间通信
+    preventAutoRedirect: false, // 示例：全局标志
+    isTestPage: false         // 示例：全局标志
   }
 })

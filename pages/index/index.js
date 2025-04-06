@@ -45,6 +45,8 @@ Page({
       loading: false
     });
     
+    // --- 注释掉整个自动跳转逻辑 ---
+    /*
     // 只有当未禁用自动跳转且不是测试页面时才执行跳转逻辑
     if (!preventAutoRedirect && !isTestPage) {
       // 延迟跳转，确保数据准备好
@@ -89,6 +91,8 @@ Page({
       console.log('自动跳转已禁用或是测试页面，不执行自动导航');
       this.addDebug('自动跳转已禁用或是测试页面，不执行自动导航');
     }
+    */
+    // --- 跳转逻辑结束 ---
   },
 
   /**
@@ -106,8 +110,37 @@ Page({
     console.log('首页 - onShow');
     this.addDebug('首页 onShow');
     
-    // 检查全局标志
+    // --- 新增：根据登录状态决定跳转 --- 
     const app = getApp();
+    // 短暂延迟以确保 app.globalData 初始化完成（特别是异步获取登录状态时）
+    // 如果 app.js 能保证 globalData.userInfo 同步可用，可以去掉 setTimeout
+    setTimeout(() => {
+        if (app.globalData.userInfo) {
+            console.log('[index.js onShow] 用户已登录，跳转到练习页面');
+            this.addDebug('用户已登录，跳转到练习页面');
+            wx.switchTab({
+              url: '/pages/article-list/article-list',
+              fail: (err) => {
+                  console.error('[index.js] 跳转到 article-list 失败:', err);
+                  this.addDebug('跳转到练习页面失败: ' + err.errMsg);
+              }
+            });
+        } else {
+            console.log('[index.js onShow] 用户未登录，跳转到我的页面');
+            this.addDebug('用户未登录，跳转到我的页面');
+            wx.switchTab({
+              url: '/pages/student/profile/profile',
+               fail: (err) => {
+                  console.error('[index.js] 跳转到 profile 失败:', err);
+                  this.addDebug('跳转到我的页面失败: ' + err.errMsg);
+               }
+            });
+        }
+    }, 100); // 延迟 100ms 检查
+    // --- 跳转逻辑结束 ---
+    
+    /* --- 移除旧的 onShow 逻辑 ---
+    // 检查全局标志
     const preventAutoRedirect = app.globalData.preventAutoRedirect;
     const isTestPage = app.globalData.isTestPage;
     
@@ -134,6 +167,7 @@ Page({
         });
       }
     }
+    */
   },
 
   /**

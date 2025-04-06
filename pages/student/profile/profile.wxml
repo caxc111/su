@@ -1,93 +1,51 @@
-<!--pages/student/profile/profile.wxml-->
+﻿<!-- pages/student/profile/profile.wxml -->
 <view class="container">
-  <!-- 标题区域 -->
-  <view class="header">
-    <view class="title-container">
-      <view class="title">个人中心</view>
-    </view>
-  </view>
-  
-  <!-- 学习数据区域 -->
-  <view class="stats-container">
-    <view class="stat-item">
-      <view class="stat-value">{{userInfo.studyDays}}</view>
-      <view class="stat-label">学习天数</view>
-    </view>
-    <view class="stat-item">
-      <view class="stat-value">{{userInfo.totalArticles}}</view>
-      <view class="stat-label">练习文章</view>
-    </view>
-    <view class="stat-item">
-      <view class="stat-value">{{userInfo.totalTime}}</view>
-      <view class="stat-label">学习分钟</view>
-    </view>
-  </view>
-  
-  <!-- 我的奖励区域 -->
-  <view class="section-container">
-    <view class="section-title">我的奖励</view>
-    
-    <!-- 添加小红花奖励统计 -->
-    <view class="flower-rewards" bindtap="showFlowerAnimation">
-      <image src="/images/flower.png" class="big-flower-icon"></image>
-      <view class="flower-info">
-        <view class="flower-title">小红花</view>
-        <view class="flower-count">已获得 {{totalFlowers}} 朵</view>
+  <!-- 加载状态 -->
+  <view wx:if="{{isLoading}}" class="loading-indicator">加载中...</view>
+
+  <!-- 已登录状态 -->
+  <block wx:elif="{{userInfo && userInfo.nickName}}">
+    <!-- 用户已登录状态 -->
+    <view class="userinfo">
+      <image class="userinfo-avatar" src="{{userInfo.avatarUrl}}" binderror="onAvatarLoadError"></image>
+      <text class="userinfo-nickname">{{userInfo.nickName || '微信用户'}}</text>
+      <!-- 使用flower-display组件 -->
+      <view class="flower-area">
+        <flower-display count="{{totalFlowers}}" bindanimationStart="onAnimationStart" bindanimationEnd="onAnimationEnd"></flower-display>
       </view>
-      <view class="view-detail">查看 ></view>
     </view>
-    
-    <view class="rewards-container" wx:if="{{rewards.length > 0}}">
-      <view class="reward-item" wx:for="{{rewards}}" wx:key="id">
-        <image class="reward-icon" src="{{'/images/' + item.type + '.png'}}"></image>
-        <view class="reward-info">
-          <view class="reward-title">{{item.title}}</view>
-          <view class="reward-date">{{item.date}}</view>
+
+    <!-- 学习统计 -->
+    <view class="stats-section">
+      <view class="section-title">学习统计</view>
+      <view class="stats-grid">
+        <view class="stat-item">
+          <text class="stat-value">{{practiceCount}}</text>
+          <text class="stat-label">练习次数</text>
         </view>
-        <view class="reward-count">x{{item.count}}</view>
+        <view class="stat-item">
+          <text class="stat-value">{{totalFlowers}}</text>
+          <text class="stat-label">获得小红花</text>
+        </view>
+        <view class="stat-item">
+          <text class="stat-value">{{averageScore}}</text>
+          <text class="stat-label">平均得分</text>
+        </view>
       </view>
     </view>
-    <view class="empty-tip" wx:else>
-      暂无奖励，快去练习获取吧
+
+    <!-- 操作按钮 -->
+    <view class="actions">
+      <button class="logout-btn" type="warn" size="mini" bindtap="handleLogout">退出登录</button>
     </view>
-  </view>
-  
-  <!-- 设置区域 -->
-  <view class="section-container">
-    <view class="section-title">设置</view>
-    <view class="menu-list">
-      <view class="menu-item" bindtap="clearCache">
-        <view class="menu-text">清除缓存</view>
-        <view class="menu-arrow">></view>
-      </view>
-      <view class="menu-item" bindtap="showAbout">
-        <view class="menu-text">关于我们</view>
-        <view class="menu-arrow">></view>
-      </view>
-      <view class="menu-item" bindtap="restartApp">
-        <view class="menu-text">重启小程序</view>
-        <view class="menu-arrow">></view>
-      </view>
+  </block>
+
+  <!-- 未登录状态 -->
+  <block wx:else>
+    <view class="login-prompt">
+      <image class="default-avatar" src="/images/default-avatar.png" mode="aspectFit"></image>
+      <text class="login-text">您还未登录</text>
+      <button class="login-btn" type="primary" bindtap="getUserProfile">微信授权登录</button>
     </view>
-  </view>
-  
-  <!-- 版权信息 -->
-  <view class="footer">
-    <view>顺口成章 © 2023</view>
-    <view>版权所有</view>
-  </view>
-  
-  <!-- 加载中状态 -->
-  <view class="loading-container" wx:if="{{isLoading}}">
-    <view class="loading">加载中...</view>
-  </view>
-  
-  <!-- 金币下落动画容器 -->
-  <view class="fireworks-container" wx:if="{{showFireworks}}" catch:tap="clearFireworks">
-    <image wx:for="{{fireworks}}" wx:key="id" 
-           src="/images/firework{{item.type}}.png" 
-           class="{{item.isCenter ? 'center-firework' : 'firework'}}" 
-           style="top: {{item.top}}px; left: {{item.left}}px; transform: rotate({{item.rotation}}deg) scale({{item.scale || 1}}); opacity: {{item.isCenter ? item.opacity : (item.landed && item.fallSpeed === 0 ? 0.9 : 1)}};">
-    </image>
-  </view>
+  </block>
 </view>

@@ -1,5 +1,7 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "flower-display": "/components/flower-display/flower-display"
+  },
   "navigationBarTitleText": "顺口成章",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark"

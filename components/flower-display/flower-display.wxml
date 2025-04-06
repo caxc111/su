@@ -1,0 +1,31 @@
+<!-- components/flower-display/flower-display.wxml -->
+<view class="flower-container">
+  <!-- 花朵显示区域 -->
+  <view class="flower-area" catchtap="handleFlowerTap">
+    <image class="flower-icon" src="/images/flower.png" mode="aspectFit"></image>
+    <text class="flower-count">{{count}}</text>
+  </view>
+  
+  <!-- 烟花特效容器 -->
+  <view wx:if="{{showFireworks}}" class="fireworks-container" catchtap="handleContainerTap">
+    <!-- 明确分开两种类型的元素 -->
+    
+    <!-- 烟花元素 - 使用firework0图片，在中央闪现 -->
+    <block wx:for="{{centerFireworks}}" wx:key="id">
+      <image 
+        class="firework-img {{item.transitionClass || ''}}" 
+        src="/images/firework0.png" 
+        style="left: {{item.left}}px; top: {{item.top}}px; transform: scale({{item.scale}}); opacity: {{item.opacity}};"
+      ></image>
+    </block>
+    
+    <!-- 金币元素 - 使用firework1-3图片，从上往下落 -->
+    <block wx:for="{{fallingCoins}}" wx:key="id">
+      <image 
+        class="coin-img {{item.flipClass || ''}}" 
+        src="/images/firework{{item.type}}.png" 
+        style="left: {{item.left}}px; top: {{item.top}}px; transform: scale({{item.scale}}) rotate({{item.rotation}}deg); transition: top 2.8s ease-in;"
+      ></image>
+    </block>
+  </view>
+</view> 

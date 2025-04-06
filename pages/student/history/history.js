@@ -1,6 +1,8 @@
 // pages/student/history/history.js
 // 注意：此版本不引入 utils/util.js，使用内部 formatDate 和 calculateFlowers
 
+const app = getApp(); // 获取 App 实例
+
 Page({
   data: {
     records: [], // 存储记录
@@ -8,24 +10,40 @@ Page({
     page: 1, // 当前页码
     pageSize: 10, // 每页记录数
     hasMore: false, // 是否有更多记录
-    loading: false // 是否正在加载
+    loading: false, // 是否正在加载
+    readingRecords: [], // 存储格式化后的记录
+    isLoading: true
   },
 
-  onLoad: function() {
-    console.log('[history.js] onLoad triggered.');
-    this.loadReadingRecords();
+  onLoad: function(options) {
+    console.log('[history.js onLoad] 页面加载');
+    // 页面加载时可以先做一次加载，但 onShow 会覆盖
+    // this.loadReadingRecords(); 
   },
 
   onShow: function() {
-    // 每次显示页面时可能需要刷新数据，特别是如果记录在其他页面被修改
-    console.log('[history.js] onShow triggered.');
-    this.loadReadingRecords(); // 重新加载以反映最新数据
+    console.log('[history.js onShow] 页面显示');
+    // --- 添加登录检查 --- 
+    if (!app.globalData.userInfo) {
+        console.log('[history.js onShow] 用户未登录，跳转到 profile 页面');
+        wx.switchTab({
+          url: '/pages/student/profile/profile',
+          fail: (err) => {
+             console.error('[history.js] 跳转到 profile 失败:', err);
+          }
+        });
+        return; // 阻止后续代码执行，因为即将跳转
+    }
+    // --- 登录检查结束 ---
+
+    // 如果用户已登录，则加载背诵记录
+    console.log('[history.js onShow] 用户已登录，加载背诵记录');
+    this.loadReadingRecords();
   },
 
   // 加载记录
   loadReadingRecords: function(append = false) {
     console.log('[history.js] loadReadingRecords called. Append:', append);
-    const app = getApp();
     // 确保全局数据已加载
     if (!app.globalData.readingRecords) {
       console.log('[history.js] Loading records from storage because globalData is empty.');
@@ -108,14 +126,14 @@ Page({
       const day = String(date.getDate()).padStart(2, '0');
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day} ${hours}:${minutes}`;
+      return `${year}-${month}-${day} ${hours}:${minutes}`
     } catch (e) {
       console.error('[history.js formatDate] Error formatting timestamp:', timestamp, e);
       return '时间格式错误';
     }
   },
 
-  // 切换顶部筛选标签
+  // 切换顶部筛选标签 (如果需要保留)
   changeFilterType: function(e) {
     const type = e.currentTarget.dataset.type;
     console.log('[history.js] Filter type changed to:', type);
@@ -124,13 +142,14 @@ Page({
         filterType: type,
         page: 1, // 重置页码
         records: [], // 清空现有列表，重新加载
-        hasMore: false // 重置状态
+        hasMore: false, // 重置状态
+        loading: false // 重置加载状态，准备加载
       });
       this.loadReadingRecords(); // 重新加载数据
     }
   },
 
-  // 页面滚动到底部时加载更多（需要在 WXML 中绑定 `bindscrolltolower`）
+  // 页面滚动到底部时加载更多（如果需要保留，并在 WXML 中绑定 `bindscrolltolower`）
   loadMore() {
     if (!this.data.hasMore || this.data.loading) {
       console.log('[history.js] Load more skipped. HasMore:', this.data.hasMore, 'Loading:', this.data.loading);
@@ -141,8 +160,8 @@ Page({
     // 注意：这里调用 loadReadingRecords 并传入 true 来追加数据
     this.loadReadingRecords(true);
   },
-
-  // 查看记录详情
+   
+  // --- 重新添加：查看记录详情 --- 
   viewRecordDetail: function(e) {
     console.log('[history.js viewRecordDetail] Event triggered:', e);
     try {
@@ -153,7 +172,8 @@ Page({
         wx.showToast({ title: '无法获取记录ID', icon: 'none' });
         return;
       }
-      const url = './detail?id=' + recordId;
+      // ---> 修改：跳转到 detail 页面，而不是 reading 页面 <---
+      const url = '/pages/student/history/detail?id=' + recordId; 
       console.log('[history.js viewRecordDetail] Navigating to URL:', url);
       wx.navigateTo({
         url: url,
@@ -167,6 +187,4 @@ Page({
       wx.showToast({ title: '打开详情页时出错', icon: 'none' });
     }
   }
-
-  // 已移除 goBack 函数
 })

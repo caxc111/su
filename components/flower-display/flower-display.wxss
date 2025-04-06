@@ -1,0 +1,142 @@
+/* components/flower-display/flower-display.wxss */
+.flower-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 花朵区域样式 */
+.flower-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.flower-icon {
+  width: 60rpx;
+  height: 60rpx;
+}
+
+.flower-count {
+  font-size: 24rpx;
+  color: #ff4081;
+  margin-top: 4rpx;
+}
+
+/* 烟花容器样式 */
+.fireworks-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+/* 烟花图片样式 */
+.firework-img {
+  position: absolute;
+  width: 150rpx;
+  height: 150rpx;
+  transition-property: opacity;
+}
+
+/* 淡入淡出动画 */
+.fade-in {
+  transition-duration: 300ms;
+  transition-timing-function: ease-in;
+}
+
+.fade-out {
+  transition-duration: 500ms;
+  transition-timing-function: ease-out;
+}
+
+/* 烟花闪动动画 - 改为闪动同时放大 */
+@keyframes fireworkBlink {
+  0% { opacity: 0.4; transform: scale(0.9); }
+  25% { opacity: 1; transform: scale(1.1); }
+  50% { opacity: 0.6; transform: scale(1.2); }
+  75% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 0.8; transform: scale(1.4); }
+}
+
+.firework-blink {
+  animation: fireworkBlink 1.2s ease-in-out forwards;
+}
+
+/* 烟花放大淡出动画 */
+@keyframes fireworkExpand {
+  0% { opacity: 1; transform: scale(1.4); }
+  100% { opacity: 0; transform: scale(2.2); }
+}
+
+.firework-expand {
+  animation: fireworkExpand 0.8s ease-out forwards;
+}
+
+/* 金币图片样式 */
+.coin-img {
+  position: absolute;
+  width: 40rpx;
+  height: 40rpx;
+  transition: top 2.8s cubic-bezier(0.47, 0, 0.745, 0.715);
+  box-shadow: 0 0 10rpx rgba(255, 215, 0, 0.6);
+  border-radius: 50%;
+}
+
+/* 金币翻转动画 - 快速顺时针 */
+@keyframes flipClockwiseFast {
+  0% { transform: rotateY(0) rotateX(0) scale(1); }
+  25% { transform: rotateY(270deg) rotateX(270deg) scale(1.1); }
+  50% { transform: rotateY(540deg) rotateX(540deg) scale(1); }
+  75% { transform: rotateY(810deg) rotateX(810deg) scale(1.1); }
+  100% { transform: rotateY(1080deg) rotateX(1080deg) scale(1); }
+}
+
+/* 金币翻转动画 - 慢速顺时针 */
+@keyframes flipClockwiseSlow {
+  0% { transform: rotateY(0) rotateX(0) scale(1); }
+  25% { transform: rotateY(180deg) rotateX(180deg) scale(1.1); }
+  50% { transform: rotateY(360deg) rotateX(360deg) scale(1); }
+  75% { transform: rotateY(540deg) rotateX(540deg) scale(1.1); }
+  100% { transform: rotateY(720deg) rotateX(720deg) scale(1); }
+}
+
+/* 金币翻转动画 - 快速逆时针 */
+@keyframes flipCounterclockwiseFast {
+  0% { transform: rotateY(0) rotateX(0) scale(1); }
+  25% { transform: rotateY(-270deg) rotateX(-270deg) scale(1.1); }
+  50% { transform: rotateY(-540deg) rotateX(-540deg) scale(1); }
+  75% { transform: rotateY(-810deg) rotateX(-810deg) scale(1.1); }
+  100% { transform: rotateY(-1080deg) rotateX(-1080deg) scale(1); }
+}
+
+/* 金币翻转动画 - 慢速逆时针 */
+@keyframes flipCounterclockwiseSlow {
+  0% { transform: rotateY(0) rotateX(0) scale(1); }
+  25% { transform: rotateY(-180deg) rotateX(-180deg) scale(1.1); }
+  50% { transform: rotateY(-360deg) rotateX(-360deg) scale(1); }
+  75% { transform: rotateY(-540deg) rotateX(-540deg) scale(1.1); }
+  100% { transform: rotateY(-720deg) rotateX(-720deg) scale(1); }
+}
+
+/* 金币翻转样式 */
+.flip-fast-clockwise {
+  animation: flipClockwiseFast 2.8s linear infinite;
+}
+
+.flip-slow-clockwise {
+  animation: flipClockwiseSlow 2.8s linear infinite;
+}
+
+.flip-fast-counterclockwise {
+  animation: flipCounterclockwiseFast 2.8s linear infinite;
+}
+
+.flip-slow-counterclockwise {
+  animation: flipCounterclockwiseSlow 2.8s linear infinite;
+} 
