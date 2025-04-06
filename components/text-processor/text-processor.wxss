@@ -1,0 +1,170 @@
+/* components/text-processor/text-processor.wxss */
+
+.text-processor {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* 错误提示样式 */
+.error-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30rpx;
+}
+
+.error-message {
+  font-size: 32rpx;
+  color: #e64340;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.error-btn {
+  width: 200rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 30rpx;
+  color: #fff;
+  background-color: #07c160;
+  border-radius: 10rpx;
+}
+
+/* 操作区域样式 */
+.actions-container {
+  width: 100%;
+  padding: 30rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #f8f8f8;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+}
+
+.action-btn {
+  width: 80%;
+  height: 90rpx;
+  line-height: 90rpx;
+  font-size: 34rpx;
+  color: #fff;
+  background-color: #07c160;
+  border-radius: 45rpx;
+  margin-bottom: 20rpx;
+}
+
+.action-btn.recording {
+  background-color: #e64340;
+}
+
+.record-time {
+  font-size: 28rpx;
+  color: #888;
+}
+
+/* 结果显示区域样式 */
+.result-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+  background-color: #fff;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20rpx;
+  margin-bottom: 20rpx;
+  border-bottom: 1rpx solid #eee;
+}
+
+.result-title {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.result-score {
+  font-size: 48rpx;
+  color: #e64340;
+  font-weight: bold;
+}
+
+.result-content {
+  margin-bottom: 30rpx;
+}
+
+.result-feedback {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.result-feedback text {
+  font-size: 28rpx;
+  color: #666;
+}
+
+.text-compare, .recognized-text {
+  margin-top: 20rpx;
+}
+
+.compare-title, .recognized-title {
+  font-size: 30rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.compare-content {
+  font-size: 30rpx;
+  line-height: 1.6;
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+}
+
+.recognized-content {
+  display: block;
+  font-size: 30rpx;
+  line-height: 1.6;
+  padding: 20rpx;
+  background-color: #f8f8f8;
+  border-radius: 8rpx;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.result-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30rpx;
+}
+
+.result-btn {
+  width: 45%;
+  height: 80rpx;
+  line-height: 80rpx;
+  font-size: 32rpx;
+  border-radius: 40rpx;
+}
+
+.try-again {
+  color: #07c160;
+  background-color: #fff;
+  border: 1rpx solid #07c160;
+}
+
+.finish {
+  color: #fff;
+  background-color: #07c160;
+} 

@@ -1,0 +1,84 @@
+<!-- components/text-processor/text-processor.wxml -->
+<view class="text-processor">
+  <!-- 错误提示 -->
+  <view class="error-container" wx:if="{{showError}}">
+    <view class="error-message">{{errorMessage}}</view>
+    <button class="error-btn" bindtap="finish">返回</button>
+  </view>
+
+  <!-- 主容器 - 根据模式显示不同的组件 -->
+  <block wx:else>
+    <!-- 文本显示组件 -->
+    <text-display 
+      id="text-display"
+      wx:if="{{article}}"
+      content="{{article.content}}"
+      language="{{article.language}}"
+      mode="{{mode}}">
+    </text-display>
+    
+    <!-- 录音组件 -->
+    <text-recorder 
+      id="text-recorder"
+      language="{{article.language}}"
+      bind:recordStart="handleRecordStart"
+      bind:recordStop="handleRecordStop"
+      bind:recordResult="handleRecordResult"
+      bind:recordTimeUpdate="handleRecordTimeUpdate"
+      bind:recordError="handleRecordError">
+    </text-recorder>
+    
+    <!-- 评估组件 -->
+    <text-evaluator
+      id="text-evaluator"
+      hidden="true">
+    </text-evaluator>
+    
+    <!-- 特效组件 -->
+    <text-effects
+      id="text-effects" 
+      wx:if="{{showEffects}}">
+    </text-effects>
+    
+    <!-- 操作区域 -->
+    <view class="actions-container" wx:if="{{!showResult}}">
+      <button 
+        class="action-btn {{recordStatus === 'recording' ? 'recording' : ''}}" 
+        bindtap="{{recordStatus === 'recording' ? 'stopRecording' : 'startRecording'}}"
+        disabled="{{recordStatus === 'processing'}}">
+        {{recordStatus === 'recording' ? '停止' : '开始'}}{{mode === 'read' ? '朗读' : '背诵'}}
+      </button>
+      <view class="record-time" wx:if="{{recordStatus === 'recording'}}">录音时间：{{recordTime}}秒</view>
+    </view>
+    
+    <!-- 结果显示区域 -->
+    <view class="result-container" wx:if="{{showResult}}">
+      <view class="result-header">
+        <text class="result-title">{{mode === 'read' ? '朗读' : '背诵'}}评分</text>
+        <text class="result-score">{{result.score}}</text>
+      </view>
+      
+      <view class="result-content">
+        <view class="result-feedback">
+          <text>准确率：{{result.accuracy}}%</text>
+          <text>正确词数：{{result.correctWords}}/{{result.totalWords}}</text>
+        </view>
+        
+        <view class="text-compare">
+          <view class="compare-title">对比结果：</view>
+          <rich-text class="compare-content" nodes="{{result.contentWithErrors}}"></rich-text>
+        </view>
+        
+        <view class="recognized-text">
+          <view class="recognized-title">识别结果：</view>
+          <text class="recognized-content">{{recognizedText}}</text>
+        </view>
+      </view>
+      
+      <view class="result-actions">
+        <button class="result-btn try-again" bindtap="tryAgain">再试一次</button>
+        <button class="result-btn finish" bindtap="finish">完成</button>
+      </view>
+    </view>
+  </block>
+</view> 

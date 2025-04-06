@@ -406,6 +406,19 @@ Page({
       reciteResult: result, 
       showResult: true, 
       recordStatus: 'idle'
+    }, () => {
+      // 如果得分是 100 分，自动触发烟花动画
+      if (result.score === 100) {
+        setTimeout(() => {
+          const flowerDisplay = this.selectComponent('#flowerDisplay');
+          if (flowerDisplay) {
+            console.log("触发烟花动画");
+            flowerDisplay.handleFlowerTap();
+          } else {
+            console.error("未找到 flower-display 组件");
+          }
+        }, 500); // 延迟 500ms 等待组件完全渲染
+      }
     });
     
     this.stopWaveAnimation();
@@ -475,5 +488,11 @@ Page({
   // 完成背诵，返回列表 (复用 finishReading)
   finishReading() {
     wx.navigateBack();
+  },
+
+  // 处理 flower-display 组件的点击事件
+  handleFlowerTap() {
+    // 不再需要此函数，因为动画会自动触发
+    // 保留此函数避免报错
   }
 });

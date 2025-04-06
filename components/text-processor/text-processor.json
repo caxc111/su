@@ -1,0 +1,9 @@
+{
+  "component": true,
+  "usingComponents": {
+    "text-display": "/components/text-display/text-display",
+    "text-recorder": "/components/text-recorder/text-recorder",
+    "text-evaluator": "/components/text-evaluator/text-evaluator",
+    "text-effects": "/components/text-effects/text-effects"
+  }
+} 

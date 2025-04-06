@@ -1,0 +1,5 @@
+/* components/text-evaluator/text-evaluator.wxss */
+
+.text-evaluator {
+  /* 评估组件不需要样式 */
+} 

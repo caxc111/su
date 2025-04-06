@@ -1,0 +1,76 @@
+/* pages/demo-text-processor/demo-text-processor.wxss */
+
+.container {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+  padding-bottom: 120rpx; /* 为底部操作区域预留空间 */
+}
+
+/* 示例选择器样式 */
+.demo-selector {
+  width: 100%;
+  padding: 30rpx;
+}
+
+.section-title {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: bold;
+  margin-bottom: 30rpx;
+  text-align: center;
+}
+
+.demo-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.demo-item {
+  background-color: #fff;
+  border-radius: 10rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.demo-item:active {
+  background-color: #f1f1f1;
+  transform: scale(0.98);
+}
+
+.demo-title {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.demo-desc {
+  font-size: 26rpx;
+  color: #888;
+}
+
+/* 模式选择器样式 */
+.mode-selector {
+  display: flex;
+  justify-content: space-around;
+  padding: 20rpx 0;
+  background-color: #fff;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.mode-btn {
+  font-size: 28rpx;
+  color: #333;
+  padding: 10rpx 30rpx;
+  border-radius: 30rpx;
+  transition: all 0.2s ease;
+}
+
+.mode-btn.active {
+  color: #fff;
+  background-color: #07c160;
+  box-shadow: 0 2rpx 5rpx rgba(7, 193, 96, 0.3);
+} 

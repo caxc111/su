@@ -1,0 +1,92 @@
+/* components/text-recorder/text-recorder.wxss */
+
+.text-recorder {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 波形容器 */
+.wave-container {
+  width: 100%;
+  height: 120rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(7, 193, 96, 0.1);
+  border-radius: 10rpx;
+  padding: 20rpx;
+  margin: 20rpx 0;
+}
+
+.wave-container.recording {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    background-color: rgba(7, 193, 96, 0.1);
+  }
+  50% {
+    background-color: rgba(7, 193, 96, 0.2);
+  }
+  100% {
+    background-color: rgba(7, 193, 96, 0.1);
+  }
+}
+
+.wave-bars {
+  display: flex;
+  align-items: flex-end;
+  height: 60rpx;
+  width: 100%;
+  padding: 0 20rpx;
+  justify-content: space-between;
+}
+
+.wave-bar {
+  width: 10rpx;
+  background-color: #07c160;
+  border-radius: 5rpx;
+  transition: height 0.3s ease;
+}
+
+.recording-tip {
+  font-size: 26rpx;
+  color: #07c160;
+  margin-top: 15rpx;
+}
+
+/* 处理中提示 */
+.processing-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.processing-icon {
+  width: 60rpx;
+  height: 60rpx;
+  border: 4rpx solid #f1f1f1;
+  border-top: 4rpx solid #07c160;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.processing-text {
+  font-size: 28rpx;
+  color: #888;
+  margin-top: 15rpx;
+} 

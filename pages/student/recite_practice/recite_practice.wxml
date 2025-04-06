@@ -109,4 +109,11 @@
       </view>
     </view>
   </view>
+  
+  <!-- 添加 flower-display 组件 -->
+  <flower-display 
+    wx:if="{{reciteResult.score === 100}}"
+    count="{{1}}" 
+    id="flowerDisplay"
+  />
 </view>
