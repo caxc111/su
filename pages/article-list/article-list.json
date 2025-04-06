@@ -1,5 +1,7 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "article-actions": "/components/article-actions/article-actions"
+  },
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "dark",
   "navigationBarTitleText": "顺口成章"

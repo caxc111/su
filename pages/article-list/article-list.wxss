@@ -315,90 +315,15 @@
   box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.05);
 }
 
-/* 操作面板样式 */
-.action-panel-container {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.action-panel {
-  width: 80%;
-  background-color: #fff;
-  border-radius: 12rpx;
-  padding: 30rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  gap: 20rpx;
-}
-
-.action-title {
-  font-size: 32rpx;
-  font-weight: bold;
-  color: #333;
-  text-align: center;
-  padding-bottom: 20rpx;
-  border-bottom: 1px solid #eee;
-}
-
-.action-btns {
-  display: flex;
-  flex-direction: column;
-  gap: 16rpx;
-}
-
-.action-panel-btn {
-  border: none;
-  border-radius: 40rpx;
-  font-size: 30rpx;
-  font-weight: bold;
-  padding: 20rpx 0;
-  text-align: center;
-  width: 100%;
-  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
-}
-
-.delete-btn {
-  background-color: #ff4d4f;
-  color: white;
-}
-
-.delete-btn:active {
-  background-color: #d93134;
-}
-
-.share-btn {
-  background-color: #92e242;
-  color: white;
-}
-
-.share-btn:active {
-  background-color: #72b234;
-}
-
-.collect-btn {
-  background-color: #ffcc00;
-  color: white;
-}
-
-.collect-btn:active {
-  background-color: #d9ad00;
-}
-
+/* 删除操作面板相关样式，因为已经移动到组件中 */
+.action-panel-container,
+.action-panel,
+.action-title,
+.action-btns,
+.action-panel-btn,
+.delete-btn,
+.share-btn,
+.collect-btn,
 .cancel-btn {
-  background-color: #f0f0f0;
-  color: #666;
-  margin-top: 10rpx;
-}
-
-.cancel-btn:active {
-  background-color: #e0e0e0;
+  /* 保留样式选择器但清空内容，以防其他地方有依赖 */
 }

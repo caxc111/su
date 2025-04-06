@@ -78,15 +78,12 @@
   </view>
   
   <!-- 操作面板 -->
-  <view class="action-panel-container" wx:if="{{showActionPanel}}" bindtap="hideActionPanel">
-    <view class="action-panel" catchtap="catchPanelTap">
-      <view class="action-title">{{currentArticle.title}}</view>
-      <view class="action-btns">
-        <button class="action-panel-btn delete-btn" bindtap="handleDeleteArticle">删除文章</button>
-        <button class="action-panel-btn share-btn" bindtap="handleShareArticle">分享文章</button>
-        <button class="action-panel-btn collect-btn" bindtap="handleCollectArticle">添加到收藏</button>
-      </view>
-      <button class="action-panel-btn cancel-btn" bindtap="hideActionPanel">取消</button>
-    </view>
-  </view>
+  <article-actions
+    visible="{{showActionPanel}}"
+    article="{{currentArticle}}"
+    bind:close="hideActionPanel"
+    bind:delete="handleDeleteArticle"
+    bind:share="handleShareArticle"
+    bind:collect="handleCollectArticle">
+  </article-actions>
 </view>

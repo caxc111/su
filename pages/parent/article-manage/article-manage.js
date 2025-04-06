@@ -9,7 +9,9 @@ Page({
       title: '',
       language: 'zh',
       content: ''
-    }
+    },
+    currentArticle: null,
+    showActionPanel: false
   },
   
   onLoad() {
@@ -34,11 +36,11 @@ Page({
       articles = app.globalData.articles || [];
     }
     
-    // 为了保持兼容性，转换字段名
+    // 为了保持兼容性，转换字段名并使用一致的 id 字段
     articles = articles.map(item => {
       console.log('处理单篇文章:', item);
       return {
-        _id: item.id,
+        id: item.id, // 使用 id 而不是 _id
         title: item.title || '未命名文章',
         content: item.content || '无内容', // 确保content有默认值
         language: item.language || 'zh',
@@ -103,13 +105,13 @@ Page({
   
   editArticle(e) {
     const id = e.currentTarget.dataset.id;
-    const article = this.data.articles.find(item => item._id === id);
+    const article = this.data.articles.find(item => item.id === id);
     
     this.setData({
       isEditing: true,
       showAddModal: true,
       editArticle: {
-        _id: article._id,
+        id: article.id, // 使用 id 而不是 _id
         title: article.title,
         language: article.language,
         content: article.content
@@ -117,47 +119,34 @@ Page({
     });
   },
   
-  deleteArticle(e) {
-    const id = e.currentTarget.dataset.id;
-    
-    wx.showModal({
-      title: '确认删除',
-      content: '确定要删除这篇文章吗？删除后无法恢复',
-      confirmColor: '#ff0000',
-      success: res => {
-        if (res.confirm) {
-          const app = getApp();
-          
-          // 更新本地数据
-          const updatedArticles = this.data.articles.filter(item => item._id !== id);
-          this.setData({
-            articles: updatedArticles
-          }, () => {
-            // 刷新筛选的文章列表
-            this.filterArticles();
-          });
-          
-          // 同步更新全局数据
-          app.globalData.articles = app.globalData.articles.filter(item => item.id !== id);
-          
-          // 保存到本地存储，确保重启后数据保持
-          app.saveArticlesToStorage();
-          
-          // 记录删除操作
-          console.log('文章已删除，ID:', id);
-          console.log('剩余文章数:', app.globalData.articles.length);
-          
-          wx.showToast({
-            title: '删除成功'
-          });
-        }
-      }
+  onInputTitle(e) {
+    this.setData({
+      'editArticle.title': e.detail.value
     });
   },
   
-  // 处理文章编辑器组件的保存事件
-  handleArticleSave(e) {
-    const { title, language, content } = e.detail;
+  onSelectLang(e) {
+    this.setData({
+      'editArticle.language': e.detail.value
+    });
+  },
+  
+  onInputContent(e) {
+    this.setData({
+      'editArticle.content': e.detail.value
+    });
+  },
+  
+  saveArticle() {
+    const { title, language, content } = this.data.editArticle;
+    
+    if (!title || !content) {
+      wx.showToast({
+        title: '请填写完整信息',
+        icon: 'none'
+      });
+      return;
+    }
     
     wx.showLoading({ title: '保存中' });
     
@@ -171,7 +160,7 @@ Page({
       if (this.data.isEditing) {
         // 编辑现有文章
         updatedArticles = this.data.articles.map(item => {
-          if (item._id === this.data.editArticle._id) {
+          if (item.id === this.data.editArticle.id) { // 使用 id 而不是 _id
             return {
               ...item,
               title,
@@ -184,7 +173,7 @@ Page({
         
         // 同步更新全局数据
         app.globalData.articles = app.globalData.articles.map(item => {
-          if (item.id === this.data.editArticle._id) {
+          if (item.id === this.data.editArticle.id) { // 使用 id 匹配
             return {
               ...item,
               title,
@@ -198,7 +187,7 @@ Page({
         // 添加新文章
         const newId = `${Date.now()}`; // 生成临时ID
         const newArticle = {
-          _id: newId,
+          id: newId, // 使用 id 而不是 _id
           title,
           language,
           content,
@@ -333,5 +322,179 @@ Page({
         duration: 2000
       });
     }, 500);
+  },
+  
+  // 文章操作相关函数
+  showArticleOptions(e) {
+    const id = e.currentTarget.dataset.id;
+    const article = this.data.articles.find(item => item.id === id);
+    if (article) {
+      this.setData({
+        showActionPanel: true,
+        currentArticle: {
+          id: article.id,
+          title: article.title
+        }
+      });
+    }
+  },
+
+  hideActionPanel() {
+    this.setData({
+      showActionPanel: false,
+      currentArticle: null
+    });
+  },
+
+  handleDeleteArticle(e) {
+    const article = e.detail.article || this.data.currentArticle;
+    if (!article) return;
+    
+    wx.showModal({
+      title: '确认删除',
+      content: `确定要删除文章"${article.title}"吗？`,
+      success: (res) => {
+        if (res.confirm) {
+          console.log('删除文章:', article);
+          
+          // 从全局数据中删除文章
+          const app = getApp();
+          app.globalData.articles = app.globalData.articles.filter(item => item.id !== article.id);
+          
+          // 保存到本地存储
+          app.saveArticlesToStorage();
+          
+          // 更新页面数据
+          const updatedArticles = this.data.articles.filter(item => item.id !== article.id);
+          this.setData({
+            articles: updatedArticles,
+            // 直接基于 updatedArticles 和 currentLang 筛选
+            filteredArticles: updatedArticles.filter(item => 
+              this.data.currentLang === 'all' || item.language === this.data.currentLang
+            ),
+            showActionPanel: false
+          });
+          
+          // 显示删除成功提示
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success'
+          });
+        }
+      }
+    });
+  },
+  
+  handleShareArticle(e) {
+    const article = e.detail.article || this.data.currentArticle;
+    if (!article) return;
+    
+    // 隐藏操作面板
+    this.hideActionPanel();
+    
+    // 显示功能开发中的提示
+    wx.showToast({
+      title: '分享功能开发中',
+      icon: 'none'
+    });
+  },
+  
+  handleCollectArticle(e) {
+    const article = e.detail.article || this.data.currentArticle;
+    if (!article) return;
+    
+    // 隐藏操作面板
+    this.hideActionPanel();
+    
+    // 显示功能开发中的提示
+    wx.showToast({
+      title: '收藏功能开发中',
+      icon: 'none'
+    });
+  },
+  
+  handleArticleSave(e) {
+    // 接收编辑器组件返回的数据
+    const article = e.detail;
+    console.log('保存文章:', article);
+    
+    if (!article.title || !article.content) {
+      wx.showToast({
+        title: '请填写完整信息',
+        icon: 'none'
+      });
+      return;
+    }
+    
+    wx.showLoading({ title: '保存中' });
+    
+    let updatedArticles = [...this.data.articles];
+    const app = getApp();
+    
+    if (this.data.isEditing) {
+      // 更新现有文章
+      const index = updatedArticles.findIndex(item => item.id === this.data.editArticle.id);
+      if (index !== -1) {
+        updatedArticles[index] = {
+          ...updatedArticles[index], // 保留其他字段
+          title: article.title,
+          language: article.language,
+          content: article.content
+        };
+        
+        // 更新全局数据
+        const globalIndex = app.globalData.articles.findIndex(item => item.id === this.data.editArticle.id);
+        if (globalIndex !== -1) {
+          app.globalData.articles[globalIndex] = {
+            ...app.globalData.articles[globalIndex],
+            title: article.title,
+            language: article.language,
+            content: article.content
+          };
+        }
+      }
+    } else {
+      // 添加新文章
+      const newId = 'art_' + Date.now();
+      const newArticle = {
+        id: newId,
+        title: article.title,
+        language: article.language,
+        content: article.content,
+        createTime: new Date().toISOString().split('T')[0],
+        level: article.language === 'zh' ? '初级' : 'Elementary'
+      };
+      
+      // 添加到本地数据
+      updatedArticles.unshift(newArticle);
+      
+      // 添加到全局数据
+      app.globalData.articles.unshift({
+        id: newId,
+        title: article.title,
+        language: article.language,
+        content: article.content,
+        createdAt: new Date().toISOString().split('T')[0],
+        level: article.language === 'zh' ? '初级' : 'Elementary'
+      });
+    }
+    
+    // 保存到本地存储
+    app.saveArticlesToStorage();
+    
+    // 更新页面数据
+    this.setData({
+      articles: updatedArticles,
+      filteredArticles: updatedArticles.filter(item => 
+        this.data.currentLang === 'all' || item.language === this.data.currentLang
+      ),
+      showAddModal: false
+    });
+    
+    wx.hideLoading();
+    wx.showToast({
+      title: this.data.isEditing ? '更新成功' : '添加成功',
+      icon: 'success'
+    });
   }
 });

@@ -451,14 +451,17 @@ Page({
   },
   
   // 执行删除操作
-  handleDeleteArticle() {
+  handleDeleteArticle(e) {
     this.hideActionPanel();
-    this.confirmDeleteArticle(this.data.currentArticle.id, this.data.currentArticle.title);
+    const article = e.detail ? e.detail.article : this.data.currentArticle;
+    this.confirmDeleteArticle(article.id, article.title);
   },
   
   // 执行分享操作
-  handleShareArticle() {
+  handleShareArticle(e) {
     this.hideActionPanel();
+    const article = e.detail ? e.detail.article : this.data.currentArticle;
+    console.log('分享文章:', article.title);
     wx.showToast({
       title: '分享功能开发中',
       icon: 'none'
@@ -466,8 +469,10 @@ Page({
   },
   
   // 执行收藏操作
-  handleCollectArticle() {
+  handleCollectArticle(e) {
     this.hideActionPanel();
+    const article = e.detail ? e.detail.article : this.data.currentArticle;
+    console.log('收藏文章:', article.title);
     wx.showToast({
       title: '收藏功能开发中',
       icon: 'none'

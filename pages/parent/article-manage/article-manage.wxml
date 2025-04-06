@@ -38,7 +38,7 @@
           <view class="article-date">{{item.createTime}}</view>
           <view class="article-actions">
             <view class="action-btn edit" bindtap="editArticle" data-id="{{item._id}}">编辑</view>
-            <view class="action-btn delete" bindtap="deleteArticle" data-id="{{item._id}}">删除</view>
+            <view class="action-btn more" bindtap="showArticleOptions" data-id="{{item._id}}">更多</view>
           </view>
         </view>
       </view>
@@ -57,4 +57,14 @@
     bind:save="handleArticleSave" 
     bind:cancel="hideAddArticleModal">
   </article-editor>
+  
+  <!-- 使用封装的文章操作面板组件 -->
+  <article-actions
+    visible="{{showActionPanel}}"
+    article="{{currentArticle}}"
+    bind:close="hideActionPanel"
+    bind:delete="handleDeleteArticle"
+    bind:share="handleShareArticle"
+    bind:collect="handleCollectArticle">
+  </article-actions>
 </view>

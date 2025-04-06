@@ -1,0 +1,35 @@
+<!-- 文章操作面板组件 -->
+<view class="article-actions-container" wx:if="{{visible && article}}" bindtap="hidePanel">
+  <view class="action-panel" catchtap="catchPanelTap">
+    <view class="action-title">{{article.title}}</view>
+    
+    <view class="action-btns">
+      <!-- 删除按钮 -->
+      <button 
+        class="action-panel-btn delete-btn" 
+        bindtap="handleDelete"
+        wx:if="{{showDelete}}">
+        {{deleteText}}
+      </button>
+      
+      <!-- 分享按钮 -->
+      <button 
+        class="action-panel-btn share-btn" 
+        bindtap="handleShare"
+        wx:if="{{showShare}}">
+        {{shareText}}
+      </button>
+      
+      <!-- 收藏按钮 -->
+      <button 
+        class="action-panel-btn collect-btn" 
+        bindtap="handleCollect"
+        wx:if="{{showCollect}}">
+        {{collectText}}
+      </button>
+    </view>
+    
+    <!-- 取消按钮 -->
+    <button class="action-panel-btn cancel-btn" bindtap="hidePanel">{{cancelText}}</button>
+  </view>
+</view> 
