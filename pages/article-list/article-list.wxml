@@ -50,6 +50,8 @@
         <view class="article-title">{{item.title}}</view>
         <text class="article-preview">{{item.previewContent}}</text>
         <view class="article-meta">
+          <view class="section-tag">{{item.section}}</view>
+          <view class="unit-tag">{{item.unit}}</view>
           <view class="language-tag {{item.language === 'zh' ? 'zh' : 'en'}}">
             {{item.language === 'zh' ? '中文' : '英文'}}
           </view>

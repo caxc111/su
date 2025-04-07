@@ -214,70 +214,16 @@ Page({
         articles = this.processArticlesContent(articles);
         
       } else {
-        console.log('阅读练习页面 - 全局数据中没有文章，尝试初始化示例数据');
-        // 确保应用初始化示例数据
-        app.initSampleData();
-        articles = app.globalData.articles;
-        
-        if (!articles || articles.length === 0) {
-          console.log('阅读练习页面 - 全局数据仍然为空，使用直接硬编码的示例数据');
-          // 如果全局数据仍然为空，使用硬编码的示例数据
-          articles = [
-            {
-              id: '1',
-              title: '静夜思',
-              language: 'zh',
-              level: '初级',
-              content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。'
-            },
-            {
-              id: '2',
-              title: 'Stopping by Woods on a Snowy Evening',
-              language: 'en',
-              level: '中级',
-              content: 'Whose woods these are I think I know.\nHis house is in the village though;\nHe will not see me stopping here\nTo watch his woods fill up with snow.'
-            },
-            {
-              id: '3',
-              title: '小花猫钓鱼',
-              language: 'zh',
-              level: '初级',
-              content: '有一只小花猫，它很喜欢钓鱼。一天，它带着鱼竿来到小河边，准备钓鱼。它找了一个好地方，把鱼饵放在鱼钩上，然后把鱼钩甩到水里。小花猫耐心地等待着，突然，鱼竿动了一下，小花猫赶紧提起鱼竿，一条大鱼上钩了！小花猫高兴地把鱼带回家，和家人一起分享了美味的鱼。'
-            },
-            {
-              id: '4',
-              title: 'The Little Red Hen',
-              language: 'en',
-              level: '中级',
-              content: 'Once upon a time, there was a little red hen who lived on a farm. She was friends with a lazy dog, a sleepy cat, and a noisy duck. One day, the little red hen found some wheat seeds. She asked her friends, "Who will help me plant these wheat seeds?" "Not I," said the dog. "Not I," said the cat. "Not I," said the duck. "Then I will do it myself," said the little red hen. And she did.'
-            }
-          ];
-          
-          // 将硬编码的示例数据添加到全局数据中
-          app.globalData.articles = articles;
-          app.saveArticlesToStorage();
-        }
+        console.log('阅读练习页面 - 全局数据为空，使用空数组');
+        articles = [];
+        app.globalData.articles = articles;
+        app.saveArticlesToStorage();
       }
     } catch (error) {
       console.error('获取文章数据失败:', error);
-      // 出错时使用备用数据
-      articles = [
-        {
-          id: '1',
-          title: '静夜思',
-          language: 'zh',
-          level: '初级',
-          content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。'
-        },
-        {
-          id: '2',
-          title: 'Stopping by Woods on a Snowy Evening',
-          language: 'en',
-          level: '中级',
-          content: 'Whose woods these are I think I know.\nHis house is in the village though;\nHe will not see me stopping here\nTo watch his woods fill up with snow.'
-        }
-      ];
-      console.log('阅读练习页面 - 加载失败，使用备用数据');
+      // 出错时使用空数组
+      articles = [];
+      console.log('阅读练习页面 - 加载失败，使用空数组');
     }
     
     // 检查数据是否有效
@@ -302,10 +248,13 @@ Page({
       let previewContent = content.replace(/[\n\r]+/g, ' ').trim();
       previewContent = previewContent.substring(0, 50) + (previewContent.length > 50 ? '...' : '');
       
+      // 返回处理后的文章对象
       return {
         ...item,
         wordCount,
-        previewContent
+        previewContent,
+        unit: item.unit || '', // 确保 unit 字段存在
+        section: item.section || '' // 确保 section 字段存在
       };
     });
     

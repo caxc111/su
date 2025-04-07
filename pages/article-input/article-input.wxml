@@ -1,7 +1,10 @@
 <!--pages/article-input/article-input.wxml-->
 <view class="container">
   <view class="header">
-    <view class="title">添加文章</view>
+    <view class="title-row">
+      <view class="title">添加文章</view>
+      <view class="add-text-btn" bindtap="showPresetTexts">添加课文</view>
+    </view>
     <view class="subtitle">添加新的练习文章</view>
   </view>
   
@@ -45,4 +48,10 @@
       <button class="btn-submit" bindtap="saveArticle">保存文章</button>
     </view>
   </view>
+
+  <text-selector 
+    visible="{{showSelector}}"
+    bind:select="handleGradeSelect"
+    bind:cancel="handleSelectorCancel"
+  />
 </view> 

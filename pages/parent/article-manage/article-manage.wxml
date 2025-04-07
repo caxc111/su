@@ -24,7 +24,10 @@
           <view class="lang-tag {{item.language === 'zh' ? 'zh' : 'en'}}">
             {{item.language === 'zh' ? '中文' : '英文'}}
           </view>
-          <view class="article-title">{{item.title}}</view>
+          <view class="article-title">
+            <text wx:if="{{item.section}}">[{{item.section}}] </text>
+            {{item.title}}
+          </view>
         </view>
         
         <view class="article-preview-section">

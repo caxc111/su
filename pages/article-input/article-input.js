@@ -8,6 +8,8 @@ Page({
     // 文章信息
     article: {
       id: '', // 新文章不需要ID，保存时生成
+      section: '', // 添加篇目字段
+      unit: '', // 添加单元字段
       title: '',
       language: 'zh', // 默认中文
       level: '初级', // 默认初级
@@ -25,7 +27,8 @@ Page({
       { value: '高级', text: '高级' }
     ],
     isEdit: false, // 是否是编辑模式
-    editId: '' // 编辑文章的ID
+    editId: '', // 编辑文章的ID
+    showSelector: false // 是否显示预设文章选择器
   },
 
   /**
@@ -193,5 +196,75 @@ Page({
         icon: 'none'
       });
     }
-  }
+  },
+
+  /**
+   * 显示预设文章选择器
+   */
+  showPresetTexts() {
+    console.log('显示预设文章选择器');
+    this.setData({
+      showSelector: true
+    });
+  },
+
+  /**
+   * 处理预设文章选择器取消事件
+   */
+  handleSelectorCancel() {
+    console.log('取消选择预设文章');
+    this.setData({
+      showSelector: false
+    });
+  },
+
+  /**
+   * 处理预设文章选择事件
+   */
+  handleGradeSelect(e) {
+    console.log('选择预设文章:', e.detail);
+    const { text, texts } = e.detail;
+    
+    if (texts) {
+      // 批量导入
+      const app = getApp();
+      const newArticles = texts.map(text => ({
+        id: `art_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        section: text.section,
+        title: text.title,
+        language: 'zh',
+        content: text.content,
+        level: '初级',
+        unit: text.unit || '', // 确保 unit 字段存在
+        createTime: new Date().toISOString().split('T')[0]
+      }));
+
+      console.log('导入的文章数据:', newArticles); // 添加调试日志
+
+      // 添加到全局数据
+      app.globalData.articles = app.globalData.articles || [];
+      app.globalData.articles.unshift(...newArticles);
+      
+      // 保存到本地存储
+      app.saveArticlesToStorage();
+
+      // 返回上一页
+      wx.navigateBack({
+        success: () => {
+          wx.showToast({
+            title: `成功导入${texts.length}篇文章`,
+            icon: 'success'
+          });
+        }
+      });
+    } else if (text) {
+      // 单篇导入
+      this.setData({
+        'article.title': text.title,
+        'article.content': text.content,
+        'article.section': text.section,
+        'article.unit': text.unit || '' // 确保 unit 字段存在
+      });
+    }
+  },
 }) 

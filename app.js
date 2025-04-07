@@ -202,16 +202,8 @@ App({
 
     console.log('开始初始化默认示例数据...');
 
-    // 重置全局数据
+    // 重置全局数据为空数组
     this.globalData.articles = [];
-
-    // 示例文章数据
-    this.globalData.articles = [
-      { id: '1', title: '静夜思', language: 'zh', level: '初级', content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。', createdAt: '2023-05-15', wordCount: 20 },
-      { id: '2', title: 'Stopping by Woods on a Snowy Evening', language: 'en', level: '中级', content: 'Whose woods these are I think I know.\nHis house is in the village though;\nHe will not see me stopping here\nTo watch his woods fill up with snow.', createdAt: '2023-05-20', wordCount: 33 },
-      { id: '3', title: '小花猫钓鱼', language: 'zh', level: '初级', content: '有一只小花猫，它很喜欢钓鱼。一天，它带着鱼竿来到小河边，准备钓鱼。它找了一个好地方，把鱼饵放在鱼钩上，然后把鱼钩甩到水里。小花猫耐心地等待着，突然，鱼竿动了一下，小花猫赶紧提起鱼竿，一条大鱼上钩了！小花猫高兴地把鱼带回家，和家人一起分享了美味的鱼。', createdAt: '2023-05-22', wordCount: 97 },
-      { id: '4', title: 'The Little Red Hen', language: 'en', level: '中级', content: 'Once upon a time, there was a little red hen who lived on a farm. She was friends with a lazy dog, a sleepy cat, and a noisy duck. One day, the little red hen found some wheat seeds. She asked her friends, "Who will help me plant these wheat seeds?" "Not I," said the dog. "Not I," said the cat. "Not I," said the duck. "Then I will do it myself," said the little red hen. And she did.', createdAt: '2023-05-25', wordCount: 85 }
-    ];
 
     console.log('初始化了', this.globalData.articles.length, '篇文章');
 

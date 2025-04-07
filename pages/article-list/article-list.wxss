@@ -327,3 +327,29 @@
 .cancel-btn {
   /* 保留样式选择器但清空内容，以防其他地方有依赖 */
 }
+
+.section-tag {
+  height: 36rpx;
+  line-height: 36rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  padding: 0 16rpx;
+  border-radius: 18rpx;
+  background-color: #fff3e0;
+  color: #ff9500;
+}
+
+.unit-tag {
+  height: 36rpx;
+  line-height: 36rpx;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  padding: 0 16rpx;
+  border-radius: 18rpx;
+  background-color: #e6f7ff;
+  color: #1890ff;
+}

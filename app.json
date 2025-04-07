@@ -52,5 +52,8 @@
       "provider": "wx069ba97219f66d99"
     }
   },
-  "requiredBackgroundModes": ["audio"]
+  "requiredBackgroundModes": ["audio"],
+  "usingComponents": {
+    "text-selector": "/components/text-selector/text-selector"
+  }
 }

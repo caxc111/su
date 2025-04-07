@@ -44,7 +44,8 @@ Page({
         title: item.title || '未命名文章',
         content: item.content || '无内容', // 确保content有默认值
         language: item.language || 'zh',
-        createTime: item.createdAt || new Date().toISOString().split('T')[0]
+        createTime: item.createdAt || new Date().toISOString().split('T')[0],
+        section: item.section || ''
       };
     });
     
@@ -165,7 +166,8 @@ Page({
               ...item,
               title,
               language,
-              content
+              content,
+              section: item.section
             };
           }
           return item;
@@ -178,7 +180,8 @@ Page({
               ...item,
               title,
               language,
-              content
+              content,
+              section: item.section
             };
           }
           return item;
@@ -191,6 +194,7 @@ Page({
           title,
           language,
           content,
+          section: '',
           createTime: new Date().toISOString().split('T')[0] // 格式化日期
         };
         
@@ -202,6 +206,7 @@ Page({
           title,
           language,
           content,
+          section: '',
           createdAt: new Date().toISOString().split('T')[0],
           level: language === 'zh' ? '初级' : 'Elementary'
         });
@@ -301,6 +306,7 @@ Page({
         language: article.language,
         content: article.content,
         level: article.level,
+        section: '',
         createdAt: new Date().toISOString().split('T')[0]
       };
     });
@@ -439,7 +445,8 @@ Page({
           ...updatedArticles[index], // 保留其他字段
           title: article.title,
           language: article.language,
-          content: article.content
+          content: article.content,
+          section: updatedArticles[index].section
         };
         
         // 更新全局数据
@@ -449,7 +456,8 @@ Page({
             ...app.globalData.articles[globalIndex],
             title: article.title,
             language: article.language,
-            content: article.content
+            content: article.content,
+            section: updatedArticles[index].section
           };
         }
       }
@@ -461,6 +469,7 @@ Page({
         title: article.title,
         language: article.language,
         content: article.content,
+        section: '',
         createTime: new Date().toISOString().split('T')[0],
         level: article.language === 'zh' ? '初级' : 'Elementary'
       };
@@ -474,6 +483,7 @@ Page({
         title: article.title,
         language: article.language,
         content: article.content,
+        section: '',
         createdAt: new Date().toISOString().split('T')[0],
         level: article.language === 'zh' ? '初级' : 'Elementary'
       });

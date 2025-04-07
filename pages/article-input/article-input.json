@@ -1,4 +1,6 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "text-selector": "/components/text-selector/text-selector"
+  },
   "navigationBarTitleText": "添加文章"
 } 

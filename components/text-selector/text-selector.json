@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "text-list": "../text-list/text-list"
+  }
+} 
