@@ -1,10 +1,13 @@
 .container {
-  padding: 16px;
+  padding: 32rpx;
+  background-color: #f8f8f8;
+  min-height: 100vh;
+  box-sizing: border-box;
 }
 
 .header {
   display: flex;
-  margin-bottom: 20px;
+  margin-bottom: 40rpx;
 }
 
 .title-container {
@@ -23,19 +26,20 @@
 .filter-tabs {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 32rpx;
   background-color: #f5f5f5;
-  border-radius: 10px;
-  padding: 4px;
+  border-radius: 20rpx;
+  padding: 8rpx;
 }
 
 .tab {
   flex: 1;
   text-align: center;
-  padding: 8px 0;
-  font-size: 14px;
+  padding: 16rpx 0;
+  font-size: 28rpx;
   color: #666;
-  border-radius: 8px;
+  border-radius: 16rpx;
+  transition: all 0.3s;
 }
 
 .tab.active {
@@ -45,80 +49,118 @@
 }
 
 .history-list {
-  padding-bottom: 20px;
+  padding-bottom: 40rpx;
+}
+
+.record-item-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 24rpx;
+  border-radius: 16rpx;
+  background: #fff;
 }
 
 .record-item {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffffff;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 32rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+  width: 100%;
+  box-sizing: border-box;
+  background: #fff;
+  transition: transform 0.3s ease;
+  z-index: 1;
 }
 
 .record-left {
   flex: 1;
-  margin-right: 10px;
+  margin-right: 32rpx;
+  overflow: hidden;
 }
 
 .record-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 4px;
+  font-size: 32rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.record-details {
+.record-date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-right {
   display: flex;
-  font-size: 12px;
-  color: #666;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 120rpx;
 }
 
 .record-score {
   display: flex;
-  align-items: center;
+  align-items: baseline;
+  flex-direction: row;
 }
 
 .score-value {
-  font-size: 20px;
+  font-size: 48rpx;
   font-weight: bold;
   color: #ff9500;
+  line-height: 1;
 }
 
 .score-unit {
-  margin-left: 2px;
-  font-size: 14px;
-  color: #666;
+  font-size: 24rpx;
+  color: #999;
+  margin-left: 4rpx;
 }
 
-.flowers {
+.delete-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 160rpx;
+  height: 100%;
+  background-color: #ff4d4f;
+  color: #fff;
   display: flex;
-  margin-left: 8px;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
 }
 
-.flower-icon {
-  width: 20px;
-  height: 20px;
-  margin-left: 4px;
+.record-item-wrapper.show-delete .record-item {
+    transform: translateX(-160rpx);
+}
+
+.record-item-wrapper.show-delete .delete-btn {
+    transform: translateX(0);
 }
 
 .load-more {
   text-align: center;
-  padding: 12px 0;
+  padding: 24rpx 0;
   color: #666;
-  font-size: 14px;
+  font-size: 28rpx;
 }
 
 .loading {
   color: #999;
-  font-size: 13px;
+  font-size: 26rpx;
 }
 
 .empty-tip {
-  padding: 40px 0;
+  padding: 80rpx 0;
   text-align: center;
   color: #999;
-  font-size: 14px;
+  font-size: 28rpx;
 } 
