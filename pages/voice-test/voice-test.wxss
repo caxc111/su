@@ -1,0 +1,8 @@
+/* pages/voice-test/voice-test.wxss */
+.container {
+  padding: 30rpx;
+  box-sizing: border-box;
+  min-height: 100vh;
+} 
+ 
+ 

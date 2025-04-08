@@ -1,0 +1,6 @@
+<!--pages/voice-test/voice-test.wxml-->
+<view class="container">
+  <voice-recognition />
+</view> 
+ 
+ 

@@ -1,0 +1,8 @@
+{
+  "usingComponents": {
+    "voice-recognition": "/components/voice-recognition/voice-recognition"
+  },
+  "navigationBarTitleText": "语音能力测试"
+} 
+ 
+ 
