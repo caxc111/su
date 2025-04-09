@@ -2,108 +2,9 @@
 .voice-recognition {
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  background: #fff;
-}
-
-.header {
-  background: #7AC23D;
-  color: #fff;
-  padding: 20rpx;
-  text-align: center;
-  font-size: 36rpx;
-}
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 30rpx;
-  position: relative;
-}
-
-.language-switcher {
-  display: flex;
-  justify-content: center;
-  gap: 20rpx;
-  margin-bottom: 40rpx;
-}
-
-.language-switcher view {
-  padding: 10rpx 30rpx;
-  border-radius: 30rpx;
-  border: 2rpx solid #7AC23D;
-  color: #7AC23D;
-  font-size: 28rpx;
-}
-
-.language-switcher view.active {
-  background: #7AC23D;
-  color: #fff;
-}
-
-.result-area {
-  flex: 1;
-  padding: 20rpx;
-  border-radius: 12rpx;
-  background: #f8f8f8;
-  margin-bottom: 40rpx;
-}
-
-.result-label {
-  color: #666;
-  font-size: 28rpx;
-  margin-bottom: 20rpx;
-  display: block;
-}
-
-.result-text {
-  min-height: 200rpx;
-  color: #333;
-  font-size: 32rpx;
-  line-height: 1.6;
-}
-
-.record-area {
-  position: absolute;
-  bottom: 100rpx;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.record-button {
-  width: 160rpx;
-  height: 160rpx;
-  border-radius: 80rpx;
-  background-color: #7AC23D;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20rpx;
-  box-shadow: 0 6rpx 12rpx rgba(122, 194, 61, 0.3);
-  transition: all 0.3s;
-}
-
-.record-button.recording {
-  background-color: #68A534;
-  transform: scale(1.1);
-  box-shadow: 0 8rpx 16rpx rgba(104, 165, 52, 0.4);
-}
-
-.mic-icon {
-  width: 60rpx;
-  height: 60rpx;
-  filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
-}
-
-.record-status-text {
-  font-size: 24rpx;
-  color: #999;
-  margin-top: 20rpx;
-  text-align: center;
+  align-items: left;
+  width: 100%;
+  padding: 20rpx 0;
 }
 
 /* 头部样式 */
@@ -127,6 +28,29 @@
   color: #666;
 }
 
+/* 语言切换样式 */
+.language-switcher {
+  margin-top: 20rpx;
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+}
+
+.language-switcher view {
+  padding: 10rpx 30rpx;
+  border: 1px solid #7AC23D;
+  border-radius: 30rpx;
+  font-size: 26rpx;
+  color: #7AC23D;
+  background-color: #fff;
+}
+
+.language-switcher view.active {
+  background-color: #7AC23D;
+  color: #fff;
+  border-color: #7AC23D;
+}
+
 /* 录音按钮区域 */
 .record-area {
   width: 100%;
@@ -134,6 +58,7 @@
   flex-direction: column;
   align-items: center;
   padding-bottom: 40rpx;
+  margin-top: 120rpx;
 }
 
 .record-status-text {
@@ -143,9 +68,29 @@
   text-align: center;
 }
 
-.record-icon {
-  width: 80rpx;
-  height: 80rpx;
+.record-button {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 80rpx;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: -10rpx;
+  box-shadow: none;
+  transition: all 0.3s;
+}
+
+.record-button.recording {
+  background-color: transparent;
+  transform: scale(1.1);
+  box-shadow: none;
+}
+
+.mic-icon {
+  width: 60rpx;
+  height: 60rpx;
+  filter: invert(66%) sepia(58%) saturate(486%) hue-rotate(44deg) brightness(95%) contrast(86%);
 }
 
 .record-tip {
@@ -157,13 +102,13 @@
 
 /* 识别结果区域 */
 .result-area {
-  width: 90%;
+  width: 100%;
   background-color: #fff;
   border-radius: 20rpx;
   padding: 30rpx;
+  margin-top: 40rpx;  /* 让文本框向下移动 20rpx，你可以修改这个值 */
   margin-bottom: 40rpx;
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
-  flex-grow: 1;
 }
 
 .result-title {
@@ -174,22 +119,15 @@
 }
 
 .result-text {
-  font-size: 28rpx;
-  color: #555;
+  min-height: 400rpx;
+  color: #333;
+  font-size: 32rpx;
   line-height: 1.6;
-  border-left: 6rpx solid #7AC23D;
-  padding-left: 20rpx;
-  background-color: #f9f9f9;
-  padding: 20rpx;
-  border-radius: 10rpx;
-  margin-bottom: 20rpx;
-  flex-grow: 1;
-  overflow-y: auto;
 }
 
 .clear-result {
   text-align: right;
   font-size: 24rpx;
-  color: #7AC23D;
+  color: #42a5e2;
   padding: 10rpx;
 } 

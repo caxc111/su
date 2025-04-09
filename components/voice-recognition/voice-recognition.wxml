@@ -2,8 +2,12 @@
 <view class="voice-recognition">
   <view class="content">
     <view class="language-switcher">
-      <view class="{{currentLang === 'zh_CN' ? 'active' : ''}}" bindtap="switchLang" data-lang="zh_CN">中文</view>
-      <view class="{{currentLang === 'en_US' ? 'active' : ''}}" bindtap="switchLang" data-lang="en_US">English</view>
+      <view class="lang-btn {{currentLang === 'zh_CN' ? 'active' : ''}}" 
+            bindtap="switchLanguage" 
+            data-lang="zh_CN">中文</view>
+      <view class="lang-btn {{currentLang === 'en_US' ? 'active' : ''}}" 
+            bindtap="switchLanguage" 
+            data-lang="en_US">English</view>
     </view>
 
     <view class="result-area">
@@ -13,7 +17,7 @@
 
     <view class="record-area">
       <view class="record-button {{isRecording ? 'recording' : ''}}" bindtap="toggleRecording">
-        <image class="mic-icon" src="../../images/mic.png" mode="aspectFit" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);"></image>
+        <image class="mic-icon" src="../../images/mic.png" mode="aspectFit"></image>
       </view>
       <text class="record-status-text">{{isRecording ? '点击结束录音' : '点击开始录音'}}</text>
     </view>

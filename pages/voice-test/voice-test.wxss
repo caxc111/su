@@ -6,3 +6,10 @@
 } 
  
  
+.container {
+  padding: 30rpx;
+  box-sizing: border-box;
+  min-height: 100vh;
+} 
+ 
+ 
