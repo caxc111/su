@@ -17,7 +17,7 @@
 
     <view class="record-area">
       <view class="record-button {{isRecording ? 'recording' : ''}}" bindtap="toggleRecording">
-		  <image class="mic-icon" src="../../images/mic.png" mode="aspectFit"></image>
+        <image class="mic-icon" src="../../images/mic.png" mode="aspectFit" style="filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);"></image>
       </view>
       <text class="record-status-text">{{isRecording ? '点击结束录音' : '点击开始录音'}}</text>
     </view>
