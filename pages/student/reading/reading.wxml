@@ -51,9 +51,15 @@
     
     <!-- 修改：将播放范读按钮和录音按钮放在一行 -->
     <view class="control-buttons-row">
-      <button class="action-btn standard-audio" bindtap="playStandardAudio" disabled="{{recordStatus !== 'idle'}}">
-        播放范读
-      </button>
+		<!-- 播放/停止范读按钮 -->
+		<!-- 播放/停止范读按钮 -->
+		<button
+		  class="action-btn standard-audio {{ isPlayingReading ? 'playing' : '' }}"
+		  bindtap="{{ isPlayingReading ? 'handleStopReading' : 'handlePlayReading' }}"
+		  disabled="{{ isLoading || recordStatus === 'recording' || recordStatus === 'processing' }}"
+>
+			{{ isPlayingReading ? '停止范读' : '播放范读' }}
+		</button>
       <!-- 替换为新的朗读录音/停止录音按钮 -->
       <button 
         class="action-btn record-self {{recordStatus === 'recording' ? 'recording' : ''}}" 

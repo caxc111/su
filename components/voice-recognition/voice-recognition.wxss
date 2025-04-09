@@ -2,7 +2,7 @@
 .voice-recognition {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: center;
   width: 100%;
   padding: 20rpx 0;
 }
@@ -58,7 +58,6 @@
   flex-direction: column;
   align-items: center;
   padding-bottom: 40rpx;
-  margin-top: 120rpx;
 }
 
 .record-status-text {
@@ -76,7 +75,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: -10rpx;
+  margin-bottom: 20rpx;
   box-shadow: none;
   transition: all 0.3s;
 }
@@ -90,7 +89,7 @@
 .mic-icon {
   width: 60rpx;
   height: 60rpx;
-  filter: invert(66%) sepia(58%) saturate(486%) hue-rotate(44deg) brightness(95%) contrast(86%);
+  filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);
 }
 
 .record-tip {
@@ -102,11 +101,10 @@
 
 /* 识别结果区域 */
 .result-area {
-  width: 100%;
+  width: 98%;
   background-color: #fff;
   border-radius: 20rpx;
   padding: 30rpx;
-  margin-top: 40rpx;  /* 让文本框向下移动 20rpx，你可以修改这个值 */
   margin-bottom: 40rpx;
   box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.05);
 }
