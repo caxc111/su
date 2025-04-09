@@ -110,8 +110,8 @@ Page({
   onPullDownRefresh() {
     console.log('文章列表页面 - 下拉刷新');
     // 下拉刷新，重新加载文章
-    this.setData({ isLoading: true });
-    this.resetAndRefresh();
+    //this.setData({ isLoading: true });
+    //this.resetAndRefresh();
     setTimeout(() => {
       wx.stopPullDownRefresh();
     }, 1000);
