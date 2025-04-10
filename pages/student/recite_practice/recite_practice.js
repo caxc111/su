@@ -1,8 +1,6 @@
 // pages/student/recite_practice/recite_practice.js
 // 引入微信同声传译插件
 const plugin = requirePlugin("WechatSI");
-// 获取全局唯一的语音识别管理器
-const manager = plugin.getRecordRecognitionManager();
 
 Page({
     data: {
@@ -12,7 +10,7 @@ Page({
         recordTime: 0,
         showResult: false,
         recordTimer: null,
-        // recorderManager: null, // 不再需要
+        recordingManager: null,
         audioFile: '',
         waveHeights: [],
         waveTimer: null,
@@ -40,13 +38,167 @@ Page({
         else { console.error('[recite_practice loadArticle] 未能找到ID为', id, '的文章'); wx.showToast({ title: '加载文章失败', icon: 'none' }); this.setData({ isLoading: false }); }
     },
 
-    onUnload() { if (this.data.recordTimer) { clearInterval(this.data.recordTimer); } if (this.data.waveTimer) { clearInterval(this.data.waveTimer); } if (this.data.recordStatus === 'recording' && manager) { try { manager.stop(); } catch (e) { console.warn("onUnload stop manager error:", e); } } },
+    onUnload() { if (this.data.recordTimer) { clearInterval(this.data.recordTimer); } if (this.data.waveTimer) { clearInterval(this.data.waveTimer); } if (this.data.recordStatus === 'recording' && this.data.recordingManager) { try { this.data.recordingManager.stop(); } catch (e) { console.warn("onUnload stop manager error:", e); } } },
     checkRecordPermission() { wx.getSetting({ success: (res) => { if (!res.authSetting['scope.record']) { console.log('背诵练习页面：未获取权限，尝试请求'); wx.authorize({ scope: 'scope.record', success: () => { console.log('录音权限授权成功'); }, fail: () => { console.error('用户拒绝录音权限'); wx.showModal({ title: '提示', content: '背诵练习需要录音权限才能进行，请在设置中允许。', confirmText: '去设置', cancelText: '取消', success: (mr) => { if (mr.confirm) { wx.openSetting(); } else { wx.showToast({ title: '未授权无法背诵', icon: 'none' }); } } }); } }); } else { console.log('背诵练习页面：已获取录音权限'); } }, fail: (err) => { console.error('检查权限设置失败:', err); } }); },
-    initRecord() { manager.onRecognize = (res) => { /* ... */ }; manager.onStop = (res) => { console.log('[onStop Callback] Triggered. Result:', JSON.stringify(res)); wx.hideLoading(); const recordTimer = this.data.recordTimer; if (recordTimer) { clearInterval(recordTimer); this.setData({ recordTimer: null }); } this.stopWaveAnimation(); this.setData({ recordStatus: 'processing' }); if (res.result) { console.log("背诵最终识别结果:", res.result); this.evaluateRecitation(this.data.article.content, res.result); } else { console.error('背诵语音识别未返回有效结果'); this.setData({ recordStatus: 'idle' }); wx.showToast({ title: '未能识别到有效语音', icon: 'none' }); } }; manager.onError = (res) => { console.error('[onError Callback] Triggered. Error:', JSON.stringify(res)); wx.hideLoading(); wx.showToast({ title: `识别错误: ${res.msg}`, icon: 'none' }); const recordTimer = this.data.recordTimer; if (recordTimer) { clearInterval(recordTimer); this.setData({ recordTimer: null }); } this.stopWaveAnimation(); this.setData({ recordStatus: 'idle' }); }; console.log('背诵页面语音识别回调初始化完成'); },
+    initRecord() {
+        console.log('[initRecord] 开始初始化录音管理器');
+        if (this.data.recordingManager) {
+            console.log('[initRecord] 已存在录音管理器，先清理');
+            this.cleanupRecite();
+        }
+
+        try {
+            const manager = plugin.getRecordRecognitionManager();
+            if (!manager) {
+                console.error('[initRecord] 获取录音管理器失败');
+                wx.showToast({ title: '录音功能初始化失败', icon: 'none' });
+                return;
+            }
+
+            // 设置回调函数
+            manager.onStart = (res) => {
+                console.log('[onStart Callback] 录音开始', res);
+                this.setData({ recordStatus: 'recording' });
+                this.startRecordTimer();
+            };
+
+            manager.onRecognize = (res) => {
+                if (res && res.result) {
+                    console.log('[onRecognize Callback] 识别结果:', res.result);
+                    this.setData({ recognizedText: res.result });
+                }
+            };
+
+            manager.onStop = (res) => {
+                console.log('[onStop Callback] 录音停止', res);
+                this.stopRecordTimer();
+                this.setData({ recordStatus: 'processing' });
+                if (res && res.result) {
+                    this.setData({ recognizedText: res.result });
+                    this.evaluateRecitation(this.data.article.content, res.result);
+                } else {
+                    console.error('背诵语音识别未返回有效结果');
+                    this.setData({ recordStatus: 'idle' });
+                    wx.showToast({ title: '未能识别到有效语音', icon: 'none' });
+                }
+            };
+
+            manager.onError = (res) => {
+                console.error('[onError Callback] 录音或识别错误:', res);
+                this.stopRecordTimer();
+                this.setData({ recordStatus: 'idle' });
+                
+                // 特殊处理网络错误
+                if (res.retcode === -30008) {
+                    console.log('[onError] 网络错误，等待用户手动重试');
+                    wx.showToast({ 
+                        title: '网络连接失败，请检查网络后重试', 
+                        icon: 'none',
+                        duration: 2000
+                    });
+                    return;
+                }
+
+                // 特殊处理录音失败错误
+                if (res.retcode === -30001) {
+                    console.log('[onError] 录音失败，尝试重新初始化');
+                    wx.showToast({ 
+                        title: '录音失败，请重试', 
+                        icon: 'none',
+                        duration: 2000
+                    });
+                    // 延迟重新初始化
+                    setTimeout(() => {
+                        this.initRecord();
+                    }, 1000);
+                    return;
+                }
+
+                // 其他错误处理
+                const errorMsg = this.getErrorMessage(res.retcode);
+                wx.showToast({ title: errorMsg, icon: 'none' });
+            };
+
+            // 保存管理器引用
+            this.setData({ recordingManager: manager });
+            console.log('[initRecord] 录音管理器初始化完成');
+        } catch (error) {
+            console.error('[initRecord] 初始化录音管理器异常:', error);
+            wx.showToast({ title: '录音功能初始化异常', icon: 'none' });
+        }
+    },
     toggleRecording() { if (this.data.recordStatus === 'idle') { wx.getSetting({ success: (res) => { if (!res.authSetting['scope.record']) { this.checkRecordPermission(); } else { this.startRecording(); } }, fail: () => { this.checkRecordPermission(); } }); } else if (this.data.recordStatus === 'recording') { this.stopRecording(); } },
-    startRecording() { console.log('准备开始背诵录音和识别'); if (!this.data.article || !this.data.article.content) { console.error('[startRecording] 文章数据无效'); wx.showToast({ title: '文章加载错误', icon: 'none' }); return; } this.setData({ recitePhase: 'reciting' }); try { const lang = this.data.article.language === 'zh' ? 'zh_CN' : 'en_US'; console.log('识别语言:', lang); this.setData({ recordStatus: 'recording', recordTime: 0, showResult: false, reciteResult: { score: 0, flowers: [], feedback: '', correctWords: 0, totalWords: 0, accuracy: 0, contentWithErrors: '', recognizedText: '' } }); console.log('[startRecording] Starting manager...'); manager.start({ lang: lang }); console.log('开始背诵录音和识别'); this.startRecordTimer(); this.startWaveAnimation(); } catch (error) { console.error('启动背诵录音时出错:', error); this.setData({ recitePhase: 'preview', recordStatus: 'idle' }); wx.showToast({ title: '录音启动失败', icon: 'none' }); const recordTimer = this.data.recordTimer; if (recordTimer) { clearInterval(recordTimer); this.setData({ recordTimer: null }); } this.stopWaveAnimation(); } },
-    stopRecording() { console.log('尝试停止录音'); if (this.data.recordStatus !== 'recording') { console.warn('非录音状态，无法停止'); return; } try { console.log('[stopRecording] Calling manager.stop()'); manager.stop(); wx.showLoading({ title: '正在处理...' }); } catch (error) { console.error('调用 manager.stop() 失败:', error); wx.hideLoading(); wx.showToast({ title: '停止录音失败', icon: 'none' }); const recordTimer = this.data.recordTimer; if (recordTimer) { clearInterval(recordTimer); this.setData({ recordTimer: null }); } this.stopWaveAnimation(); this.setData({ recordStatus: 'idle' }); } },
+    startRecording() {
+        if (!this.data.recordingManager) {
+            console.warn('[startRecording] 录音管理器未初始化，尝试初始化');
+            this.initRecord();
+            return;
+        }
+
+        if (this.data.recordStatus === 'recording') {
+            console.warn('[startRecording] 正在录音中，无法开始新的录音');
+            return;
+        }
+
+        // 检查网络状态
+        wx.getNetworkType({
+            success: (res) => {
+                if (res.networkType === 'none') {
+                    wx.showToast({ title: '请检查网络连接', icon: 'none' });
+                    return;
+                }
+                
+                // 检查录音权限
+                wx.getSetting({
+                    success: (res) => {
+                        if (res.authSetting['scope.record']) {
+                            const lang = this.data.article.language === 'zh' ? 'zh_CN' : 'en_US';
+                            this.data.recordingManager.start({ lang: lang });
+                            console.log('[startRecording] 开始录音，语言:', lang);
+                        } else {
+                            wx.authorize({
+                                scope: 'scope.record',
+                                success: () => {
+                                    const lang = this.data.article.language === 'zh' ? 'zh_CN' : 'en_US';
+                                    this.data.recordingManager.start({ lang: lang });
+                                    console.log('[startRecording] 开始录音，语言:', lang);
+                                },
+                                fail: () => {
+                                    wx.showModal({
+                                        title: '权限提示',
+                                        content: '需要录音权限才能使用。请在小程序设置中打开录音权限。',
+                                        confirmText: '去设置',
+                                        cancelText: '取消',
+                                        success: (res) => {
+                                            if (res.confirm) {
+                                                wx.openSetting();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        });
+    },
+    stopRecording() {
+        if (!this.data.recordingManager || this.data.recordStatus !== 'recording') {
+            console.warn('[stopRecording] 未在录音状态');
+            return;
+        }
+
+        try {
+            this.data.recordingManager.stop();
+            console.log('[stopRecording] 停止录音请求已发送');
+        } catch (error) {
+            console.error('[stopRecording] 停止录音异常:', error);
+            this.cleanupRecite();
+        }
+    },
     startRecordTimer() { console.log('启动背诵录音计时器'); if (this.recordTimer) { clearInterval(this.recordTimer); } this.recordTimer = setInterval(() => { if (this.data.recordStatus !== 'recording') { if (this.recordTimer) { clearInterval(this.recordTimer); this.recordTimer = null; } return; } const newTime = this.data.recordTime + 1; this.setData({ recordTime: newTime }); }, 1000); this.setData({ recordTimer: this.recordTimer }); },
+    stopRecordTimer() { console.log('停止背诵录音计时器'); if (this.recordTimer) { clearInterval(this.recordTimer); this.recordTimer = null; } },
     // --- 波浪动画 ---
     startIdleWaveAnimation() { /* ... */ }, updateIdleWaveHeights() { /* ... */ },
     startWaveAnimation() { if (this.data.waveTimer) { clearInterval(this.data.waveTimer); } const timer = setInterval(() => { if (this.data.recordStatus !== 'recording') { clearInterval(timer); this.setData({ waveHeights: Array(8).fill(5) }); return; } this.updateWaveHeights(); }, 200); this.setData({ waveTimer: timer }); },
@@ -76,16 +228,16 @@ Page({
         // --- 映射结束 ---
 
         // --- 标点符号定义 ---
-        const punctuationAndSpaceRegex = /[.,!?;:"'()，。！？；：“”‘’（）《》【】、~——\s]/g;
+        const punctuationAndSpaceRegex = /[.,!?;:"'()，。！？；：""''（）《》【】、~——\s]/g;
         // --- 标点定义结束 ---
 
         if (!original) { console.warn('[compareTexts v4] 原文为空'); return { accuracy: recognized ? 0 : 100, correctWords: 0, totalWords: 0, contentWithErrors: '<span style="color:orange;">原文为空</span>' }; }
         if (!recognized) {
             console.warn('[compareTexts v4] 识别结果为空');
             const isChineseInner = language === 'zh'; // 在闭包内使用 language
-            const displayTokensInner = isChineseInner ? original.split('') : original.split(/([.,!?;:"'()，。！？；：“”‘’（）《》【】、~——\s])/g).filter(Boolean);
+            const displayTokensInner = isChineseInner ? original.split('') : original.split(/([.,!?;:"'()，。！？；：""''（）《》【】、~——\s])/g).filter(Boolean);
             const separatorInner = isChineseInner ? '' : ' ';
-            const errorsInner = displayTokensInner.map(token => /^[.,!?;:"'()，。！？；：“”‘’（）《》【】、~——\s]$/.test(token) ? token : `<span style="color:red;">${token}</span>`).join(separatorInner);
+            const errorsInner = displayTokensInner.map(token => /^[.,!?;:"'()，。！？；：""''（）《》【】、~——\s]$/.test(token) ? token : `<span style="color:red;">${token}</span>`).join(separatorInner);
             let normOriginalLengthInner = 0;
             if (original) {
                 const tempNormOrigInner = original.toLowerCase().replace(punctuationAndSpaceRegex, '');
@@ -143,7 +295,7 @@ Page({
 
         // --- 2. 生成带标记的 HTML (遍历原始文本, 仅标记非标点内容) ---
         let contentWithErrors = '';
-        const displayTokens = isChinese ? original.split('') : original.split(/([.,!?;:"'()，。！？；：“”‘’（）《》【】、~——\s])/g).filter(Boolean);
+        const displayTokens = isChinese ? original.split('') : original.split(/([.,!?;:"'()，。！？；：""''（）《》【】、~——\s])/g).filter(Boolean);
         const recognizedTokenSet = new Set(recognizedTokens);
         const recognizedEquivalentSet = new Set();
         if (isChinese) {
@@ -159,7 +311,7 @@ Page({
 
         for (let k = 0; k < displayTokens.length; k++) {
             const currentDisplayToken = displayTokens[k];
-            const isPunctOrSpace = /^[.,!?;:"'()，。！？；：“”‘’（）《》【】、~——\s]$/.test(currentDisplayToken);
+            const isPunctOrSpace = /^[.,!?;:"'()，。！？；：""''（）《》【】、~——\s]$/.test(currentDisplayToken);
 
             if (isPunctOrSpace) {
                 contentWithErrors += currentDisplayToken; // 标点空格直接添加
@@ -213,9 +365,47 @@ Page({
     calculateRecitationScore(accuracy, totalWords, language) { return Math.round(accuracy); },
     generateRecitationFeedback(score, accuracy) { if (accuracy >= 95) { return '太棒了！简直是原文复现！'; } else if (accuracy >= 85) { return '非常出色！继续保持！'; } else if (accuracy >= 70) { return '还不错！注意标红的部分哦。'; } else if (accuracy >= 50) { return '有进步！对照标错的地方多练练。'; } else { return '加油！多听几遍范读再试试吧。'; } },
     generateFlowers(score) { const flowerCount = Math.min(Math.floor(score / 20), 5); return Array(flowerCount).fill(true); },
-    showReciteErrorResult(message) { this.setData({ reciteResult: { score: 0, flowers: [], feedback: message || '处理失败，请重试', correctWords: 0, totalWords: this.data.article ? (this.data.article.content || '').replace(/[.,!?;:"'()，。！？；：“”‘’（）《》【】、~——\s]/g, '').length : 0, accuracy: 0, contentWithErrors: '<span class="error">处理失败</span>', recognizedText: '' }, showResult: true, recordStatus: 'idle', recitePhase: 'preview' }); this.stopWaveAnimation(); },
+    showReciteErrorResult(message) { this.setData({ reciteResult: { score: 0, flowers: [], feedback: message || '处理失败，请重试', correctWords: 0, totalWords: this.data.article ? (this.data.article.content || '').replace(/[.,!?;:"'()，。！？；：""''（）《》【】、~——\s]/g, '').length : 0, accuracy: 0, contentWithErrors: '<span class="error">处理失败</span>', recognizedText: '' }, showResult: true, recordStatus: 'idle', recitePhase: 'preview' }); this.stopWaveAnimation(); },
     tryAgain() { this.setData({ showResult: false, recordTime: 0, recitePhase: 'preview', recordStatus: 'idle', reciteResult: { score: 0, flowers: [], feedback: '', correctWords: 0, totalWords: 0, accuracy: 0, contentWithErrors: '', recognizedText: '' } }); /* this.startIdleWaveAnimation(); */ },
     finishReading() { wx.navigateBack(); }, // 可以考虑改名 finishPractice
-    handleFlowerTap() { /* 保留为空 */ }
+    handleFlowerTap() { /* 保留为空 */ },
+    cleanupRecite() {
+        console.log('[cleanupRecite] 开始清理背诵状态...');
+        this.stopRecordTimer();
+        
+        if (this.data.recordingManager) {
+            try {
+                this.data.recordingManager.stop();
+                this.data.recordingManager.onStart = null;
+                this.data.recordingManager.onRecognize = null;
+                this.data.recordingManager.onStop = null;
+                this.data.recordingManager.onError = null;
+            } catch (e) {
+                console.warn('[cleanupRecite] 清理录音管理器出错:', e);
+            }
+        }
 
+        this.setData({ 
+            recordingManager: null,
+            recordStatus: 'idle',
+            recognizedText: '',
+            recordTime: 0
+        });
+        console.log('[cleanupRecite] 清理完成');
+    },
+    getErrorMessage(retcode, defaultMsg = '识别错误，请重试') {
+        const errorMap = {
+            '-30001': '录音失败',
+            '-30002': '连接失败',
+            '-30003': '识别超时',
+            '-30004': '无有效语音',
+            '-30005': '参数错误',
+            '-30007': '参数错误',
+            '-30008': '网络发送失败',
+            '-30009': '网络接收失败',
+            '-30011': '用户取消',
+            '-30012': '权限或状态错误'
+        };
+        return errorMap[retcode] || defaultMsg;
+    }
 }); // Page 结束
