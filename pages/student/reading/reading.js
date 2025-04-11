@@ -2,7 +2,7 @@
 // 引入微信同声传译插件
 const plugin = requirePlugin("WechatSI");
 // 获取全局唯一的语音识别管理器
-const manager = plugin.getRecordRecognitionManager();
+let manager = null;
 
 Page({
   data: {
@@ -17,7 +17,8 @@ Page({
         isPlayingReading: false, // 是否正在播放范读
         mode: 'practice', // reading 页面现在只处理 practice 模式
         isLoading: false,
-        recordHint: ''
+        recordHint: '',
+        permissionDenied: false // 是否拒绝了录音权限
     },
 
     // --- 实例状态变量 ---
@@ -30,12 +31,16 @@ Page({
     _isCleaningUp: false,
     recordTimer: null,
     maxRecordDuration: 120,
+    retryCount: 0,
     // --- 实例状态变量结束 ---
 
     onLoad(options) {
         console.log("朗读页面加载，options:", options);
         this.setData({ isLoading: true });
-        this.initRecord();
+        
+        // 确保先初始化全局的录音管理器
+        this.resetRecordManager();
+        
         this.initAudioContext();
         this.checkRecordPermission();
 
@@ -48,6 +53,40 @@ Page({
             console.error('[reading.js onLoad] 缺少文章 ID (id)');
             wx.showToast({ title: '页面参数错误', icon: 'none' });
             this.setData({ isLoading: false });
+        }
+    },
+
+    resetRecordManager() {
+        console.log('[resetRecordManager] 重置录音管理器');
+        
+        // 如果存在旧的录音管理器，先清理
+        if (manager) {
+            try {
+                manager.stop();
+            } catch (e) {
+                console.error('[resetRecordManager] 停止旧录音管理器失败:', e);
+            }
+            
+            // 清除所有回调
+            manager.onRecognize = null;
+            manager.onStop = null;
+            manager.onStart = null;
+            manager.onError = null;
+            manager = null;
+        }
+        
+        // 创建新的录音管理器
+        try {
+            manager = plugin.getRecordRecognitionManager();
+            console.log('[resetRecordManager] 新录音管理器创建成功');
+            this.initRecord();
+        } catch (e) {
+            console.error('[resetRecordManager] 创建新录音管理器失败:', e);
+            wx.showToast({
+                title: '初始化录音失败，请重启小程序',
+                icon: 'none',
+                duration: 2000
+            });
         }
     },
 
@@ -71,113 +110,389 @@ Page({
             this.setData({ article: articleData, isLoading: false });
             wx.setNavigationBarTitle({ title: articleData.title || '朗读练习' });
         } else { console.error('[reading.js loadArticle] 未能找到文章 ID:', id); this.setData({ isLoading: false }); wx.showToast({ title: '加载文章失败', icon: 'none' }); }
-  },
-  
-  onUnload() {
-        if (this.recordTimer) {
-            clearInterval(this.recordTimer);
-            this.recordTimer = null;
-        }
-        if (manager && this.data.recordStatus === 'recording') {
-            try {
-                manager.stop();
-            } catch (e) {
-                console.warn('[onUnload] 停止录音出错:', e);
-            }
-        }
-        if (this.audioContext) {
-            this.audioContext.stop();
-            this.audioContext.destroy();
-            this.audioContext = null;
-        }
-        if (this.waveTimer) {
-            clearInterval(this.waveTimer);
-            this.waveTimer = null;
-        }
     },
 
     checkRecordPermission() {
-        wx.getSetting({
+        console.log('[checkRecordPermission] 检查录音权限');
+        return new Promise((resolve, reject) => {
+            wx.getSetting({
+                success: (res) => {
+                    if (!res.authSetting['scope.record']) {
+                        if (this.data.permissionDenied) {
+                            // 用户之前拒绝过，直接提示
+                            this.showPermissionDialog();
+                            reject('用户之前拒绝了录音权限');
+                            return;
+                        }
+                        
+                        wx.authorize({
+                            scope: 'scope.record',
+                            success: () => {
+                                console.log('[checkRecordPermission] 已获得录音权限');
+                                this.setData({ permissionDenied: false });
+                                resolve(true);
+                            },
+                            fail: (err) => {
+                                console.error('[checkRecordPermission] 授权失败:', err);
+                                this.setData({ permissionDenied: true });
+                                this.showPermissionDialog();
+                                reject('未获得录音权限');
+                            }
+                        });
+                    } else {
+                        console.log('[checkRecordPermission] 已有录音权限');
+                        this.setData({ permissionDenied: false });
+                        resolve(true);
+                    }
+                },
+                fail: (err) => {
+                    console.error('[checkRecordPermission] 获取设置失败:', err);
+                    reject('获取设置失败');
+                }
+            });
+        });
+    },
+    
+    showPermissionDialog() {
+        wx.showModal({
+            title: '需要录音权限',
+            content: '朗读练习需要使用麦克风。请在设置中允许小程序使用麦克风权限。',
+            confirmText: '去设置',
+            showCancel: true,
+            cancelText: '取消',
             success: (res) => {
-                if (!res.authSetting['scope.record']) {
-                    console.log('朗读页面：未获取权限，尝试请求');
-                    wx.authorize({
-                        scope: 'scope.record',
-                        success: () => {
-                            console.log('录音权限授权成功');
-                        },
-                        fail: () => {
-                            console.error('用户拒绝录音权限');
-                            wx.showModal({
-                                title: '提示',
-                                content: '朗读练习需要录音权限才能进行。',
-                                confirmText: '去设置',
-                                cancelText: '取消',
-                                success: (mr) => {
-                                    if (mr.confirm) wx.openSetting();
-                                    else wx.showToast({ title: '未授权无法朗读', icon: 'none' });
-                                }
-                            });
+                if (res.confirm) {
+                    wx.openSetting({
+                        success: (res) => {
+                            if (res.authSetting['scope.record']) {
+                                this.setData({ permissionDenied: false });
+                                wx.showToast({
+                                    title: '已获得录音权限',
+                                    icon: 'success'
+                                });
+                            }
                         }
                     });
-                } else {
-                    console.log('朗读页面：已获取录音权限');
                 }
-            },
-            fail: (err) => {
-                console.error('检查权限设置失败:', err);
             }
         });
     },
 
     initRecord() {
-        manager.onRecognize = (res) => {
-            console.log('[onRecognize Callback] Triggered. Result:', JSON.stringify(res));
-            if (res.result) {
-                console.log('[onRecognize] 识别结果:', res.result);
-            }
-        };
+        console.log('[initRecord] 初始化录音管理器');
+        
+        if (!manager) {
+            console.error('[initRecord] 录音管理器不存在');
+            this.resetRecordManager();
+            return;
+        }
 
-        manager.onStop = (res) => {
-            console.log('[onStop Callback] Triggered. Result:', JSON.stringify(res));
-            wx.hideLoading();
-            if (this.recordTimer) {
-                clearInterval(this.recordTimer);
-                this.recordTimer = null;
-            }
-            if (this.waveTimer) {
-                clearInterval(this.waveTimer);
-                this.waveTimer = null;
-                this.setData({ waveHeights: [] });
-            }
-            this.setData({ recordStatus: 'processing' });
-            if (res.result) {
-                console.log('[onStop] 结果有效，调用评估');
-                this.evaluateReading(this.data.article.content, res.result);
-            } else {
-                console.error('[onStop Callback] 结果无效或为空');
+        // 如果已经在录音，先停止
+        if (this.data.recordStatus === 'recording') {
+            console.log('[initRecord] 正在录音中，先停止');
+            this.stopRecording();
+        }
+        
+        try {
+            console.log('[initRecord] 使用已有录音管理器');
+            
+            // 设置录音管理器事件回调
+            manager.onStart = (res) => {
+                console.log('[onStart Callback] 录音开始');
+                wx.hideLoading();
+                this.setData({ recordStatus: 'recording' });
+                this.startRecordTimer();
+            };
+            
+            manager.onRecognize = (res) => {
+                console.log('[onRecognize Callback] 触发，结果:', JSON.stringify(res));
+                if (res.result) {
+                    console.log('[onRecognize] 识别结果:', res.result);
+                }
+            };
+
+            manager.onStop = (res) => {
+                console.log('[onStop Callback] 触发，结果:', JSON.stringify(res));
+                wx.hideLoading();
+                if (this.recordTimer) {
+                    clearInterval(this.recordTimer);
+                    this.recordTimer = null;
+                }
+                if (this.data.waveTimer) {
+                    clearInterval(this.data.waveTimer);
+                    this.setData({ waveTimer: null, waveHeights: [] });
+                }
+                this.setData({ recordStatus: 'processing' });
+                if (res.result) {
+                    console.log('[onStop] 结果有效，调用评估');
+                    this.evaluateReading(this.data.article.content, res.result);
+                } else {
+                    console.error('[onStop Callback] 结果无效或为空');
+                    this.setData({ recordStatus: 'idle' });
+                    wx.showToast({ title: '未能识别到有效语音', icon: 'none' });
+                }
+            };
+
+            manager.onError = (res) => {
+                console.error('[onError Callback] 触发，错误:', JSON.stringify(res));
+                wx.hideLoading();
+                if (this.recordTimer) {
+                    clearInterval(this.recordTimer);
+                    this.recordTimer = null;
+                }
+                if (this.data.waveTimer) {
+                    clearInterval(this.data.waveTimer);
+                    this.setData({ waveTimer: null, waveHeights: [] });
+                }
+                
+                // 特定错误处理
+                let errorMsg = '录音出错，请重试';
+                let needRetry = false;
+                let needReset = false;
+                
+                switch (res.retcode) {
+                    case -30008:
+                        errorMsg = '网络连接不稳定，请检查网络';
+                        console.log('[onError] WebSocket连接失败，尝试重新连接');
+                        needRetry = true;
+                        break;
+                    case -30001:
+                        errorMsg = '录音失败，请检查麦克风权限';
+                        needReset = true; // 需要完全重置录音管理器
+                        this.checkRecordPermission(); // 重新检查权限
+                        break;
+                    case -30003:
+                        errorMsg = '录音时间过短';
+                        needRetry = false;
+                        break;
+                    case -30012:
+                        errorMsg = '录音状态异常，请重试';
+                        needReset = true;
+                        break;
+                    default:
+                        errorMsg = `录音错误: ${res.msg || '未知错误'}`;
+                        needRetry = true;
+                }
+                
                 this.setData({ recordStatus: 'idle' });
-                wx.showToast({ title: '未能识别到有效语音', icon: 'none' });
-            }
-        };
+                wx.showToast({ 
+                    title: errorMsg, 
+                    icon: 'none',
+                    duration: 2000
+                });
+                
+                if (needReset) {
+                    console.log('[onError] 需要重置录音管理器');
+                    setTimeout(() => this.resetRecordManager(), 500);
+                } else if (needRetry && this.retryCount < 2) {
+                    console.log(`[onError] 尝试重新初始化录音管理器，第${this.retryCount + 1}次重试`);
+                    this.retryCount++;
+                    setTimeout(() => {
+                        // 确保状态是 idle 才重试
+                        if (this.data.recordStatus === 'idle') {
+                            this.initRecord();
+                        }
+                    }, 1000);
+                } else {
+                    this.retryCount = 0;
+                }
+            };
+            
+            console.log('朗读页面语音识别回调初始化完成');
+        } catch (err) {
+            console.error('[initRecord] 初始化录音管理器失败:', err);
+            wx.showToast({
+                title: '初始化录音失败，请重启小程序',
+                icon: 'none',
+                duration: 2000
+            });
+        }
+    },
 
-        manager.onError = (res) => {
-            console.error('[onError Callback] Triggered. Error:', JSON.stringify(res));
-            wx.hideLoading();
+    startRecording() {
+        console.log('[startRecording] 准备开始朗读录音和识别');
+        
+        // 检查当前状态
+        if (this.data.recordStatus !== 'idle') {
+            console.warn('[startRecording] 当前状态不是 idle，无法开始录音');
+            return;
+        }
+        
+        const article = this.data.article;
+        if (!article || !article.content) {
+            console.error('[startRecording] 文章数据不完整');
+            wx.showToast({ title: '文章加载不完整', icon: 'none' });
+            return;
+        }
+        
+        // 重置重试计数
+        this.retryCount = 0;
+
+        // 先检查录音权限
+        this.checkRecordPermission().then(() => {
+            // 再检查网络状态
+            wx.getNetworkType({
+                success: (res) => {
+                    if (res.networkType === 'none') {
+                        console.error('[startRecording] 无网络连接');
+                        wx.showToast({ 
+                            title: '请检查网络连接', 
+                            icon: 'none',
+                            duration: 2000
+                        });
+                        return;
+                    }
+
+                    // 确保录音管理器存在且初始化成功
+                    if (!manager) {
+                        console.error('[startRecording] 录音管理器不存在，重置');
+                        this.resetRecordManager();
+                        wx.showToast({ 
+                            title: '录音初始化中，请稍后再试', 
+                            icon: 'none',
+                            duration: 2000
+                        });
+                        return;
+                    }
+
+                    const language = article.language === 'zh' ? 'zh_CN' : 'en_US';
+                    console.log(`[startRecording] 文章语言: ${article.language}, 识别语言: ${language}`);
+                    
+                    this.setData({
+                        recordStatus: 'idle', // 先设为 idle，由 onStart 回调设为 recording
+                        recordTime: 0,
+                        readingResult: {
+                            score: 0,
+                            flowers: [],
+                            feedback: '',
+                            correctWords: 0,
+                            totalWords: 0,
+                            accuracy: 0,
+                            contentWithErrors: '',
+                            recognizedText: ''
+                        },
+                        showResult: false
+                    });
+
+                    wx.showLoading({ title: '准备录音...' });
+                    
+                    try {
+                        console.log('[startRecording] Starting manager...');
+                        manager.start({ 
+                            lang: language,
+                            duration: 30000,  // 最长录音时间调整为 30 秒
+                            format: 'mp3',
+                            sampleRate: 16000,
+                            frameSize: 4  // 降低帧大小，减少数据量
+                        });
+                        console.log('[startRecording] Manager started successfully.');
+                        // 注意：不要在这里启动计时器，等 onStart 回调再启动
+                    } catch (error) {
+                        console.error('[startRecording] 启动录音失败:', error);
+                        wx.hideLoading();
+                        wx.showToast({ 
+                            title: `启动录音失败: ${error.errMsg || '请重试'}`, 
+                            icon: 'none',
+                            duration: 2000
+                        });
+                        this.setData({ recordStatus: 'idle' });
+                        // 出错时重置录音管理器
+                        setTimeout(() => this.resetRecordManager(), 500);
+                    }
+                },
+                fail: (err) => {
+                    console.error('[startRecording] 获取网络状态失败:', err);
+                    wx.showToast({ 
+                        title: '网络状态检查失败', 
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            });
+        }).catch(err => {
+            console.error('[startRecording] 权限检查失败:', err);
+            this.setData({ recordStatus: 'idle' });
+        });
+    },
+
+    stopRecording() {
+        console.log('[stopRecording] 准备停止录音');
+        if (this.data.recordStatus !== 'recording') {
+            console.warn('[stopRecording] 非录音状态');
+            return;
+        }
+
+        try {
+            if (!manager) {
+                console.error('[stopRecording] 录音管理器不存在');
+                this.setData({ recordStatus: 'idle' });
+                return;
+            }
+            
+            console.log('[stopRecording] Calling manager.stop()');
+            manager.stop();
+            console.log('[stopRecording] manager.stop() called.');
             if (this.recordTimer) {
                 clearInterval(this.recordTimer);
                 this.recordTimer = null;
             }
-            if (this.waveTimer) {
-                clearInterval(this.waveTimer);
-                this.waveTimer = null;
-                this.setData({ waveHeights: [] });
+            wx.showLoading({ title: '正在识别...' });
+        } catch (error) {
+            console.error('[stopRecording] 调用 manager.stop() 失败:', error);
+            wx.hideLoading();
+            wx.showToast({ 
+                title: `停止录音失败: ${error.errMsg || '请重试'}`, 
+                icon: 'none',
+                duration: 2000
+            });
+            if (this.recordTimer) {
+                clearInterval(this.recordTimer);
+                this.recordTimer = null;
             }
             this.setData({ recordStatus: 'idle' });
-            wx.showToast({ title: `识别错误: ${res.msg}`, icon: 'none' });
-            this.cleanupReading();
-        };
-        console.log('朗读页面语音识别回调初始化完成');
+            
+            // 出错时重置录音管理器
+            setTimeout(() => this.resetRecordManager(), 500);
+        }
+    },
+
+    onUnload() {
+        console.log('[reading.js onUnload] 页面卸载');
+        // 先停止录音
+        if (this.data.recordStatus === 'recording') {
+            this.stopRecording();
+        }
+        
+        // 清理定时器
+        if (this.recordTimer) {
+            clearInterval(this.recordTimer);
+            this.recordTimer = null;
+        }
+        if (this.data.waveTimer) {
+            clearInterval(this.data.waveTimer);
+            this.setData({ waveTimer: null });
+        }
+        
+        // 停止音频上下文
+        if (this.audioContext) {
+            this.audioContext.stop();
+            this.audioContext.destroy();
+        }
+        
+        // 停止录音管理器
+        if (manager) {
+            try {
+                manager.stop();
+                // 重置所有回调
+                manager.onRecognize = null;
+                manager.onStop = null;
+                manager.onStart = null;
+                manager.onError = null;
+                manager = null;
+            } catch (e) {
+                console.error('[onUnload] 停止录音管理器失败:', e);
+            }
+        }
     },
 
     // --- 范读功能 ---
@@ -287,40 +602,111 @@ Page({
                 recordHint: '正在播放标题...'
             });
         } else {
-            this.setData({ 
+    this.setData({
                 isPlayingReading: true,
                 recordStatus: 'idle',
                 recordHint: '正在播放内容...'
             });
         }
         
-        this.synthesizeSpeech(chunk);
+        this.synthesizeSpeech(chunk, this.data.article.language, this.retryCount);
     },
 
-    synthesizeSpeech(text) {
+    synthesizeSpeech(text, language, retryCount = 0) {
         if (!text) {
             console.error('[synthesizeSpeech] 文本为空');
             return;
         }
         
-        plugin.textToSpeech({
-            lang: this.data.article.language === 'zh' ? 'zh_CN' : 'en_US',
-            content: text,
+        const maxRetries = 2; // 最大重试次数
+        const plugin = requirePlugin("WechatSI");
+        
+        // 检查网络连接
+        wx.getNetworkType({
             success: (res) => {
-                console.log('[synthesizeSpeech] 语音合成成功');
-                if (res.filename) {
-                    this.audioContext.src = res.filename;
-                    this.audioContext.play();
-                } else {
-                    console.error('[synthesizeSpeech] 未获取到音频文件');
-                    wx.showToast({ title: '语音合成失败', icon: 'none' });
-                    this.cleanupReading();
+                if (res.networkType === 'none') {
+                    console.error('[synthesizeSpeech] 无网络连接');
+                    wx.showToast({ 
+                        title: '网络连接不可用', 
+                        icon: 'none',
+                        duration: 2000
+                    });
+                    this.stopReadingPlayback();
+                    return;
                 }
+                
+                // 显示加载提示（只在第一个块时显示）
+                if (this.currentReadingChunkIndex === 0 && retryCount === 0) {
+                    wx.showLoading({ title: '正在准备朗读...' });
+                }
+                
+                plugin.textToSpeech({
+                    lang: language === 'zh' ? 'zh_CN' : 'en_US',
+                    tts: true,
+                    content: text,
+                    success: (res) => {
+                        wx.hideLoading();
+                        if (this.isReadingStopped) {
+                            console.log('[synthesizeSpeech] 合成成功但已停止播放');
+                            this.cleanupReading();
+                            return;
+                        }
+                        
+                        console.log('[synthesizeSpeech] 语音合成成功');
+                        if (res.filename) {
+                            this.audioContext.src = res.filename;
+                            this.audioContext.play();
+                        } else {
+                            console.error('[synthesizeSpeech] 未获取到音频文件');
+                            wx.showToast({ title: '语音合成失败', icon: 'none' });
+                            // 合成失败时，继续下一块文本
+                            this.currentReadingChunkIndex++;
+                            this.startReadingFlow();
+                        }
+                    },
+                    fail: (err) => {
+                        wx.hideLoading();
+                        console.error(`[synthesizeSpeech] 语音合成失败: ${JSON.stringify(err)}`);
+                        
+                        // 网络错误时尝试重试
+                        if (err.retcode === -20005 && retryCount < maxRetries) {  // 网络错误
+                            console.log(`[synthesizeSpeech] 网络错误，尝试重试 ${retryCount + 1}/${maxRetries}`);
+                            setTimeout(() => {
+                                this.synthesizeSpeech(text, language, retryCount + 1);
+                            }, 1000);  // 延迟1秒后重试
+                            return;
+                        }
+                        
+                        // 多次重试失败或其他错误
+                        if (retryCount >= maxRetries) {
+                            wx.showToast({
+                                title: '网络不稳定，朗读失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        } else {
+                            wx.showToast({
+                                title: '语音合成失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                        
+                        // 出错时仍继续下一块
+                        this.currentReadingChunkIndex++;
+                        this.startReadingFlow();
+                    }
+                });
             },
-            fail: (res) => {
-                console.error('[synthesizeSpeech] 语音合成失败:', res);
-                wx.showToast({ title: '语音合成失败', icon: 'none' });
-                this.cleanupReading();
+            fail: (err) => {
+                console.error('[synthesizeSpeech] 获取网络状态失败', err);
+                wx.hideLoading();
+                wx.showToast({
+                    title: '网络状态检查失败',
+                    icon: 'none',
+                    duration: 2000
+                });
+                this.stopReadingPlayback();
             }
         });
     },
@@ -368,74 +754,7 @@ Page({
     }
   },
   
-  startRecording() {
-        console.log('[startRecording] 准备开始朗读录音和识别');
-        const article = this.data.article;
-        if (!article || !article.content) {
-            console.error('[startRecording] 文章数据不完整');
-            wx.showToast({ title: '文章加载不完整', icon: 'none' });
-            return;
-        }
-        const language = article.language === 'zh' ? 'zh_CN' : 'en_US';
-        console.log(`[startRecording] 文章语言: ${article.language}, 识别语言: ${language}`);
-    this.setData({
-      recordStatus: 'recording',
-            recordTime: 0,
-            readingResult: {
-                score: 0,
-                flowers: [],
-                feedback: '',
-                correctWords: 0,
-                totalWords: 0,
-                accuracy: 0,
-                contentWithErrors: '',
-                recognizedText: ''
-            },
-            showResult: false
-        });
-        wx.showLoading({ title: '准备录音...' });
-        try {
-            console.log('[startRecording] Starting manager...');
-            manager.start({ lang: language });
-            console.log('[startRecording] Manager started successfully.');
-            this.startRecordTimer();
-            wx.hideLoading();
-        } catch (error) {
-            console.error('[startRecording] 启动录音失败:', error);
-            wx.hideLoading();
-            wx.showToast({ title: `启动录音失败: ${error.errMsg || '请重试'}`, icon: 'none' });
-            this.setData({ recordStatus: 'idle' });
-        }
-    },
-
-    stopRecording() {
-        console.log('[stopRecording] 准备停止录音');
-        if (this.data.recordStatus !== 'recording') {
-            console.warn('[stopRecording] 非录音状态');
-            return;
-        }
-        try {
-            console.log('[stopRecording] Calling manager.stop()');
-            manager.stop();
-            console.log('[stopRecording] manager.stop() called.');
-            if (this.recordTimer) {
-                clearInterval(this.recordTimer);
-                this.recordTimer = null;
-            }
-            wx.showLoading({ title: '正在识别...' });
-        } catch (error) {
-            console.error('[stopRecording] 调用 manager.stop() 失败:', error);
-            wx.hideLoading();
-            wx.showToast({ title: `停止录音失败: ${error.errMsg || '请重试'}`, icon: 'none' });
-            if (this.recordTimer) {
-                clearInterval(this.recordTimer);
-                this.recordTimer = null;
-            }
-            this.setData({ recordStatus: 'idle' });
-        }
-    },
-
-    startRecordTimer() {
+  startRecordTimer() {
         console.log('[startRecordTimer] 启动朗读录音计时器');
         if (this.recordTimer) {
             clearInterval(this.recordTimer);
@@ -690,5 +1009,19 @@ Page({
         showResult: true,
         recordStatus: 'idle'
       });
-  }
+  },
+
+    stopReadingPlayback() {
+        console.log('[stopReadingPlayback] 停止朗读播放');
+        this.isReadingStopped = true;
+        
+        if (this.audioContext) {
+            this.audioContext.stop();
+        }
+        
+        this.setData({ isPlayingReading: false });
+        this.cleanupReading();
+        
+        wx.hideLoading();
+    }
 });

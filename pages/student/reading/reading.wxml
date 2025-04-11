@@ -16,7 +16,26 @@
   -->
   
   <view class="article-content">
-    <text user-select="true">{{article.content}}</text>
+    <text>{{article.content}}</text>
+  </view>
+  
+  <text-recorder
+    id="textRecorder"
+    language="{{article.language || 'zh'}}"
+    maxDuration="60"
+    bind:start="startRecording"
+    bind:stop="handleRecordStop"
+    bind:error="handleRecordError"
+    hidden="{{true}}"
+  />
+  
+  <view class="record-section">
+    <view class="record-button {{recordingStatus === 'recording' ? 'recording' : ''}}" bindtap="startRecording">
+      <text>{{recordingStatus === 'recording' ? '停止录音' : '开始录音'}}</text>
+    </view>
+    <view class="record-timer" wx:if="{{recordingStatus === 'recording'}}">
+      <text>{{recordingDuration}}秒</text>
+    </view>
   </view>
   
   <!-- 添加文章长度信息 -->
