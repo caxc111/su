@@ -16,26 +16,7 @@
   -->
   
   <view class="article-content">
-    <text>{{article.content}}</text>
-  </view>
-  
-  <text-recorder
-    id="textRecorder"
-    language="{{article.language || 'zh'}}"
-    maxDuration="60"
-    bind:start="startRecording"
-    bind:stop="handleRecordStop"
-    bind:error="handleRecordError"
-    hidden="{{true}}"
-  />
-  
-  <view class="record-section">
-    <view class="record-button {{recordingStatus === 'recording' ? 'recording' : ''}}" bindtap="startRecording">
-      <text>{{recordingStatus === 'recording' ? '停止录音' : '开始录音'}}</text>
-    </view>
-    <view class="record-timer" wx:if="{{recordingStatus === 'recording'}}">
-      <text>{{recordingDuration}}秒</text>
-    </view>
+    <text user-select="true">{{article.content}}</text>
   </view>
   
   <!-- 添加文章长度信息 -->
@@ -70,15 +51,9 @@
     
     <!-- 修改：将播放范读按钮和录音按钮放在一行 -->
     <view class="control-buttons-row">
-		<!-- 播放/停止范读按钮 -->
-		<!-- 播放/停止范读按钮 -->
-		<button
-		  class="action-btn standard-audio {{ isPlayingReading ? 'playing' : '' }}"
-		  bindtap="{{ isPlayingReading ? 'handleStopReading' : 'handlePlayReading' }}"
-		  disabled="{{ isLoading || recordStatus === 'recording' || recordStatus === 'processing' }}"
->
-			{{ isPlayingReading ? '停止范读' : '播放范读' }}
-		</button>
+      <button class="action-btn standard-audio" bindtap="playStandardAudio" disabled="{{recordStatus !== 'idle'}}">
+        播放范读
+      </button>
       <!-- 替换为新的朗读录音/停止录音按钮 -->
       <button 
         class="action-btn record-self {{recordStatus === 'recording' ? 'recording' : ''}}" 

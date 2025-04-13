@@ -446,25 +446,17 @@
 
 /* --- 添加评分结果错误标记样式 --- */
 /* 错误文本样式 */
-.error-content .error {
+.error { /* 直接选择 .error 类 */
   color: red; /* 设置为红色 */
   /* 可以根据需要取消注释或添加其他样式 */
   /* text-decoration: underline; */
   /* font-weight: bold; */
 }
 
-/* 正确文本样式 (可选) */
-.error-content .correct {
+/* 正确文本样式 */
+.correct { /* 直接选择 .correct 类 */
   /* color: inherit; */ /* 保持默认颜色 */
   /* 或者设置为绿色： */
    color: green; 
 }
 /* ------------------------------ */
-
-/* 语音识别组件样式 */
-.voice-recognition-container {
-  width: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}

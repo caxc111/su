@@ -1,6 +1,4 @@
 {
   "navigationBarTitleText": "朗读练习",
-  "usingComponents": {
-    "text-recorder": "/components/text-recorder/text-recorder"
-  }
+  "usingComponents": {}
 }

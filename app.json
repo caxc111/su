@@ -8,8 +8,7 @@
     "pages/student/history/detail",
     "pages/student/profile/profile",
     "pages/article-input/article-input",
-    "pages/demo-text-processor/demo-text-processor",
-    "pages/voice-test/voice-test"
+    "pages/demo-text-processor/demo-text-processor"
   ],
   "window": {
     "backgroundTextStyle": "dark",

@@ -2,9 +2,9 @@
 .voice-recognition {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: center;
   width: 100%;
-  padding: 60rpx 0;
+  padding: 20rpx 0;
 }
 
 /* 头部样式 */
@@ -34,22 +34,21 @@
   display: flex;
   justify-content: center;
   gap: 20rpx;
-  margin-bottom: 80rpx;
 }
 
-.language-switcher view {
+.lang-btn {
   padding: 10rpx 30rpx;
-  border: 1px solid #7AC23D;
+  border: 1px solid #ccc;
   border-radius: 30rpx;
   font-size: 26rpx;
-  color: #7AC23D;
+  color: #555;
   background-color: #fff;
 }
 
-.language-switcher view.active {
-  background-color: #7AC23D;
+.lang-btn.active {
+  background-color: #42a5e2;
   color: #fff;
-  border-color: #7AC23D;
+  border-color: #42a5e2;
 }
 
 /* 录音按钮区域 */
@@ -58,7 +57,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-bottom: 40rpx;
+  margin-bottom: 40rpx;
 }
 
 .record-status-text {
@@ -72,25 +71,24 @@
   width: 160rpx;
   height: 160rpx;
   border-radius: 80rpx;
-  background-color: transparent;
+  background-color: #42a5e2;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-bottom: 130rpx;
-  box-shadow: none;
+  margin-bottom: 20rpx;
+  box-shadow: 0 6rpx 12rpx rgba(66, 165, 226, 0.3);
   transition: all 0.3s;
 }
 
 .record-button.recording {
-  background-color: transparent;
+  background-color: #e25842;
   transform: scale(1.1);
-  box-shadow: none;
+  box-shadow: 0 8rpx 16rpx rgba(226, 88, 66, 0.4);
 }
 
-.mic-icon {
-  width: 60rpx;
-  height: 60rpx;
-  margin-top: 300rpx;
+.record-icon {
+  width: 80rpx;
+  height: 80rpx;
 }
 
 .record-tip {
@@ -102,7 +100,7 @@
 
 /* 识别结果区域 */
 .result-area {
-  width: 100%;
+  width: 90%;
   background-color: #fff;
   border-radius: 20rpx;
   padding: 30rpx;
@@ -118,10 +116,15 @@
 }
 
 .result-text {
-  min-height: 400rpx;
-  color: #333;
-  font-size: 32rpx;
+  font-size: 28rpx;
+  color: #555;
   line-height: 1.6;
+  border-left: 6rpx solid #42a5e2;
+  padding-left: 20rpx;
+  background-color: #f9f9f9;
+  padding: 20rpx;
+  border-radius: 10rpx;
+  margin-bottom: 20rpx;
 }
 
 .clear-result {

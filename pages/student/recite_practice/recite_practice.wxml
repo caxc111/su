@@ -120,9 +120,3 @@
     autoPlay="{{true}}"
   />
 </view>
-<!-- 其他 WXML 代码 -->
-
-<!-- [临时调试按钮] -->
-<button type="warn" bindtap="debugCompareTexts" style="margin: 20px;">测试 compareTexts</button>
-
-<!-- 其他 WXML 代码 -->

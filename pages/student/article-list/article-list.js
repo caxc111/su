@@ -105,7 +105,7 @@ Page({
       url: '../reading/reading?id=' + articleId
     });
   },
-  
+
   // 跳转到历史记录页面
   goToHistory: function() {
     wx.navigateTo({
@@ -120,7 +120,7 @@ Page({
       url: `/pages/student/reading/reading?id=${articleId}`
     });
   },
-  
+
   // 添加开始背诵练习函数 (确保位置正确)
   startRecitePractice(e) {
     const articleId = e.currentTarget.dataset.id;

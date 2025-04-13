@@ -73,6 +73,6 @@
   </view>
   
   <view class="empty-tip" wx:if="{{articles.length === 0}}">
-	  请点击“添加文章”添加文本
+    暂时没有{{selectedLanguage === 'zh' ? '中文' : selectedLanguage === 'en' ? '英文' : ''}}文章，请等待家长添加
   </view>
 </view>

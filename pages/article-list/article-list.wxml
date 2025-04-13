@@ -74,9 +74,9 @@
 
   <!-- 如果没有文章显示提示 -->
   <view class="empty-tip" wx:if="{{!isLoading && (!filteredArticles || filteredArticles.length === 0)}}">
-    <view>请点击添加文章</view>
-    
-   
+    <view>暂无{{selectedLanguage === 'zh' ? '中文' : selectedLanguage === 'en' ? '英文' : ''}}文章，请下拉刷新重试</view>
+    <view class="refresh-btn" bindtap="loadArticles">点击刷新</view>
+    <view class="restart-btn" bindtap="restartApp">重启小程序</view>
   </view>
   
   <!-- 操作面板 -->
