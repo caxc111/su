@@ -1,9 +1,0 @@
-<!-- components/text-effects/text-effects.wxml -->
-<view class="text-effects" bindtap="handleTap">
-  <!-- 复用flower-display组件 -->
-  <flower-display 
-    id="flower-display"
-    wx:if="{{showFireworks}}"
-    count="{{1}}" 
-  />
-</view> 

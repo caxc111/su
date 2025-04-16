@@ -1,0 +1,318 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 顺口成章小程序开发规范
+
+> 版本：1.0.0
+> 关联规范：
+> - [全局代码规范](mdc:global-code-rules.mdc)
+> - [语音服务规范](mdc:speech-rules.mdc)
+> - [广告服务规范](mdc:ad-rules.mdc)
+
+## 一、项目结构规范
+
+```
+miniprogram/
+├── app.js                 // 小程序入口文件
+├── app.json              // 小程序全局配置
+├── app.wxss             // 小程序全局样式
+├── project.config.json  // 项目配置文件
+├── sitemap.json        // 小程序索引配置
+│
+├── assets/             // 静态资源目录
+│   ├── icons/         // 图标文件
+│   ├── images/        // 图片文件 (最大500KB)
+│   ├── audio/         // 音频文件 (16kHz PCM格式)
+│   └── data/          // 预置课文JSON数据
+│
+├── components/         // 自定义组件
+│   ├── article-item/  // 文章列表项组件
+│   ├── nav-bar/       // 导航栏组件
+│   ├── score-card/    // 得分卡片组件
+│   ├── ad-banner/     // 广告组件
+│   └── progress-bar/  // 进度条组件
+│
+├── libs/              // 第三方库
+│   └── wechat-si/     // 微信同声传译插件
+│
+├── pages/             // 页面文件
+│   ├── index/        // 首页(练习页)
+│   ├── login/        // 登录页
+│   ├── record/       // 记录页
+│   ├── profile/      // 我的页面
+│   ├── reading/      // 朗读练习页
+│   └── reciting/     // 背诵练习页
+│
+├── services/          // 服务层
+│   ├── speech/              // 语音服务
+│   │   ├── speech.service.ts  // 核心实现
+│   │   ├── speech.config.ts   // 配置参数
+│   │   ├── speech.cache.ts    // 缓存管理
+│   │   └── speech.types.ts    // 类型定义
+│   ├── auth.service.js       // 登录授权服务
+│   ├── storage.service.js    // 数据存储服务
+│   └── ad.service.js         // 广告服务
+│
+└── utils/            // 工具函数
+    ├── constant.js   // 常量定义
+    ├── http.js      // 网络请求
+    ├── text-diff.js  // 文本比对算法
+    └── validator.js  // 数据验证器
+```
+
+## 二、代码规范
+
+### 1. 文件行数限制
+遵循[全局代码规范](mdc:global-code-rules.mdc)中的规定：
+- 页面文件(.js/.ts)：建议500行内，最大800行
+- 组件文件：建议400行内，最大600行
+- 工具类文件：建议300行内，最大500行
+- 配置文件：建议200行内，最大300行
+
+### 2. 命名规范
+详细命名规范请参考[全局代码规范](mdc:global-code-rules.mdc)，主要包括：
+- 文件夹命名：kebab-case
+- 服务类文件：使用.service.js或.service.ts后缀
+- 组件文件：kebab-case
+- 变量命名：camelCase
+- 组件命名：PascalCase
+- CSS类名：BEM命名规范
+
+## 三、命名规范
+
+### 1. 文件命名
+- 页面文件夹：kebab-case，如：`article-list`
+- 组件文件夹：kebab-case，如：`nav-bar`
+- JS/TS文件：kebab-case，如：`auth-service.js`
+- 工具类文件：camelCase，如：`textUtil.js`
+- 服务层文件：使用.service.js或.service.ts后缀，如：`auth.service.js`、`speech.service.ts`
+
+### 2. 变量命名
+- 变量：camelCase，如：`userInfo`
+- 常量：UPPER_SNAKE_CASE，如：`MAX_FILE_SIZE`
+- 组件：PascalCase，如：`ArticleItem`
+- 私有变量：下划线开头，如：`_privateVar`
+- 类：PascalCase，如：`SpeechService`
+
+### 3. CSS类名
+- 采用BEM命名规范
+- 块：kebab-case，如：`.article-card`
+- 元素：双下划线，如：`.article-card__title`
+- 修饰符：双中划线，如：`.article-card--featured`
+
+## 四、数据存储规范
+
+### 1. 存储结构
+```javascript
+wx.setStorageSync('DB', {
+  // 版本控制
+  "version": "1.0.0",
+  
+  // 用户数据
+  "users": {
+    [openid]: {
+      "nickName": "学生A",
+      "customArticles": ["U123-456"],
+      "studyRecords": [
+        {
+          "articleId": "CH3-001",
+          "accuracy": 85,
+          "timestamp": 1690000000
+        }
+      ]
+    }
+  },
+  
+  // 广告配置
+  "adConfig": {
+    "lastFetchTime": 1690000000,
+    "placements": {
+      "banner": ["adunit-123"]
+    }
+  }
+})
+```
+
+### 2. 存储Key规范
+| Key名称 | 类型 | 说明 |
+|---------|------|------|
+| DB | Object | 主数据库 |
+| LAST_LOGIN_TIME | Number | 最后登录时间戳 |
+| DEVICE_ID | String | 设备唯一标识 |
+
+## 五、语音处理规范
+
+语音处理相关的详细规范请参考 [语音服务规范](mdc:speech-rules.mdc)，包含：
+- 语音服务架构
+- 录音规范
+- 语音合成规范
+- 错误处理规范
+- 性能优化规范
+- 使用示例
+
+## 六、编码规范
+
+### 1. JavaScript规范
+- 使用ES6+语法
+- 使用async/await处理异步
+- 避免全局变量
+- 函数单一职责
+- 适当添加注释
+
+```javascript
+// 推荐写法
+async function getUserInfo() {
+  try {
+    const res = await wx.getUserProfile({
+      desc: '用于完善用户资料'
+    });
+    return res.userInfo;
+  } catch (err) {
+    console.error('获取用户信息失败:', err);
+    return null;
+  }
+}
+```
+
+### 2. WXML规范
+- 保持结构清晰
+- 适当使用注释
+- 组件属性换行对齐
+- 避免过深的节点嵌套
+
+### 3. WXSS规范
+- 避免使用内联样式
+- 使用class而非id
+- 合理使用flex布局
+- 统一使用rpx单位
+
+## 七、性能规范
+
+### 1. 页面性能
+- 合理使用分包加载
+- 避免不必要的setData
+- 及时销毁定时器和事件监听
+- 合理使用组件生命周期
+
+### 2. 存储性能
+- 避免存储大量数据
+- 及时清理临时数据
+- 合理使用分页加载
+- 定期清理缓存
+
+### 3. 网络性能
+- 合理使用缓存
+- 避免频繁请求
+- 使用节流和防抖
+- 请求错误重试机制
+
+## 八、安全规范
+
+### 1. 数据安全
+- 敏感信息加密存储
+- 及时清理敏感数据
+- 使用wx.getStorageSync的异常处理
+
+### 2. 接口安全
+- 使用HTTPS
+- 添加请求签名
+- 防重放攻击
+- 错误信息脱敏
+
+## 九、广告模块规范
+
+广告服务相关的详细规范请参考 [广告服务规范](mdc:ad-rules.mdc)，包含：
+- 广告服务架构
+- 广告类型定义
+- 广告服务实现
+- 广告展示规则
+- 错误处理规范
+- 性能优化规范
+- 使用示例
+
+## 十、文档规范
+
+### 1. 注释规范
+- 组件必须包含注释
+- 复杂逻辑必须注释
+- 公共函数必须注释
+- 适当添加TODO注释
+
+### 2. 文档要求
+- README.md项目说明
+- CHANGELOG.md更新日志
+- API文档及示例
+- 组件使用说明
+
+## 十一、UI设计规范
+
+### 1. 品牌色彩
+- 主色调
+  - 浅绿色：`#8ce552` - 用于主要按钮、重要文字、强调元素
+  - 橙色：`#f97316` - 用于标注、提示、得分显示等
+
+### 2. 颜色使用规范
+- 浅绿色（#8ce552）使用场景：
+  - 主操作按钮背景色
+  - 重要链接文字
+  - 选中状态指示
+  - 成功状态提示
+  - 进度条等进度指示
+
+- 橙色（#f97316）使用场景：
+  - 得分数字显示
+  - 重要提示文字
+  - 警告信息
+  - 标签背景
+  - 次要按钮
+
+### 3. 颜色变量
+```css
+:root {
+  --primary-green: #8ce552;
+  --primary-orange: #f97316;
+  --primary-green-hover: #7ed441;
+  --primary-orange-hover: #ea6c0f;
+}
+```
+
+### 4. 使用示例
+```html
+<!-- 按钮示例 -->
+<button class="btn-primary">开始练习</button>
+<button class="btn-secondary">查看记录</button>
+
+<!-- 文字示例 -->
+<text class="score-text">98</text>
+<text class="success-text">朗读成功</text>
+```
+
+```css
+.btn-primary {
+  background-color: var(--primary-green);
+}
+
+.btn-secondary {
+  background-color: var(--primary-orange);
+}
+
+.score-text {
+  color: var(--primary-orange);
+}
+
+.success-text {
+  color: var(--primary-green);
+}
+```
+
+### 5. 无障碍设计
+- 确保文字在不同背景色上的对比度符合WCAG 2.0标准
+- 不依赖颜色来传达重要信息，应配合使用图标或文字
+- 为色盲用户提供备选的视觉提示
+
+### 6. 响应式设计
+- 在不同尺寸设备上保持颜色一致性
+- 确保颜色在不同光线条件下的可识别性
+- 避免使用过于相近的颜色搭配 

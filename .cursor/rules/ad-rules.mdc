@@ -1,0 +1,161 @@
+# 顺口成章小程序广告服务规范
+
+> 版本：1.0.0
+> 关联规范：
+> - [项目开发规范](./project-rules.mdc)
+> - [全局代码规范](./global-code-rules.mdc)
+
+## 一、广告模块架构
+
+### 1. 在项目中的位置
+遵循[项目开发规范](./project-rules.mdc)中的目录结构，广告服务位于：
+```
+miniprogram/
+└── services/
+    └── ad.service.js    // 广告服务实现
+```
+
+### 2. 代码规范
+- 遵循[全局代码规范](./global-code-rules.mdc)中的文件行数限制
+- 确保代码注释完整
+- 遵循项目命名规范
+
+### 3. 模块内部结构
+```
+广告服务层
+└── AdService
+    ├── init()            // 初始化预留接口
+    └── showLoginAd()     // 登录前广告展示
+```
+
+## 二、广告服务接口（纯预留）
+
+```typescript
+// services/ad.service.js
+class AdService {
+  /**
+   * 初始化广告服务（预留接口）
+   * @param {object} config - 未来广告配置
+   * @property {string[]} bannerIds - 横幅广告ID数组
+   * @property {string} interstitialId - 插屏广告ID 
+   */
+  init(config = {}) {
+    this._config = {
+      // 硬编码空值，未来替换为实际广告ID
+      bannerIds: [],
+      interstitialId: '',
+      ...config
+    }
+    this._isInitialized = true
+  }
+
+  /**
+   * 登录前广告展示（预留空实现）
+   * @returns {Promise<void>}
+   */
+  showLoginAd() {
+    return new Promise((resolve) => {
+      // 当前为空实现，未来接入广告时替换为：
+      // wx.createInterstitialAd({ adUnitId: this._config.interstitialId }).show()
+      console.log('[AdService] 广告展示预留接口')
+      resolve()
+    })
+  }
+}
+
+export default new AdService()
+```
+
+## 三、广告触发规则
+
+```javascript
+// app.js
+App({
+  onLaunch() {
+    // 初始化空广告服务
+    const adService = require('./services/ad.service')
+    adService.init()
+
+    // 登录前调用预留接口
+    adService.showLoginAd().then(() => {
+      this.doLogin()
+    })
+  },
+  
+  doLogin() {
+    // 实际登录逻辑
+  }
+})
+```
+
+## 四、未来接入规范
+
+### 4.1 广告ID配置（预留）
+```javascript
+// 未来可配置在远程或本地
+{
+  "adUnits": {
+    "interstitial": "adunit-xxxxxx", // 插屏广告ID
+    "banner": ["adunit-yyyyyy"]      // 横幅广告ID数组
+  },
+  "policy": {
+    "showOnLogin": true   // 登录展示开关
+  }
+}
+```
+
+### 4.2 接入步骤说明
+1. 移除ad.service.js中的空实现
+2. 取消注释广告创建代码
+3. 添加实际广告ID配置：
+```javascript
+// 实际接入时的初始化方式
+adService.init({
+  interstitialId: 'adunit-实际广告ID',
+  bannerIds: ['adunit-实际横幅ID']
+})
+```
+
+## 五、注意事项
+
+### 1. 代码规范
+- 遵循[全局代码规范](./global-code-rules.mdc)中的文件行数限制
+- 遵循项目规范中的命名规范
+- 确保代码注释完整
+
+### 2. 当前版本特性
+- 所有广告方法均为空实现
+- 控制台仅输出日志，无实际广告行为
+
+### 3. 未来升级要点
+- 需在showLoginAd()中实现完整广告逻辑
+- 必须添加错误处理：
+```javascript
+showLoginAd() {
+  return new Promise((resolve, reject) => {
+    const ad = wx.createInterstitialAd({ 
+      adUnitId: this._config.interstitialId 
+    })
+    ad.onError(err => reject(err))
+    ad.show().then(resolve)
+  })
+}
+```
+
+### 4. 版本兼容处理
+```javascript
+// 版本检测
+if (version >= '2.0.0') {
+  require('./services/real-ad.service')
+} else {
+  require('./services/dummy-ad.service')
+}
+```
+
+## 六、方案优势
+
+1. 当前版本完全无广告代码侵入
+2. 保留标准化的广告接入点
+3. 提供清晰的未来升级路径
+4. 不增加现有包体积
+5. 不触发微信广告审核要求 

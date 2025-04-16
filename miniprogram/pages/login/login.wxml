@@ -1,0 +1,42 @@
+<view class="login-container">
+  <view class="logo-section">
+    <view class="app-title">顺口成章</view>
+    <view class="app-subtitle">让朗读和背诵更轻松</view>
+  </view>
+
+  <view class="login-section">
+    <!-- 普通登录按钮 - 使用默认用户信息 -->
+    <button 
+      class="login-btn" 
+      bindtap="handleLogin" 
+      loading="{{isLoading}}" 
+      disabled="{{isLoading || !isReady}}"
+      hover-class="login-btn-hover">
+      <image class="wechat-icon" src="/assets/icons/wechat.png" mode="aspectFit"></image>
+      <text class="login-btn-text">微信一键登录</text>
+    </button>
+    
+    <!-- 获取用户信息按钮 - 目前暂不使用，仅保留结构 -->
+    <!-- 未来如果需要获取用户信息，可以解除注释启用 -->
+    <!-- <button 
+      class="profile-btn" 
+      open-type="getUserProfile" 
+      bindgetuserinfo="handleGetUserProfile" 
+      disabled="{{isLoading || !isReady}}"
+      hover-class="profile-btn-hover">
+      授权登录
+    </button> -->
+  </view>
+
+  <view class="footer">
+    <view class="agreement-text">
+      登录即表示同意
+      <text class="link" bindtap="showUserAgreement">《用户协议》</text>
+      和
+      <text class="link" bindtap="showPrivacyPolicy">《隐私政策》</text>
+    </view>
+  </view>
+  
+  <!-- 清除灰蒙版的透明层 -->
+  <view class="clear-overlay"></view>
+</view> 

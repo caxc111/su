@@ -1,0 +1,293 @@
+---
+description: 语音服务板块
+globs: 
+alwaysApply: false
+---
+# 顺口成章小程序语音服务规范
+
+> 版本：1.0.0
+> 关联规范：
+> - [项目开发规范](mdc:project-rules.mdc)
+> - [全局代码规范](mdc:global-code-rules.mdc)
+
+## 一、语音服务架构
+
+### 1. 在项目中的位置
+遵循[项目开发规范](mdc:project-rules.mdc)中的目录结构，语音服务位于：
+```
+miniprogram/
+└── services/
+    └── speech/
+        ├── speech.service.ts      # 语音服务核心类
+        ├── speech.config.ts       # 配置参数
+        ├── speech.cache.ts        # 缓存管理
+        └── speech.types.ts        # 类型定义
+```
+
+### 2. 代码规范
+- 遵循[全局代码规范](mdc:global-code-rules.mdc)中的文件行数限制
+- 使用TypeScript进行开发
+- 确保代码注释完整
+- 遵循项目命名规范
+
+## 二、录音规范
+
+### 1. 录音配置
+```typescript
+interface RecordConfig {
+  format: 'PCM',           // 必须使用PCM格式
+  frameSize: 1,           // 帧大小
+  numberOfChannels: 1,    // 单声道
+  sampleRate: 16000,      // 16kHz采样率
+  encodeBitRate: 96000,   // 编码比特率
+  maxDuration: 600000,    // 最大录音时长(ms)
+}
+
+class RecordManager {
+  private recorder: WechatMiniprogram.RecorderManager;
+  
+  constructor(config: RecordConfig) {
+    this.recorder = wx.getRecorderManager();
+    this.init(config);
+  }
+
+  // 开始录音
+  startRecord(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.recorder.start({
+        ...this.config,
+        success: resolve,
+        fail: reject
+      });
+    });
+  }
+
+  // 停止录音
+  stopRecord(): Promise<string> {
+    return new Promise((resolve, reject) => {
+      this.recorder.stop();
+      this.recorder.onStop((res) => {
+        resolve(res.tempFilePath);
+      });
+    });
+  }
+}
+```
+
+## 三、语音合成规范
+
+### 1. 语音服务类
+```typescript
+class SpeechService {
+  private ttsEngine: any = null;
+  private audioCache: AudioCache;
+
+  constructor() {
+    this.audioCache = new AudioCache();
+  }
+
+  /**
+   * 实时生成语音
+   * @param text - 需要合成的文本
+   * @returns Promise<AudioContext>
+   */
+  async synthesize(text: string): Promise<WechatMiniprogram.InnerAudioContext> {
+    try {
+      // 检查缓存
+      const cached = await this.audioCache.get(text);
+      if (cached) {
+        return this.createAudioContext(cached);
+      }
+
+      // 实时合成
+      const result = await this.generateSpeech(text);
+      await this.audioCache.set(text, result.filename);
+      return this.createAudioContext(result.filename);
+    } catch (error) {
+      throw new SpeechError('SYNTHESIS_FAILED', error.message);
+    }
+  }
+
+  // 销毁实例
+  destroy(): void {
+    this.ttsEngine?.stop();
+    this.ttsEngine = null;
+  }
+}
+```
+
+## 四、缓存管理规范
+
+### 1. 音频缓存类
+```typescript
+class AudioCache {
+  private readonly CACHE_PREFIX = 'SPEECH_CACHE_';
+  private readonly MAX_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
+
+  async set(key: string, audioPath: string): Promise<void> {
+    const cacheKey = this.getCacheKey(key);
+    await wx.setStorage({
+      key: cacheKey,
+      data: audioPath
+    });
+  }
+
+  async get(key: string): Promise<string | null> {
+    try {
+      const cacheKey = this.getCacheKey(key);
+      const value = await wx.getStorage({ key: cacheKey });
+      return value.data;
+    } catch {
+      return null;
+    }
+  }
+
+  async clear(): Promise<void> {
+    const keys = await this.getAllCacheKeys();
+    for (const key of keys) {
+      await wx.removeStorage({ key });
+    }
+  }
+}
+```
+
+## 五、错误处理规范
+
+### 1. 错误类型定义
+```typescript
+enum SpeechErrorType {
+  SYNTHESIS_FAILED = 'SYNTHESIS_FAILED',
+  PLAYBACK_FAILED = 'PLAYBACK_FAILED',
+  CACHE_ERROR = 'CACHE_ERROR',
+}
+
+class SpeechError extends Error {
+  constructor(
+    public type: SpeechErrorType,
+    message: string
+  ) {
+    super(message);
+    this.name = 'SpeechError';
+  }
+}
+```
+
+### 2. 错误处理示例
+```typescript
+try {
+  const audioCtx = await speechService.synthesize(text);
+  audioCtx.play();
+} catch (error) {
+  if (error instanceof SpeechError) {
+    switch (error.type) {
+      case SpeechErrorType.SYNTHESIS_FAILED:
+        wx.showToast({ title: '语音生成失败', icon: 'none' });
+        break;
+      case SpeechErrorType.PLAYBACK_FAILED:
+        wx.showToast({ title: '播放失败', icon: 'none' });
+        break;
+      default:
+        wx.showToast({ title: '未知错误', icon: 'none' });
+    }
+  }
+}
+```
+
+## 六、性能优化规范
+
+### 1. 内存管理
+- 及时销毁不再使用的语音实例
+- 避免同时创建多个语音合成任务
+- 使用完毕后主动调用destroy方法释放资源
+- 页面卸载时确保清理所有语音相关资源
+
+### 2. 缓存策略
+- 优先使用缓存音频，提高响应速度
+- 定期清理过期缓存，控制缓存大小
+- 实现LRU淘汰机制，自动清理最少使用的缓存
+- 支持预加载常用音频
+
+### 3. 并发控制
+- 实现请求队列，避免并发请求
+- 控制单次合成文本长度（建议不超过1000字）
+- 限制同时播放的音频数量
+- 合理设置音频质量和大小
+
+## 七、使用示例
+
+### 1. 页面集成示例
+```typescript
+// pages/reading/reading.ts
+Page({
+  private speechService: SpeechService;
+
+  onLoad() {
+    // 初始化语音服务
+    this.speechService = new SpeechService();
+  }
+
+  onUnload() {
+    // 释放资源
+    this.speechService.destroy();
+  }
+
+  async playArticle(text: string) {
+    try {
+      const audioCtx = await this.speechService.synthesize(text);
+      
+      // 播放音频
+      audioCtx.play();
+      
+      // 注册事件处理
+      audioCtx.onEnded(() => {
+        audioCtx.destroy();
+      });
+      
+      audioCtx.onError((err) => {
+        console.error('播放错误:', err);
+        wx.showToast({
+          title: '播放失败，请重试',
+          icon: 'none'
+        });
+      });
+      
+    } catch (error) {
+      console.error('语音服务错误:', error);
+      wx.showToast({
+        title: error.message,
+        icon: 'none'
+      });
+    }
+  }
+});
+```
+
+### 2. 缓存音频播放示例
+```typescript
+async function playCachedAudio(text: string) {
+  const speechService = new SpeechService();
+  
+  try {
+    // 检查缓存
+    const cached = await speechService.audioCache.get(text);
+    if (cached) {
+      const audioCtx = wx.createInnerAudioContext();
+      audioCtx.src = cached;
+      audioCtx.play();
+      return;
+    }
+    
+    // 缓存不存在，实时合成
+    const audioCtx = await speechService.synthesize(text);
+    audioCtx.play();
+    
+  } catch (error) {
+    console.error('播放失败:', error);
+    wx.showToast({
+      title: '播放失败，请重试',
+      icon: 'none'
+    });
+  } finally {
+    speechService.destroy();
+  }
+} 

@@ -1,0 +1,190 @@
+---
+description: 组件标准
+globs: 
+alwaysApply: false
+---
+---
+description: 需要生成组件的时候引用
+globs: 
+alwaysApply: false
+---
+# 顺口成章小程序组件速查手册
+
+## 一、组件目录结构
+```
+components/
+├── capsule-button/      # 胶囊按钮组件
+│   ├── index.js        # 组件逻辑
+│   ├── index.wxml      # 组件模板
+│   ├── index.wxss      # 组件样式
+│   └── index.json      # 组件配置
+└── README.md           # 组件说明文档
+```
+
+## 二、组件创建模板
+
+### 1. 组件配置（index.json）
+```json
+{
+  "component": true,
+  "usingComponents": {}
+}
+```
+
+### 2. 组件模板（index.wxml）
+```html
+<view class="custom-component">
+  <slot></slot>
+</view>
+```
+
+### 3. 组件逻辑（index.js）
+```js
+Component({
+  // 组件的属性列表
+  properties: {
+    // 属性名
+    propName: {
+      type: String,
+      value: ''
+    }
+  },
+
+  // 组件的初始数据
+  data: {
+    key: value
+  },
+
+  // 组件的方法列表
+  methods: {
+    customMethod() {
+      // 自定义方法
+    }
+  }
+})
+```
+
+### 4. 组件样式（index.wxss）
+```css
+/* 组件样式 */
+.custom-component {
+  /* 样式定义 */
+}
+```
+
+## 三、组件使用方法
+
+### 1. 在页面配置中引入
+```json
+{
+  "usingComponents": {
+    "custom-component": "/components/custom-component/index"
+  }
+}
+```
+
+### 2. 在页面中使用
+```html
+<custom-component prop-name="value">
+  <!-- 内容 -->
+</custom-component>
+```
+
+## 四、组件通信方式
+
+### 1. 属性传值
+```js
+Component({
+  properties: {
+    title: String,
+    showIcon: {
+      type: Boolean,
+      value: false
+    }
+  }
+})
+```
+
+### 2. 事件通信
+```js
+// 组件内部
+Component({
+  methods: {
+    onTap() {
+      this.triggerEvent('customevent', {
+        value: this.data.value
+      })
+    }
+  }
+})
+
+// 使用组件
+<custom-component bind:customevent="handleEvent" />
+```
+
+### 3. 获取组件实例
+```js
+// 页面中获取组件实例
+Page({
+  onReady() {
+    const component = this.selectComponent('#componentId')
+    component.customMethod()
+  }
+})
+```
+
+## 五、组件样式说明
+
+### 1. 样式隔离
+```json
+{
+  "component": true,
+  "styleIsolation": "isolated"
+}
+```
+
+### 2. 外部样式类
+```js
+Component({
+  externalClasses: ['external-class']
+})
+```
+
+### 3. 全局样式变量使用
+```css
+.custom-component {
+  color: var(--brand-green);
+}
+```
+
+## 六、最佳实践
+
+1. 组件命名规范
+   - 文件夹和文件名使用小写字母
+   - 多个单词用中划线连接
+   - 组件名要有意义且具描述性
+
+2. 属性命名规范
+   - 使用驼峰命名
+   - 布尔类型属性使用is前缀
+   - 事件处理函数使用on前缀
+
+3. 样式规范
+   - 使用BEM命名规范
+   - 避免使用内联样式
+   - 优先使用外部样式类
+
+4. 性能优化
+   - 合理使用observers
+   - 避免频繁setData
+   - 及时销毁资源
+
+## 七、待添加组件
+1. 胶囊按钮组件（等待样式规范）
+   - 支持图标
+   - 支持自定义颜色
+   - 支持禁用状态
+   - 支持加载状态
+   - 支持点击事件
+
+注：具体胶囊按钮组件的实现将根据您提供的样式规范来完成。 

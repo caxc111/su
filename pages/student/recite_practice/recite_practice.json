@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "背诵练习",
-  "usingComponents": {
-    "flower-display": "/components/flower-display/flower-display"
-  }
-}

@@ -1,0 +1,69 @@
+.capsule-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 32rpx;
+  height: 72rpx;
+  border-radius: 36rpx;
+  border: none;
+  font-size: 28rpx;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 0.3s;
+}
+
+.capsule-button--primary {
+  background-color: var(--brand-green, #8ce552);
+  color: #ffffff;
+}
+
+.capsule-button--primary:active {
+  opacity: 0.8;
+}
+
+.capsule-button--secondary {
+  background-color: #ffffff;
+  color: var(--brand-green, #8ce552);
+  border: 2rpx solid var(--brand-green, #8ce552);
+}
+
+.capsule-button--secondary:active {
+  background-color: rgba(140, 229, 82, 0.1);
+}
+
+.capsule-button--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.capsule-button--disabled:active {
+  opacity: 0.5;
+}
+
+.capsule-button__icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
+.capsule-button__text {
+  font-size: 28rpx;
+}
+
+.capsule-button__loading {
+  width: 32rpx;
+  height: 32rpx;
+  border: 3rpx solid;
+  border-color: transparent currentColor currentColor currentColor;
+  border-radius: 50%;
+  animation: capsule-button-loading 0.8s linear infinite;
+}
+
+@keyframes capsule-button-loading {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+} 

@@ -1,8 +1,0 @@
-{
-  "navigationBarTitleText": "文章管理",
-  "usingComponents": {
-    "article-card": "/components/article-card/article-card",
-    "article-editor": "/components/article-editor/article-editor",
-    "article-actions": "/components/article-actions/article-actions"
-  }
-}

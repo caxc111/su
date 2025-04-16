@@ -1,0 +1,49 @@
+# 项目决策日志
+
+## 日期：2024-07-27
+
+### 决策主题：用户登录与信息处理方案 (初期阶段)
+
+**背景与问题:**
+
+1.  **OpenID 获取:** 微信小程序前端无法直接获取用户的 OpenID，必须通过后端服务器使用 `wx.login()` 获取的 `code` 向微信服务器换取。
+2.  **微信昵称获取:** 尝试使用 `<input type="nickname">` 的 `bindnicknamereview` 事件直接获取用户选择的微信昵称时，遇到了兼容性或 API 不稳定的问题 (事件触发但无法从中提取昵称)。直接调用 `wx.getUserProfile` 获取信息的方式已被微信官方不推荐。
+3.  **服务器依赖:** 项目当前阶段尚未部署后端服务器。
+
+**临时解决方案 (纯前端):**
+
+1.  **登录流程:**
+    *   前端调用 `wx.login()` 获取 `code`。
+    *   **当前不发送 `code` 到服务器** (因为服务器不存在)。
+    *   登录成功后，使用本地存储 `wx.getStorageSync('userInfo')` 中已有的用户信息，若无则使用默认信息 (默认头像和"微信用户"昵称)。
+2.  **用户信息获取与存储:**
+    *   **头像:** 用户通过 `<button open-type="chooseAvatar">` 主动选择头像，获取到的 `avatarUrl` 通过 `wx.setStorageSync` 保存到本地存储 `userInfo` 对象中。
+    *   **昵称:** 用户通过 `<input type="nickname">`：
+        *   尝试使用 `bindnicknamereview` 事件获取微信昵称，如果成功，通过 `wx.setStorageSync` 保存到本地存储 `userInfo` 对象中 (接受此功能可能不稳定的现状)。
+        *   用户也可以通过键盘手动输入昵称，通过 `bindblur` 事件触发 `onNicknameChange` 函数，将输入的昵称通过 `wx.setStorageSync` 保存到本地存储 `userInfo` 对象中。
+    *   **用户信息读取:** 在 "我的" (`profile`) 页面加载时 (`onShow`)，通过 `wx.getStorageSync('userInfo')` 读取本地存储的用户信息并显示。
+3.  **本地存储:** 完全依赖 `wx.setStorageSync` 和 `wx.getStorageSync` 在小程序本地存储用户信息 (`avatarUrl`, `nickName`)。
+
+**未来规划 (服务器集成):**
+
+1.  **后端服务器:** 项目上线或后续阶段将部署后端服务器。
+2.  **登录流程 (有服务器后):**
+    *   小程序获取 `code` 后，将其发送到后端服务器。
+    *   服务器使用 `code` 换取 `OpenID` 和 `session_key`。
+    *   服务器根据 `OpenID` 管理用户，生成并返回登录凭证 (如 token) 和用户信息给小程序。
+    *   小程序保存 token，用于后续API请求。
+3.  **用户信息同步:**
+    *   用户在小程序中更新头像或昵称时，除了更新本地存储，**还需要将更改同步到后端服务器**。
+    *   登录时，优先使用服务器返回的用户信息。
+
+**代码准备:**
+
+*   已在 `login.js` 中获取 `code` 后添加 `TODO` 注释，标记将来发送 `code` 到服务器的逻辑位置。
+*   已在 `profile.js` 的 `onChooseAvatar`, `getNickName`, `onNicknameChange` 函数中保存本地存储后添加 `TODO` 注释，标记将来同步用户信息到服务器的逻辑位置。
+*   已创建/重写 `services/user.service.js` 文件，包含与后端交互的占位函数 (`loginWithCode`, `updateUserInfo`, `getUserInfoFromServer`) 和 `TODO` 注释，为将来实现后端通信做好准备。
+
+**决策原因:**
+
+*   在没有后端服务器的情况下，优先保证小程序核心功能可用。
+*   采用纯前端本地存储方案满足当前阶段的用户信息展示和修改需求。
+*   通过预留接口和注释，为未来平滑过渡到后端方案做好准备，降低后续开发成本。 

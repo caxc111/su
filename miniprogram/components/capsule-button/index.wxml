@@ -1,0 +1,13 @@
+<button 
+  class="capsule-button {{type === 'primary' ? 'capsule-button--primary' : 'capsule-button--secondary'}} {{disabled ? 'capsule-button--disabled' : ''}} {{loading ? 'capsule-button--loading' : ''}}"
+  bind:tap="handleTap"
+  disabled="{{disabled}}"
+>
+  <block wx:if="{{loading}}">
+    <view class="capsule-button__loading"></view>
+  </block>
+  <block wx:else>
+    <image wx:if="{{icon}}" class="capsule-button__icon" src="{{icon}}" mode="aspectFit"></image>
+    <text class="capsule-button__text">{{text}}</text>
+  </block>
+</button> 

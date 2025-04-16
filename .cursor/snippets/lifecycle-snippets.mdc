@@ -1,0 +1,249 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# 小程序页面生命周期速查手册
+
+## 一、基础页面生命周期
+```js
+// pages/practice/index.js
+Page({
+  // 1. 页面加载时触发，只会触发一次
+  onLoad(options) {
+    // options中包含打开当前页面传入的参数
+    console.log('页面参数：', options)
+    
+    // 获取上一页传来的练习信息
+    const { articleId } = options
+    this.loadArticleData(articleId)
+  },
+
+  // 2. 页面显示时触发，每次页面显示都会触发
+  onShow() {
+    // 检查登录状态
+    if (!wx.getStorageSync('userInfo')) {
+      wx.showToast({
+        title: '请先登录',
+        icon: 'none'
+      })
+      return
+    }
+    
+    // 更新练习数据
+    this.updatePracticeData()
+  },
+
+  // 3. 页面初次渲染完成时触发，只会触发一次
+  onReady() {
+    // 页面初始化完成，可以进行一些UI操作
+    wx.showLoading({
+      title: '加载中...'
+    })
+  },
+
+  // 4. 页面隐藏时触发
+  onHide() {
+    // 暂停播放
+    this.audioContext?.pause()
+    // 保存未完成的练习
+    this.saveDraft()
+  },
+
+  // 5. 页面卸载时触发
+  onUnload() {
+    // 清理资源
+    this.audioContext?.destroy()
+    // 保存练习记录
+    this.saveRecord()
+  }
+})
+```
+
+## 二、常用事件处理
+```js
+Page({
+  // 1. 下拉刷新
+  onPullDownRefresh() {
+    // 重新加载数据
+    this.loadData().then(() => {
+      // 停止下拉刷新动画
+      wx.stopPullDownRefresh()
+    })
+  },
+
+  // 2. 上拉加载更多
+  onReachBottom() {
+    // 判断是否还有更多数据
+    if (this.data.hasMore) {
+      this.loadMoreData()
+    }
+  },
+
+  // 3. 页面滚动
+  onPageScroll(event) {
+    // event.scrollTop 页面在垂直方向已滚动的距离（px）
+    if (event.scrollTop > 100) {
+      this.setData({
+        showBackTop: true
+      })
+    }
+  },
+
+  // 4. 用户点击右上角分享
+  onShareAppMessage() {
+    return {
+      title: '顺口成章 - 练习分享',
+      path: '/pages/practice/index?id=' + this.data.articleId,
+      imageUrl: '分享图片路径'
+    }
+  }
+})
+```
+
+## 三、组件生命周期
+```js
+Component({
+  lifetimes: {
+    // 1. 组件实例刚创建时
+    created() {
+      // 组件实例刚创建，还不能调用setData
+    },
+
+    // 2. 组件实例进入页面节点树时
+    attached() {
+      // 可以进行初始化工作
+      this.initData()
+    },
+
+    // 3. 组件在视图层布局完成后
+    ready() {
+      // 可以进行DOM操作
+      this.updateUI()
+    },
+
+    // 4. 组件实例被移动到节点树另一个位置时
+    moved() {
+      // 很少使用
+    },
+
+    // 5. 组件实例被从页面节点树移除时
+    detached() {
+      // 清理工作
+      this.cleanup()
+    }
+  }
+})
+```
+
+## 四、常见使用场景
+
+### 1. 练习页面示例
+```js
+Page({
+  data: {
+    articleInfo: null,
+    isReady: false
+  },
+
+  onLoad(options) {
+    // 1. 获取文章信息
+    this.loadArticle(options.id)
+    
+    // 2. 初始化录音管理器
+    this.initRecorder()
+  },
+
+  onShow() {
+    // 1. 检查设备权限
+    this.checkPermission()
+    
+    // 2. 恢复上次练习进度
+    this.resumePractice()
+  },
+
+  onHide() {
+    // 保存练习进度
+    this.savePractice()
+  },
+
+  onUnload() {
+    // 清理资源
+    this.recorder.destroy()
+  }
+})
+```
+
+### 2. 列表页面示例
+```js
+Page({
+  data: {
+    list: [],
+    page: 1,
+    hasMore: true
+  },
+
+  onLoad() {
+    // 加载第一页数据
+    this.loadData()
+  },
+
+  onPullDownRefresh() {
+    // 重置页码
+    this.setData({ page: 1 })
+    // 重新加载数据
+    this.loadData()
+  },
+
+  onReachBottom() {
+    if (this.data.hasMore) {
+      this.loadMoreData()
+    }
+  }
+})
+```
+
+## 五、注意事项
+
+1. 生命周期执行顺序
+   - onLoad -> onShow -> onReady
+   - 页面切换：onHide -> onShow
+   - 页面关闭：onHide -> onUnload
+
+2. 常见问题
+   - onLoad中不要直接操作UI，应在onReady中进行
+   - onShow中要注意重复加载的问题
+   - onUnload中要清理定时器、播放器等资源
+
+3. 最佳实践
+   - 数据加载放在onLoad中
+   - 状态检查放在onShow中
+   - UI操作放在onReady中
+   - 资源清理放在onUnload中
+
+## 六、调试技巧
+```js
+// 添加日志跟踪生命周期
+Page({
+  onLoad(options) {
+    console.log('[生命周期] onLoad', options)
+  },
+  onShow() {
+    console.log('[生命周期] onShow')
+  },
+  onReady() {
+    console.log('[生命周期] onReady')
+  },
+  onHide() {
+    console.log('[生命周期] onHide')
+  },
+  onUnload() {
+    console.log('[生命周期] onUnload')
+  }
+})
+``` 

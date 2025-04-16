@@ -1,0 +1,34 @@
+<view class="container">
+  <view class="header">
+    <view class="title">记录</view>
+  </view>
+
+  <view class="filter-tabs">
+    <view class="tab {{currentTab === 'reading' ? 'active' : ''}}" bindtap="switchTab" data-tab="reading">朗读</view>
+    <view class="tab {{currentTab === 'reciting' ? 'active' : ''}}" bindtap="switchTab" data-tab="reciting">背诵</view>
+  </view>
+
+  <view class="record-list">
+    <block wx:for="{{records}}" wx:key="id">
+      <view class="record-item">
+        <view class="record-info">
+          <view class="article-title">{{item.title}}</view>
+          <view class="article-meta">
+            <text class="lesson-tag">课文{{item.lessonNo}}</text>
+            <text class="language-tag">{{item.language}}</text>
+          </view>
+          <view class="practice-time">{{item.time}}</view>
+        </view>
+        <view class="record-score">
+          <text class="score-label">得分：</text>
+          <text class="score-value {{item.score >= 90 ? 'excellent' : ''}}">{{item.score}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+
+  <view wx:if="{{records.length === 0}}" class="empty-state">
+    <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit"></image>
+    <text class="empty-text">暂无练习记录</text>
+  </view>
+</view> 

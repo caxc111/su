@@ -1,0 +1,108 @@
+---
+description: 有关按钮代码时引用
+globs: 
+alwaysApply: false
+---
+---
+description: 生成按钮样式时引用
+globs: 
+alwaysApply: false
+---
+# 顺口成章小程序主题配置速查
+
+## 一、主色调
+```css
+/* 品牌主色 */
+--brand-green: #8ce552;  /* 主要按钮、成功状态 */
+--brand-orange: #f97316; /* 分数显示、警告状态 */
+```
+
+## 二、常用类名速查表
+
+### 1. 文字颜色
+| 类名 | 用途 | 示例 |
+|------|------|------|
+| text-green | 绿色文字 | `<text class="text-green">练习成功</text>` |
+| text-orange | 橙色文字 | `<text class="text-orange">98分</text>` |
+| text-success | 成功提示 | `<text class="text-success">完成练习</text>` |
+| text-warning | 警告提示 | `<text class="text-warning">请继续努力</text>` |
+
+### 2. 按钮样式
+| 类名 | 用途 | 示例 |
+|------|------|------|
+| btn-primary | 主要按钮 | `<button class="btn-primary">开始练习</button>` |
+| btn-secondary | 次要按钮 | `<button class="btn-secondary">查看记录</button>` |
+
+### 3. 标签样式
+| 类名 | 用途 | 示例 |
+|------|------|------|
+| tag-primary | 主要标签 | `<view class="tag-primary">初级</view>` |
+| tag-secondary | 次要标签 | `<view class="tag-secondary">进行中</view>` |
+
+## 三、常用组合示例
+
+### 1. 练习卡片
+```html
+<view class="practice-card">
+  <view class="practice-title text-primary">早春</view>
+  <view class="practice-score">
+    <text>得分：</text>
+    <text class="score-text">98</text>
+  </view>
+  <button class="btn-primary">开始练习</button>
+</view>
+```
+
+### 2. 状态展示
+```html
+<view class="status-container">
+  <text class="score-text">100</text>
+  <text class="status-success">完美朗读</text>
+  <view class="tag-primary">优秀</view>
+</view>
+```
+
+## 四、变量使用示例
+
+### 1. 自定义样式
+```css
+.custom-element {
+  color: var(--brand-green);
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+}
+```
+
+### 2. 混合使用
+```css
+.special-button {
+  background-color: var(--brand-green-light);
+  color: var(--brand-green-dark);
+  border: 2px solid var(--brand-green);
+}
+```
+
+## 五、注意事项
+
+1. 颜色使用规范
+   - 主要操作使用绿色
+   - 分数显示使用橙色
+   - 状态提示使用对应功能色
+
+2. 样式优先级
+   - 优先使用预定义类名
+   - 需要自定义时使用变量
+   - 避免直接使用颜色代码
+
+3. 常见问题
+   - 确保app.wxss已引入theme.wxss
+   - 注意类名大小写
+   - 检查样式权重冲突
+
+## 六、文件位置
+```
+miniprogram/
+├── styles/
+│   └── theme.wxss    # 主题文件
+└── app.wxss          # 引入主题
+``` 

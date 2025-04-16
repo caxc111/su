@@ -1,0 +1,45 @@
+<view class="container">
+  <view class="header">
+    <view class="title">记录</view>
+  </view>
+
+  <view class="filter-tabs">
+    <view class="tab {{activeTab === 'reading' ? 'active' : ''}}" bindtap="switchTab" data-tab="reading">朗读</view>
+    <view class="tab {{activeTab === 'reciting' ? 'active' : ''}}" bindtap="switchTab" data-tab="reciting">背诵</view>
+  </view>
+
+  <view class="record-list">
+    <block wx:if="{{recordList.length > 0}}">
+      <block wx:for="{{recordList}}" wx:key="id">
+        <view class="record-item">
+          <view class="record-info">
+            <view class="article-title">{{item.title}}</view>
+            <view class="article-meta">
+              <text class="lesson-tag">课文{{item.lessonNo}}</text>
+              <text class="language-tag">{{item.language}}</text>
+            </view>
+            <view class="practice-time">{{item.time}}</view>
+          </view>
+          <view class="record-score">
+            <text class="score-label">得分：</text>
+            <text class="score-value {{item.score >= 90 ? 'excellent' : ''}}">{{item.score}}</text>
+          </view>
+          <view class="record-actions">
+            <text class="action-btn" bindtap="viewRecordDetail" data-id="{{item.id}}">查看</text>
+            <text class="action-btn delete" bindtap="deleteRecord" data-id="{{item.id}}">删除</text>
+          </view>
+        </view>
+      </block>
+    </block>
+  </view>
+
+  <view wx:if="{{!hasRecords}}" class="empty-state">
+    <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit"></image>
+    <text class="empty-text">暂无练习记录</text>
+  </view>
+  
+  <view wx:if="{{isLoading}}" class="loading-state">
+    <view class="loading-icon"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+</view> 

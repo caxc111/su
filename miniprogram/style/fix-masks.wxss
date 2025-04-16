@@ -1,0 +1,60 @@
+/**
+ * 全局灰蒙版修复样式
+ * 通过覆盖微信原生组件样式来解决灰蒙版问题
+ */
+
+/* 遮罩蒙版元素清除 */
+.wx-mask,
+.weui-mask,
+.weui-mask_transparent,
+.weui-toast-mask,
+.weui-dialog__mask,
+.wx-toast-mask,
+.modal-mask,
+.action-sheet-mask,
+.loading-mask,
+.wx-modal-mask {
+  opacity: 0 !important;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+/* 确保弹出层内容仍然显示 */
+.wx-modal,
+.weui-dialog,
+.weui-actionsheet,
+.weui-toast,
+.wx-toast {
+  position: fixed !important;
+  z-index: 5001 !important;
+  pointer-events: auto !important;
+}
+
+/* 确保页面内容正常交互 */
+page {
+  background-color: #f8f8f8;
+}
+
+page::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 防止加载导致的灰蒙版 */
+.clear-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  z-index: 9999;
+} 

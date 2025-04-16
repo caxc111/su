@@ -1,0 +1,224 @@
+/* 主题颜色定义 */
+page {
+  /* 品牌主色 */
+  --brand-green: #8ce552;
+  --brand-orange: #f97316;
+  
+  /* 主色调亮度变体 */
+  --brand-green-light: #a4eb74;
+  --brand-green-dark: #7ed441;
+  --brand-orange-light: #fa8f4c;
+  --brand-orange-dark: #ea6c0f;
+  
+  /* 文字颜色 */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-disabled: #999999;
+  --text-placeholder: #cccccc;
+  
+  /* 背景颜色 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-mask: rgba(0, 0, 0, 0.4);
+  
+  /* 边框颜色 */
+  --border-color: #eeeeee;
+  
+  /* 功能色 */
+  --success: var(--brand-green);
+  --warning: var(--brand-orange);
+  --error: #ff4d4f;
+  --info: #1890ff;
+}
+
+/* 文字颜色类 */
+.text-green {
+  color: var(--brand-green);
+}
+
+.text-orange {
+  color: var(--brand-orange);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+/* 背景颜色类 */
+.bg-green {
+  background-color: var(--brand-green);
+}
+
+.bg-orange {
+  background-color: var(--brand-orange);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: var(--brand-green);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: var(--brand-orange);
+  color: #ffffff;
+}
+
+/* 分数显示 */
+.score-text {
+  color: var(--brand-orange);
+  font-weight: bold;
+}
+
+/* 状态提示 */
+.status-success {
+  color: var(--success);
+}
+
+.status-warning {
+  color: var(--warning);
+}
+
+.status-error {
+  color: var(--error);
+}
+
+/* 进度条 */
+.progress-bar {
+  background-color: var(--brand-green-light);
+}
+
+.progress-bar__inner {
+  background-color: var(--brand-green);
+}
+
+/* 标签 */
+.tag-primary {
+  background-color: var(--brand-green-light);
+  color: var(--brand-green-dark);
+}
+
+.tag-secondary {
+  background-color: var(--brand-orange-light);
+  color: var(--brand-orange-dark);
+} 
+page {
+  /* 品牌主色 */
+  --brand-green: #8ce552;
+  --brand-orange: #f97316;
+  
+  /* 主色调亮度变体 */
+  --brand-green-light: #a4eb74;
+  --brand-green-dark: #7ed441;
+  --brand-orange-light: #fa8f4c;
+  --brand-orange-dark: #ea6c0f;
+  
+  /* 文字颜色 */
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-disabled: #999999;
+  --text-placeholder: #cccccc;
+  
+  /* 背景颜色 */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f5f5f5;
+  --bg-mask: rgba(0, 0, 0, 0.4);
+  
+  /* 边框颜色 */
+  --border-color: #eeeeee;
+  
+  /* 功能色 */
+  --success: var(--brand-green);
+  --warning: var(--brand-orange);
+  --error: #ff4d4f;
+  --info: #1890ff;
+}
+
+/* 文字颜色类 */
+.text-green {
+  color: var(--brand-green);
+}
+
+.text-orange {
+  color: var(--brand-orange);
+}
+
+.text-success {
+  color: var(--success);
+}
+
+.text-warning {
+  color: var(--warning);
+}
+
+.text-error {
+  color: var(--error);
+}
+
+/* 背景颜色类 */
+.bg-green {
+  background-color: var(--brand-green);
+}
+
+.bg-orange {
+  background-color: var(--brand-orange);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background-color: var(--brand-green);
+  color: #ffffff;
+}
+
+.btn-secondary {
+  background-color: var(--brand-orange);
+  color: #ffffff;
+}
+
+/* 分数显示 */
+.score-text {
+  color: var(--brand-orange);
+  font-weight: bold;
+}
+
+/* 状态提示 */
+.status-success {
+  color: var(--success);
+}
+
+.status-warning {
+  color: var(--warning);
+}
+
+.status-error {
+  color: var(--error);
+}
+
+/* 进度条 */
+.progress-bar {
+  background-color: var(--brand-green-light);
+}
+
+.progress-bar__inner {
+  background-color: var(--brand-green);
+}
+
+/* 标签 */
+.tag-primary {
+  background-color: var(--brand-green-light);
+  color: var(--brand-green-dark);
+}
+
+.tag-secondary {
+  background-color: var(--brand-orange-light);
+  color: var(--brand-orange-dark);
+} 
+ 

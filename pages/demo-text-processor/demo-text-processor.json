@@ -1,6 +1,0 @@
-{
-  "navigationBarTitleText": "文本处理器演示",
-  "usingComponents": {
-    "text-processor": "/components/text-processor/text-processor"
-  }
-} 

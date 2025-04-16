@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顺口成章 - 小程序原型</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        .screens-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            justify-content: center;
+        }
+        .iphone15-frame {
+            width: 393px;
+            height: 852px;
+            background-color: white;
+            border-radius: 55px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            border: 12px solid #1a1a1a;
+        }
+        .iphone15-frame:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 160px;
+            height: 35px;
+            background-color: #1a1a1a;
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+            z-index: 10;
+        }
+        .screen-label {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 12px;
+            margin-bottom: 24px;
+            color: #333;
+        }
+        .status-bar {
+            height: 44px;
+            background-color: transparent;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 5;
+        }
+        .app-theme-green {
+            background-color: #8ce552;
+        }
+        .text-theme-green {
+            color: #8ce552;
+        }
+        .border-theme-green {
+            border-color: #8ce552;
+        }
+        .nav-bar {
+            height: 70px;
+            background-color: #ffffff;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+        .screen-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-3xl font-bold text-center my-8">顺口成章 - 小程序原型设计</h1>
+    
+    <div class="screens-container">
+        <!-- 首页/练习页面 -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">22:17</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">64</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-center relative" style="padding-top: 44px;">
+                        <h1 class="text-white font-medium text-xl">顺口成章</h1>
+                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 mt-5 flex items-center bg-white bg-opacity-20 rounded-full px-3 py-1.5">
+                            <span class="text-white mx-1">•••</span>
+                            <div class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center ml-2">
+                                <i class="fas fa-camera text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 主要内容 -->
+                    <div class="bg-white flex-1">
+                        <div class="py-5 px-5">
+                            <h2 class="text-2xl font-bold">练习</h2>
+                            
+                            <div class="flex justify-between mt-4">
+                                <div class="flex-1"></div>
+                                <div class="flex space-x-2">
+                                    <button class="py-2 px-4 app-theme-green rounded-full text-sm font-medium text-white">
+                                        添加文章
+                                    </button>
+                                    <button class="py-2 px-4 app-theme-green rounded-full text-sm font-medium text-white">
+                                        语音测试
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <p class="text-gray-600 mt-6 mb-4">请选择您想要练习的文章</p>
+                            
+                            <!-- 分类标签 -->
+                            <div class="flex border-b border-gray-100">
+                                <div class="px-5 py-2 app-theme-green rounded-full text-white text-sm font-medium mr-3">全部</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium mr-3">中文</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">英文</div>
+                            </div>
+                            
+                            <!-- 文章列表 -->
+                            <div class="mt-6 space-y-4">
+                                <!-- 文章1 -->
+                                <div class="bg-white border border-gray-100 rounded-lg p-4">
+                                    <h3 class="font-bold text-lg">村居[清]高鼎</h3>
+                                    <div class="bg-gray-50 rounded-lg p-3 mt-2">
+                                        <p class="text-gray-700">草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早...</p>
+                                    </div>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-sm text-orange-500 font-medium mr-3">课文1</span>
+                                        <span class="px-5 py-1 rounded-full bg-blue-50 text-blue-500 text-xs mr-3">中文</span>
+                                        <span class="px-5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs">初级</span>
+                                        <span class="px-5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs ml-3">32字</span>
+                                    </div>
+                                    <div class="flex justify-end mt-2">
+                                        <button class="mr-4 px-4 py-1 bg-gray-100 text-theme-green rounded-full text-sm">朗读</button>
+                                        <button class="px-4 py-1 bg-gray-100 text-theme-green rounded-full text-sm">背诵</button>
+                                        <button class="ml-4 px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-sm">•••</button>
+                                    </div>
+                                </div>
+                                
+                                <!-- 文章2 -->
+                                <div class="bg-white border border-gray-100 rounded-lg p-4">
+                                    <h3 class="font-bold text-lg">咏柳[唐]贺知章</h3>
+                                    <div class="bg-gray-50 rounded-lg p-3 mt-2">
+                                        <p class="text-gray-700">碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出...</p>
+                                    </div>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-sm text-orange-500 font-medium mr-3">课文1</span>
+                                        <span class="px-5 py-1 rounded-full bg-blue-50 text-blue-500 text-xs mr-3">中文</span>
+                                        <span class="px-5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs">初级</span>
+                                        <span class="px-5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs ml-3">32字</span>
+                                    </div>
+                                    <div class="flex justify-end mt-2">
+                                        <button class="mr-4 px-4 py-1 bg-gray-100 text-theme-green rounded-full text-sm">朗读</button>
+                                        <button class="px-4 py-1 bg-gray-100 text-theme-green rounded-full text-sm">背诵</button>
+                                        <button class="ml-4 px-2 py-1 bg-gray-100 text-gray-500 rounded-full text-sm">•••</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 底部导航 -->
+                    <div class="nav-bar">
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-comment-dots text-xl text-theme-green"></i>
+                            <span class="text-xs text-theme-green mt-1">练习</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="far fa-clipboard text-xl text-gray-400"></i>
+                            <span class="text-xs text-gray-400 mt-1">记录</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="far fa-user text-xl text-gray-400"></i>
+                            <span class="text-xs text-gray-400 mt-1">我的</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">首页/练习</div>
+        </div>
+
+        <!-- 朗读练习页面 -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8">
+                            <i class="fas fa-chevron-left text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-white font-medium text-xl">朗读练习</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 主要内容 -->
+                    <div class="bg-white flex-1 relative">
+                        <div class="py-5 px-5">
+                            <!-- 文章标题 -->
+                            <div class="mb-4">
+                                <h2 class="text-xl font-bold">村居[清]高鼎</h2>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-sm text-orange-500 font-medium mr-3">课文1</span>
+                                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-500 text-xs">中文</span>
+                                </div>
+                            </div>
+
+                            <!-- 朗读页面的原文文本框 -->
+                            <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="color: #8ce552;" class="font-medium">原文</h3>
+                                    <button style="color: #8ce552;" class="text-sm">
+                                        <i class="fas fa-volume-up mr-1"></i>
+                                        播放
+                                    </button>
+                                </div>
+                                <div class="w-full bg-gray-50 rounded-lg border border-gray-200 p-4">
+                                    <p class="text-theme-green leading-relaxed">草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 识别结果文本框 -->
+                            <div class="mb-8">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="color: #f97316;" class="font-medium">识别结果</h3>
+                                </div>
+                                <div class="w-full bg-gray-50 rounded-lg border border-gray-200 p-4 min-h-[100px]">
+                                    <p class="text-gray-500 leading-relaxed">草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。</p>
+                                </div>
+                            </div>
+
+                            <!-- 评分结果 -->
+                            <div class="bg-green-50 rounded-lg p-4 mb-8">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 style="color: #9ca3af;" class="font-medium">本次得分</h4>
+                                        <p style="color: #9ca3af;" class="text-sm mt-1">完美朗读，发音准确</p>
+                                    </div>
+                                    <div style="color: #f97316;" class="text-3xl font-bold">100</div>
+                                </div>
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div class="flex justify-center items-center space-x-12">
+                                <button class="px-6 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                    重新朗读
+                                </button>
+                                <button class="px-6 py-2 app-theme-green text-white rounded-full text-sm font-medium">
+                                    完成练习
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 麦克风按钮和提示文本容器 -->
+                        <div class="absolute left-0 right-0" style="bottom: 10vh;">
+                            <div class="flex flex-col items-center">
+                                <!-- 麦克风按钮 -->
+                                <button class="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-theme-green mb-3">
+                                    <i class="fas fa-microphone text-2xl text-theme-green"></i>
+                                </button>
+                                <!-- 提示文本 -->
+                                <p class="text-center text-gray-500 text-sm whitespace-nowrap">
+                                    点击麦克风开始朗读
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">朗读练习</div>
+        </div>
+
+        <!-- 背诵练习页面 -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8">
+                            <i class="fas fa-chevron-left text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-white font-medium text-xl">背诵练习</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 主要内容 -->
+                    <div class="bg-white flex-1 relative">
+                        <div class="py-5 px-5">
+                            <!-- 文章标题 -->
+                            <div class="mb-4">
+                                <h2 class="text-xl font-bold">村居[清]高鼎</h2>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-sm text-orange-500 font-medium mr-3">课文1</span>
+                                    <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-500 text-xs">中文</span>
+                                </div>
+                            </div>
+
+                            <!-- 原文文本框 -->
+                            <div class="mb-4">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="color: #8ce552;" class="font-medium">原文</h3>
+                                </div>
+                                <div class="w-full bg-gray-50 rounded-lg border border-gray-200 p-4">
+                                    <p class="text-theme-green leading-relaxed">草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。</p>
+                                </div>
+                            </div>
+                            
+                            <!-- 识别结果文本框 -->
+                            <div class="mb-8">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 style="color: #f97316;" class="font-medium">识别结果</h3>
+                                </div>
+                                <div class="w-full bg-gray-50 rounded-lg border border-gray-200 p-4 min-h-[100px]">
+                                    <p class="text-gray-500 leading-relaxed">草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。</p>
+                                </div>
+                            </div>
+
+                            <!-- 评分结果 -->
+                            <div class="bg-green-50 rounded-lg p-4 mb-8">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <h4 style="color: #9ca3af;" class="font-medium">本次得分</h4>
+                                        <p style="color: #9ca3af;" class="text-sm mt-1">完美背诵，记忆准确</p>
+                                    </div>
+                                    <div style="color: #f97316;" class="text-3xl font-bold">100</div>
+                                </div>
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div class="flex justify-center items-center space-x-12">
+                                <button class="px-6 py-2 bg-gray-100 text-gray-600 rounded-full text-sm font-medium">
+                                    重新背诵
+                                </button>
+                                <button class="px-6 py-2 app-theme-green text-white rounded-full text-sm font-medium">
+                                    完成练习
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 麦克风按钮和提示文本容器 -->
+                        <div class="absolute left-0 right-0" style="bottom: 10vh;">
+                            <div class="flex flex-col items-center">
+                                <!-- 麦克风按钮 -->
+                                <button class="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-theme-green mb-3">
+                                    <i class="fas fa-microphone text-2xl text-theme-green"></i>
+                                </button>
+                                <!-- 提示文本 -->
+                                <p class="text-center text-gray-500 text-sm whitespace-nowrap">
+                                    点击麦克风开始背诵
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">背诵练习</div>
+        </div>
+
+        <!-- 语音识别页面 -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8">
+                            <i class="fas fa-chevron-left text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-white font-medium text-xl">语音识别</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 主要内容 -->
+                    <div class="bg-white flex-1 relative">
+                        <div class="py-5 px-5">
+                            <!-- 语言选择按钮 -->
+                            <div class="flex justify-center space-x-4 mb-8">
+                                <button class="px-8 py-2 app-theme-green rounded-full text-white text-sm font-medium">
+                                    中文
+                                </button>
+                                <button class="px-8 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                    英文
+                                </button>
+                            </div>
+                            
+                            <!-- 识别文本框 -->
+                            <div class="w-full" style="height: 35vh;">
+                                <div class="w-full h-full p-4 bg-gray-50 rounded-lg border border-gray-200">
+                                    <p class="text-gray-400 text-center mt-4">等待语音输入...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 麦克风按钮和提示文本容器 -->
+                        <div class="absolute left-0 right-0" style="bottom: 10vh;">
+                            <div class="flex flex-col items-center">
+                                <!-- 麦克风按钮 -->
+                                <button class="w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-2 border-theme-green mb-3">
+                                    <i class="fas fa-microphone text-2xl text-theme-green"></i>
+                                </button>
+                                <!-- 提示文本 -->
+                                <p class="text-center text-gray-500 text-sm whitespace-nowrap">
+                                    点击麦克风开始录音
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">语音识别</div>
+        </div>
+
+        <!-- 选择年级学期（中文） -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8">
+                            <i class="fas fa-chevron-left text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-white font-medium text-xl">添加文章</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 底部弹窗 -->
+                    <div class="bg-gray-900 bg-opacity-50 absolute inset-0" style="z-index: 100;">
+                        <div class="bg-white rounded-t-3xl absolute left-0 right-0 bottom-0 p-6">
+                            <div class="flex justify-between items-center mb-8">
+                                <h3 class="text-xl font-bold">选择年级学期</h3>
+                                <button>
+                                    <i class="fas fa-times text-gray-400 text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-lg">年级</h4>
+                                <div class="flex space-x-2">
+                                    <button class="px-4 py-1.5 app-theme-green rounded-full text-white text-sm font-medium">
+                                        中文
+                                    </button>
+                                    <button class="px-4 py-1.5 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                        英文
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 mb-8">
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">三年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">四年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">五年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">六年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">七年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">八年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">九年级</div>
+                            </div>
+                            
+                            <h4 class="font-bold text-lg mb-4">学期</h4>
+                            <div class="grid grid-cols-2 gap-4 mb-10">
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">上册</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">下册</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <button class="px-5 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium">
+                                    取消
+                                </button>
+                                <button class="px-5 py-2 app-theme-green text-white rounded-full text-sm font-medium">
+                                    确定
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">选择年级学期（中文）</div>
+        </div>
+
+        <!-- 选择年级学期（英文） -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8">
+                            <i class="fas fa-chevron-left text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-white font-medium text-xl">添加文章</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 底部弹窗 -->
+                    <div class="bg-gray-900 bg-opacity-50 absolute inset-0" style="z-index: 100;">
+                        <div class="bg-white rounded-t-3xl absolute left-0 right-0 bottom-0 p-6">
+                            <div class="flex justify-between items-center mb-8">
+                                <h3 class="text-xl font-bold">选择年级学期</h3>
+                                <button>
+                                    <i class="fas fa-times text-gray-400 text-xl"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="flex justify-between items-center mb-4">
+                                <h4 class="font-bold text-lg">年级</h4>
+                                <div class="flex space-x-2">
+                                    <button class="px-4 py-1.5 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                        中文
+                                    </button>
+                                    <button class="px-4 py-1.5 app-theme-green rounded-full text-white text-sm font-medium">
+                                        英文
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-3 gap-4 mb-8">
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">三年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">四年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">五年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">六年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">七年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">八年级</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">九年级</div>
+                            </div>
+                            
+                            <h4 class="font-bold text-lg mb-4">学期</h4>
+                            <div class="grid grid-cols-2 gap-4 mb-10">
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">上册</div>
+                                <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-700 text-sm font-medium text-center">下册</div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <button class="px-5 py-2 bg-gray-200 text-gray-700 rounded-full text-sm font-medium">
+                                    取消
+                                </button>
+                                <button class="px-5 py-2 app-theme-green text-white rounded-full text-sm font-medium">
+                                    确定
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">选择年级学期（英文）</div>
+        </div>
+
+        <!-- 记录页面 -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8"></div>
+                        <h1 class="text-white font-medium text-xl">记录</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 主要内容 -->
+                    <div class="bg-white flex-1">
+                        <div class="py-5 px-5">
+                            <!-- 朗读/背诵切换按钮 -->
+                            <div class="flex justify-center space-x-4 mb-6">
+                                <button class="px-8 py-2 app-theme-green rounded-full text-white text-sm font-medium">
+                                    朗读
+                                </button>
+                                <button class="px-8 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                    背诵
+                                </button>
+                            </div>
+
+                            <!-- 记录列表 -->
+                            <div class="space-y-4">
+                                <!-- 记录项1 -->
+                                <div class="bg-white border border-gray-100 rounded-lg p-4">
+                                    <h3 class="font-bold text-lg">村居[清]高鼎</h3>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-sm text-orange-500 font-medium mr-3">课文1</span>
+                                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-500 text-xs">中文</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <span class="text-gray-500 text-sm">2024-03-20 15:46</span>
+                                        <div class="flex items-center">
+                                            <span class="text-theme-green font-medium mr-2">得分：</span>
+                                            <span class="text-xl font-bold text-theme-green">98</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 记录项2 -->
+                                <div class="bg-white border border-gray-100 rounded-lg p-4">
+                                    <h3 class="font-bold text-lg">咏柳[唐]贺知章</h3>
+                                    <div class="flex items-center mt-2">
+                                        <span class="text-sm text-orange-500 font-medium mr-3">课文2</span>
+                                        <span class="px-3 py-1 rounded-full bg-blue-50 text-blue-500 text-xs">中文</span>
+                                    </div>
+                                    <div class="flex justify-between items-center mt-3">
+                                        <span class="text-gray-500 text-sm">2024-03-20 15:30</span>
+                                        <div class="flex items-center">
+                                            <span class="text-theme-green font-medium mr-2">得分：</span>
+                                            <span class="text-xl font-bold text-theme-green">95</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 底部导航 -->
+                    <div class="nav-bar">
+                        <div class="flex flex-col items-center">
+                            <i class="far fa-comment-dots text-xl text-gray-400"></i>
+                            <span class="text-xs text-gray-400 mt-1">练习</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="fas fa-clipboard text-xl text-theme-green"></i>
+                            <span class="text-xs text-theme-green mt-1">记录</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <i class="far fa-user text-xl text-gray-400"></i>
+                            <span class="text-xs text-gray-400 mt-1">我的</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">记录</div>
+        </div>
+
+        <!-- 添加文章 -->
+        <div>
+            <div class="iphone15-frame">
+                <div class="screen-content">
+                    <!-- 状态栏 -->
+                    <div class="status-bar">
+                        <div class="flex items-center">
+                            <span class="text-black font-semibold text-sm">15:46</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <i class="fas fa-signal"></i>
+                            <i class="fas fa-wifi"></i>
+                            <span class="text-sm font-semibold bg-white px-2 py-0.5 rounded-md">27</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 顶部应用栏 -->
+                    <div class="app-theme-green py-3 px-4 flex items-center justify-between relative" style="padding-top: 44px;">
+                        <div class="w-8">
+                            <i class="fas fa-chevron-left text-white text-xl"></i>
+                        </div>
+                        <h1 class="text-white font-medium text-xl">顺口成章</h1>
+                        <div class="w-8"></div>
+                    </div>
+                    
+                    <!-- 主要内容 -->
+                    <div class="bg-white flex-1">
+                        <div class="py-5 px-5">
+                            <h2 class="text-2xl font-bold">添加文章</h2>
+                            <button class="mt-2 float-right px-4 py-2 app-theme-green text-white rounded-full text-sm font-medium">
+                                添加课文
+                            </button>
+                            
+                            <!-- 添加文章表单 -->
+                            <div class="mt-8 bg-white rounded-lg shadow-sm p-6">
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 font-bold mb-2">文章标题</label>
+                                    <input type="text" placeholder="请输入文章标题" class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700">
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 font-bold mb-2">语言</label>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="px-5 py-2 app-theme-green rounded-full text-white text-sm font-medium">
+                                            中文
+                                        </div>
+                                        <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                            英文
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="block text-gray-700 font-bold mb-2">难度</label>
+                                    <div class="flex items-center space-x-4">
+                                        <div class="px-5 py-2 app-theme-green rounded-full text-white text-sm font-medium">
+                                            初级
+                                        </div>
+                                        <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                            中级
+                                        </div>
+                                        <div class="px-5 py-2 bg-gray-100 rounded-full text-gray-600 text-sm font-medium">
+                                            高级
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-12">
+                                    <label class="block text-gray-700 font-bold mb-2">文章内容</label>
+                                    <textarea placeholder="请输入文章内容" class="w-full p-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-700 h-32"></textarea>
+                                </div>
+                                
+                                <div class="flex justify-center">
+                                    <button class="px-8 py-2 app-theme-green text-white rounded-full text-sm font-medium">
+                                        保存文章
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="screen-label">添加文章</div>
+        </div>
+    </div>
+</body>
+</html> 

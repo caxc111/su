@@ -1,0 +1,97 @@
+/**app.wxss**/
+@import './styles/theme.wxss';
+@import './style/fix-masks.wxss';
+
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+  background-color: #f8f8f8;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 清除灰蒙版的样式 */
+.wx-toast-mask,
+.wx-mask,
+.weui-mask,
+.weui-toast-mask,
+.modal-mask,
+.action-sheet-mask,
+.loading-mask {
+  opacity: 0 !important;
+  background: transparent !important;
+  pointer-events: none !important;
+}
+
+/* 强制设置页面可见和交互 */
+page::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* 其他全局样式 */
+/* ... existing code ... */ 
+@import './styles/theme.wxss';
+
+page {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica,
+    Segoe UI, Arial, Roboto, 'PingFang SC', 'miui', 'Hiragino Sans GB', 'Microsoft Yahei',
+    sans-serif;
+  background-color: #f8f8f8;
+}
+
+.container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 其他全局样式 */
+/* ... existing code ... */ 
+ 

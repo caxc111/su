@@ -1,3 +1,0 @@
-<!-- components/text-evaluator/text-evaluator.wxml -->
-<!-- 评估组件不需要UI，主要是提供方法 -->
-<view class="text-evaluator" style="display: none;"></view> 

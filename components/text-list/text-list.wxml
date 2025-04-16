@@ -1,8 +1,0 @@
-<view class="text-list" wx:if="{{visible}}">
-  <view class="text-list-content">
-    <view class="text-item" wx:for="{{texts}}" wx:key="section" bindtap="selectText" data-index="{{index}}">
-      <view class="text-section">{{item.section}}</view>
-      <view class="text-title">{{item.title}}</view>
-    </view>
-  </view>
-</view> 

@@ -1,0 +1,106 @@
+.login-container {
+  padding: 40rpx;
+  min-height: 100vh;
+  background-color: #ffffff;
+}
+
+/* 清除灰蒙版的样式 */
+.clear-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* 覆盖微信默认蒙版样式 */
+.wx-mask,
+.wx-toast-mask,
+.weui-mask,
+.weui-dialog__mask,
+.weui-actionsheet__mask {
+  background: transparent !important;
+  opacity: 0 !important;
+}
+
+.logo-section {
+  margin-top: 200rpx;
+  text-align: center;
+}
+
+.app-title {
+  font-size: 48rpx;
+  font-weight: bold;
+  color: #333333;
+  margin-bottom: 20rpx;
+}
+
+.app-subtitle {
+  font-size: 28rpx;
+  color: #666666;
+}
+
+.login-section {
+  margin-top: 120rpx;
+}
+
+.login-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  background-color: #8ce552 !important;
+  color: #ffffff !important;
+  border-radius: 44rpx;
+  font-size: 32rpx;
+  padding: 20rpx 0;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  gap: 10rpx;
+}
+
+/* 新增微信图标样式 */
+.wechat-icon {
+  width: 40rpx;
+  height: 40rpx;
+}
+
+/* 使用类名选择器替代标签选择器 */
+.login-btn-text {
+  /* 这里可以添加针对文字的特定样式，如果需要的话 */
+  /* 例如： line-height: 1; */
+}
+
+.login-btn::after {
+  border: none;
+}
+
+.login-btn[disabled] {
+  background-color: #c8c8c8 !important;
+  color: #ffffff !important;
+}
+
+.login-btn-hover {
+  background-color: #7ed441 !important;
+  opacity: 0.9;
+}
+
+.footer {
+  position: fixed;
+  bottom: 80rpx;
+  left: 0;
+  right: 0;
+  text-align: center;
+}
+
+.agreement-text {
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.link {
+  color: #8ce552;
+} 

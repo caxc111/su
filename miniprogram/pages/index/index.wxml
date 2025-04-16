@@ -1,0 +1,105 @@
+<!-- miniprogram/pages/index/index.wxml -->
+<view class="container" wx:if="{{pageReady}}">
+  <!-- 页面头部 - 修改为水平布局 -->
+  <view class="header">
+    <view class="header-left">
+      <text class="title">练习</text>
+    </view>
+    <view class="header-right">
+      <button class="action-btn add-btn" bindtap="handleAddArticle">添加文章</button>
+      <button class="action-btn test-btn" bindtap="handleVoiceTest" data-articleid="">
+        <text wx:if="{{isSpeaking && !currentPlayingArticleId}}">暂停</text><text wx:else>语音测试</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 提示文字 -->
+  <view class="hint-text" wx:if="{{!articles.length}}">暂无文章，点击右上角添加</view>
+  <view class="hint-text" wx:else>请选择您想要练习的文章</view>
+
+  <!-- 语音播放控制面板 (仅在有语音活动时显示) -->
+  <view class="speech-panel" wx:if="{{isSpeaking || speechProgress > 0}}">
+    <view class="speech-content">
+      <!-- 显示当前朗读的句子 -->
+      <view class="speech-text">{{currentSentence || '准备朗读...'}}</view>
+      <!-- 播放进度条 -->
+      <view class="speech-progress">
+        <view class="progress-bar">
+          <view class="progress-inner" style="width: {{speechProgress}}%"></view>
+        </view>
+        <view class="progress-text">{{speechProgress.toFixed(0)}}%</view>
+      </view>
+    </view>
+    <!-- 语音控制按钮 -->
+    <view class="speech-controls">
+       <!-- 播放/暂停按钮，根据是否当前文章播放状态显示图标 -->
+       <button class="speech-btn" bindtap="handleVoiceTest" data-articleid="{{currentPlayingArticleId}}">
+         <text class="iconfont {{isSpeaking ? 'icon-pause' : 'icon-play'}}"></text>
+         {{isSpeaking ? '暂停' : '播放'}}
+       </button>
+       <!-- 停止按钮 -->
+       <button class="speech-btn" bindtap="handleStopSpeech">
+         <text class="iconfont icon-stop"></text>
+         停止
+       </button>
+       <!-- 调整语速按钮 -->
+       <button class="speech-btn" bindtap="handleChangeRate">
+         <text class="iconfont icon-speed"></text>
+         语速
+       </button>
+    </view>
+  </view>
+
+  <!-- 文章分类筛选 -->
+  <view class="filter-tabs">
+    <view class="tab {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="tab {{currentTab === 'chinese' ? 'active' : ''}}" bindtap="switchTab" data-tab="chinese">中文</view>
+    <view class="tab {{currentTab === 'english' ? 'active' : ''}}" bindtap="switchTab" data-tab="english">英文</view>
+  </view>
+
+  <!-- 文章列表 -->
+  <view class="article-list">
+    <block wx:for="{{articles}}" wx:key="id">
+      <view class="article-wrapper">
+        <!-- 文章内容卡片 -->
+        <view class="article-item">
+          <view class="article-title">{{item.title}}</view>
+          <view class="article-preview">{{item.preview}}</view>
+        </view>
+        
+        <!-- 文章标签 - 在文本框外部 -->
+        <view class="article-tags">
+          <text class="article-tag">课文{{item.lessonNo}}</text>
+          <text class="article-tag">{{item.language}}</text>
+          <text class="article-tag">{{item.level}}</text>
+          <text class="article-tag">{{item.wordCount}}字</text>
+        </view>
+        
+        <!-- 文章操作按钮 - 在文本框外部 -->
+        <view class="article-actions">
+          <view class="btn-group">
+            <view class="read-btn" bindtap="handleVoiceTest" data-id="{{item.id}}">朗读</view>
+            <view class="recite-btn" bindtap="handlePracticeReciting" data-id="{{item.id}}">背诵</view>
+          </view>
+          <text class="more-btn" bindtap="showMoreActions" data-id="{{item.id}}">...</text>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>
+
+<!-- 页面加载中或出错时的提示 -->
+<view class="loading-container" wx:else>
+   <view wx:if="{{loadingError}}" class="error-message">
+      <text class="iconfont icon-error"></text>
+      <text>{{loadingError}}</text>
+   </view>
+   <view wx:else class="loading-indicator">
+      <view class="loading-icon"></view>
+      <text>加载中...</text>
+   </view>
+</view>
+
+<!-- 清除灰蒙版的透明层 -->
+<view class="clear-overlay"></view>
+ 
