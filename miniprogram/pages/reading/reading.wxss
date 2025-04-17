@@ -96,7 +96,7 @@
   background-color: #f0f9f0;
   padding: 10rpx 20rpx;
   border-radius: 30rpx;
-  color: #07c160;
+  color: #8ce552;
   font-size: 26rpx;
 }
 
@@ -192,9 +192,9 @@
 }
 
 .btn-primary {
-  background-color: #07c160;
+  background-color: #8ce552;
   color: #fff;
-  box-shadow: 0 4rpx 12rpx rgba(7, 193, 96, 0.3);
+  box-shadow: 0 4rpx 12rpx rgba(140, 229, 82, 0.3);
 }
 
 .btn-secondary {
