@@ -1,0 +1,92 @@
+<!-- record-detail.wxml - 练习记录详情页 -->
+<view class="container">
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading">
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 记录详情 -->
+  <block wx:elif="{{record}}">
+    <!-- 顶部信息 -->
+    <view class="header">
+      <text class="title">{{record.title || '未命名练习'}}</text>
+      <view class="meta">
+        <text class="practice-type {{record.practiceType === 'read' ? 'read' : 'recite'}}">{{practiceTypeText}}</text>
+        <text class="date">{{dateFormatted}}</text>
+      </view>
+    </view>
+
+    <!-- 得分卡片 -->
+    <view class="score-card">
+      <view class="score-container">
+        <view class="score {{scoreClass}}">{{record.score}}</view>
+        <text class="score-label">分</text>
+      </view>
+      <view class="score-detail">
+        <view class="similarity">
+          <text class="label">相似度</text>
+          <text class="value">{{similarityPercent}}%</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 文本区域 -->
+    <view class="text-section">
+      <view class="text-header">
+        <text class="text-title">原文</text>
+        <view class="play-btn {{audioPlaying && audioPlayingType === 'original' ? 'playing' : ''}}" bindtap="playOriginalAudio">
+          <text>{{audioPlaying && audioPlayingType === 'original' ? '停止' : '播放'}}</text>
+        </view>
+      </view>
+      <view class="text-content original-text">
+        <text>{{record.originalText}}</text>
+      </view>
+    </view>
+
+    <view class="text-section">
+      <view class="text-header">
+        <text class="text-title">识别结果</text>
+        <view class="play-btn {{audioPlaying && audioPlayingType === 'recognized' ? 'playing' : ''}}" bindtap="playRecognizedAudio">
+          <text>{{audioPlaying && audioPlayingType === 'recognized' ? '停止' : '播放'}}</text>
+        </view>
+      </view>
+      <view class="text-content recognized-text">
+        <text>{{record.recognizedText}}</text>
+      </view>
+    </view>
+
+    <!-- 对比分析 -->
+    <view class="compare-section">
+      <view class="compare-header" bindtap="toggleCompare">
+        <text class="compare-title">对比分析</text>
+        <text class="compare-toggle">{{compareVisible ? '收起' : '展开'}}</text>
+      </view>
+      <view class="compare-content" wx:if="{{compareVisible}}">
+        <view class="compare-item">
+          <text class="compare-label">相似度</text>
+          <text class="compare-value">{{similarityPercent}}%</text>
+        </view>
+        <view class="compare-item">
+          <text class="compare-label">原文字数</text>
+          <text class="compare-value">{{record.originalText.length}}字</text>
+        </view>
+        <view class="compare-item">
+          <text class="compare-label">识别字数</text>
+          <text class="compare-value">{{record.recognizedText.length}}字</text>
+        </view>
+        <view class="compare-note">
+          <text>注：相似度基于字符匹配和语义理解计算，分数会根据练习类型有所调整。</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons">
+      <button class="action-btn back-btn" bindtap="goBack">返回列表</button>
+      <button class="action-btn delete-btn" bindtap="deleteRecord">删除记录</button>
+      <button class="action-btn share-btn" open-type="share">分享</button>
+    </view>
+  </block>
+</view> 

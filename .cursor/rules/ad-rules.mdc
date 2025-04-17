@@ -1,14 +1,19 @@
+---
+description: 广告模版
+globs: 
+alwaysApply: false
+---
 # 顺口成章小程序广告服务规范
 
 > 版本：1.0.0
 > 关联规范：
-> - [项目开发规范](./project-rules.mdc)
-> - [全局代码规范](./global-code-rules.mdc)
+> - [项目开发规范](mdc:project-rules.mdc)
+> - [全局代码规范](mdc:global-code-rules.mdc)
 
 ## 一、广告模块架构
 
 ### 1. 在项目中的位置
-遵循[项目开发规范](./project-rules.mdc)中的目录结构，广告服务位于：
+遵循[项目开发规范](mdc:project-rules.mdc)中的目录结构，广告服务位于：
 ```
 miniprogram/
 └── services/
@@ -16,7 +21,7 @@ miniprogram/
 ```
 
 ### 2. 代码规范
-- 遵循[全局代码规范](./global-code-rules.mdc)中的文件行数限制
+- 遵循[全局代码规范](mdc:global-code-rules.mdc)中的文件行数限制
 - 确保代码注释完整
 - 遵循项目命名规范
 
@@ -119,7 +124,7 @@ adService.init({
 ## 五、注意事项
 
 ### 1. 代码规范
-- 遵循[全局代码规范](./global-code-rules.mdc)中的文件行数限制
+- 遵循[全局代码规范](mdc:global-code-rules.mdc)中的文件行数限制
 - 遵循项目规范中的命名规范
 - 确保代码注释完整
 

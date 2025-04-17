@@ -1,0 +1,44 @@
+<!-- reciting.wxml - 背诵页面布局 -->
+<view class="container" wx:if="{{!loading}}">
+  <!-- 头部信息 -->
+  <view class="header">
+    <text class="title">{{article.title}}</text>
+    <text class="subtitle">背诵练习</text>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="hint" wx:if="{{!showText}}">
+    <text>请点击下方按钮开始录音，尝试背诵全文</text>
+    <view class="hint-actions">
+      <button class="btn-show-text" bindtap="toggleShowText">显示原文</button>
+    </view>
+  </view>
+
+  <!-- 原文区域 -->
+  <scroll-view scroll-y class="article-content" wx:if="{{showText}}">
+    <view class="content-wrapper">
+      <text class="content">{{article.content}}</text>
+      <view class="hint-actions" style="margin-top: 20rpx;">
+        <button class="btn-hide-text" bindtap="toggleShowText">隐藏原文</button>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 语音识别组件 -->
+  <speech-recognition 
+    id="speechRecognition"
+    originText="{{article.content}}" 
+    mode="recite"
+    bind:score="handleRecognitionScore"
+    bind:reset="handleRecognitionReset"
+    bind:confirm="handleRecognitionConfirm">
+  </speech-recognition>
+</view>
+
+<!-- 加载中 -->
+<view class="loading-container" wx:if="{{loading}}">
+  <view class="loading">
+    <image class="loading-icon" src="/assets/images/loading.png" mode="aspectFit"></image>
+    <text>加载中...</text>
+  </view>
+</view> 

@@ -78,7 +78,7 @@
         <!-- 文章操作按钮 - 在文本框外部 -->
         <view class="article-actions">
           <view class="btn-group">
-            <view class="read-btn" bindtap="handleVoiceTest" data-id="{{item.id}}">朗读</view>
+            <view class="read-btn" bindtap="handlePracticeReading" data-id="{{item.id}}">朗读</view>
             <view class="recite-btn" bindtap="handlePracticeReciting" data-id="{{item.id}}">背诵</view>
           </view>
           <text class="more-btn" bindtap="showMoreActions" data-id="{{item.id}}">...</text>

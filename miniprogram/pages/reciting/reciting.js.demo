@@ -1,0 +1,230 @@
+// reciting.js - 背诵练习页面逻辑（使用语音识别组件）
+
+const app = getApp();
+
+Page({
+  /**
+   * 页面的初始数据
+   */
+  data: {
+    article: null,        // 当前文章
+    articleId: '',        // 文章ID
+    isReady: false,       // 语音服务是否准备好
+    showText: false,      // 是否显示原文
+    loading: true,        // 是否正在加载
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad: function (options) {
+    const { id } = options;
+    
+    if (!id) {
+      wx.showToast({
+        title: '缺少文章ID',
+        icon: 'error'
+      });
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+      return;
+    }
+
+    this.setData({
+      articleId: id,
+      loading: true
+    });
+
+    // 提前请求麦克风授权
+    this.requestRecordAuth();
+
+    // 加载文章
+    this.loadArticle(id);
+  },
+
+  /**
+   * 加载文章数据
+   */
+  loadArticle: function(id) {
+    // 从本地存储获取文章
+    try {
+      const articles = wx.getStorageSync('articles') || [];
+      const article = articles.find(item => item.id === id);
+      
+      if (!article) {
+        wx.showToast({
+          title: '文章不存在',
+          icon: 'error'
+        });
+        setTimeout(() => {
+          wx.navigateBack();
+        }, 1500);
+        return;
+      }
+      
+      this.setData({
+        article,
+        loading: false,
+        isReady: true
+      });
+    } catch (e) {
+      console.error('加载文章失败', e);
+      wx.showToast({
+        title: '加载文章失败',
+        icon: 'error'
+      });
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+    }
+  },
+
+  /**
+   * 切换显示原文
+   */
+  toggleShowText: function() {
+    this.setData({
+      showText: !this.data.showText
+    });
+  },
+
+  /**
+   * 处理识别得分事件
+   * @param {Object} e - 事件对象
+   */
+  handleRecognitionScore: function(e) {
+    console.log('识别得分:', e.detail);
+  },
+
+  /**
+   * 处理识别重置事件
+   * @param {Object} e - 事件对象
+   */
+  handleRecognitionReset: function(e) {
+    console.log('识别重置');
+    
+    // 背诵模式下重置时隐藏原文
+    this.setData({
+      showText: false
+    });
+  },
+
+  /**
+   * 处理识别确认事件
+   * @param {Object} e - 事件对象
+   */
+  handleRecognitionConfirm: function(e) {
+    console.log('识别确认:', e.detail);
+    
+    // 保存练习记录
+    this.savePracticeRecord(e.detail);
+  },
+
+  /**
+   * 保存练习记录
+   * @param {Object} recordData - 练习记录数据
+   */
+  savePracticeRecord: function(recordData) {
+    try {
+      // 构建记录对象
+      const record = {
+        articleId: this.data.articleId,
+        title: this.data.article.title,
+        score: recordData.score,
+        recognitionText: recordData.recognitionText,
+        recordFilePath: recordData.recordFilePath,
+        duration: recordData.duration,
+        timestamp: recordData.timestamp,
+        id: recordData.id,
+        type: 'recite'  // 背诵类型
+      };
+      
+      // 获取已有记录
+      let records = wx.getStorageSync('reciting_records') || [];
+      
+      // 添加新记录
+      records.unshift(record);
+      
+      // 最多保存100条记录
+      if (records.length > 100) {
+        records = records.slice(0, 100);
+      }
+      
+      // 保存到存储
+      wx.setStorageSync('reciting_records', records);
+      
+      // 显示成功提示
+      wx.showToast({
+        title: '保存成功',
+        icon: 'success'
+      });
+      
+      // 延迟返回
+      setTimeout(() => {
+        wx.navigateBack();
+      }, 1500);
+    } catch (e) {
+      console.error('保存记录失败', e);
+      wx.showToast({
+        title: '保存记录失败',
+        icon: 'none'
+      });
+    }
+  },
+
+  /**
+   * 请求麦克风授权
+   */
+  requestRecordAuth: function() {
+    wx.getSetting({
+      success: (res) => {
+        // 检查是否已经授权录音功能
+        if (!res.authSetting['scope.record']) {
+          wx.authorize({
+            scope: 'scope.record',
+            success: () => {
+              console.log('麦克风授权成功');
+            },
+            fail: (err) => {
+              console.error('麦克风授权失败', err);
+              // 提示用户开启授权
+              wx.showModal({
+                title: '提示',
+                content: '使用背诵功能需要您授权麦克风权限',
+                confirmText: '去授权',
+                cancelText: '取消',
+                success: (modalRes) => {
+                  if (modalRes.confirm) {
+                    // 引导用户到设置页手动授权
+                    wx.openSetting({
+                      success: (settingRes) => {
+                        if (settingRes.authSetting['scope.record']) {
+                          console.log('用户已授权麦克风权限');
+                        } else {
+                          console.log('用户拒绝授权麦克风权限');
+                        }
+                      }
+                    });
+                  }
+                }
+              });
+            }
+          });
+        } else {
+          console.log('已授权麦克风权限');
+        }
+      }
+    });
+  },
+
+  /**
+   * 分享
+   */
+  onShareAppMessage: function() {
+    return {
+      title: `我正在练习背诵《${this.data.article?.title || '背诵练习'}》`,
+      path: `/pages/reciting/reciting?id=${this.data.articleId}`
+    };
+  }
+}); 

@@ -15,11 +15,11 @@ Page({
       
       // 检查app是否存在以及应用是否已初始化完成
       if (app && app.globalData && app.globalData.isReady) {
-        console.log('[Login] App is ready.');
-        this.setData({ isReady: true });
-      } else {
+      console.log('[Login] App is ready.');
+      this.setData({ isReady: true });
+    } else {
         console.log('[Login] App not ready or not fully initialized, waiting...');
-        // 等待应用初始化完成
+      // 等待应用初始化完成
         this.waitForAppReady();
       }
     } catch (e) {
@@ -72,23 +72,23 @@ Page({
     let waitTime = 0;
 
     try {
-      const timer = setInterval(() => {
+    const timer = setInterval(() => {
         try {
           // 同样需要检查app是否存在
           if (app && app.globalData && app.globalData.isReady) {
-            clearInterval(timer);
-            console.log('[Login] App ready detected after waiting.');
-            this.setData({ isReady: true });
+        clearInterval(timer);
+        console.log('[Login] App ready detected after waiting.');
+        this.setData({ isReady: true });
             this.hideAllLoadingAndModal(); // 关闭可能的加载提示
-            return;
+        return;
           } else {
             console.log(`[Login] Still waiting for app ready... ${waitTime}ms elapsed`);
-          }
+      }
 
-          waitTime += checkInterval;
-          if (waitTime >= maxWaitTime) {
-            clearInterval(timer);
-            console.error('[Login] 等待应用初始化超时');
+      waitTime += checkInterval;
+      if (waitTime >= maxWaitTime) {
+        clearInterval(timer);
+        console.error('[Login] 等待应用初始化超时');
             
             // 超时后仍然尝试让页面可用
             this.setData({ 
@@ -96,10 +96,10 @@ Page({
               isLoading: false 
             });
             
-            wx.showToast({
+        wx.showToast({
               title: '系统初始化可能未完成，功能可能受限',
-              icon: 'none',
-              duration: 2000
+          icon: 'none',
+          duration: 2000
             });
           }
         } catch (e) {
@@ -109,9 +109,9 @@ Page({
           this.setData({ 
             isReady: true, 
             isLoading: false 
-          });
-        }
-      }, checkInterval);
+        });
+      }
+    }, checkInterval);
     } catch (e) {
       console.error('[Login] Fatal error in waitForAppReady:', e);
       // 即使设置定时器出错，也让页面可用
@@ -147,7 +147,7 @@ Page({
       title: '登录中...',
       mask: true
     });
-    
+
     this.setData({ isLoading: true });
     console.log('[Login] handleLogin - Set isLoading to true.');
 
@@ -197,7 +197,7 @@ Page({
       try {
         if (app && app.globalData) {
           app.globalData.userInfo = finalUserInfo;
-          app.globalData.isLoggedIn = true;
+        app.globalData.isLoggedIn = true;
           console.log('[Login] Global data updated');
         } else {
           console.warn('[Login] Could not update global data, app or globalData is undefined');
@@ -209,7 +209,7 @@ Page({
       // 关闭加载提示
       wx.hideLoading();
       
-      // 5. 登录成功后跳转
+      // 5. 登录成功后跳转  --- 恢复跳转逻辑 ---
       console.log('[Login] Navigating to index page...');
       wx.switchTab({
         url: '/pages/index/index',
@@ -241,16 +241,17 @@ Page({
           });
         }
       });
+
     } catch (e) {
       // ... (错误处理，确保 hideLoading) ...
        // --- TODO: 将来在这里处理服务器登录失败的情况 --- 
       console.error('[Login] Fatal error in login process:', e);
       wx.hideLoading();
-      wx.showToast({
+        wx.showToast({
         title: '登录失败，请重试',
-        icon: 'none',
+          icon: 'none',
         duration: 2000
-      });
+        });
       this.setData({ isLoading: false });
       // -------------------------------------------------------
     }

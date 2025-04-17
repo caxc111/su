@@ -1,9 +1,13 @@
 {
   "pages": [
-    "pages/login/login",
     "pages/index/index",
+    "pages/login/login",
     "pages/record/record",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/record-detail/record-detail",
+    "pages/article-edit/article-edit",
+    "pages/reading/reading",
+    "pages/reciting/reciting"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -11,6 +15,7 @@
     "navigationBarTitleText": "顺口成章",
     "navigationBarTextStyle": "black"
   },
+  "requiredBackgroundModes": ["audio"],
   "tabBar": {
     "color": "#999999",
     "selectedColor": "#8ce552",

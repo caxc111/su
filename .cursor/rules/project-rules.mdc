@@ -63,7 +63,7 @@ miniprogram/
 ```
 
 ## 二、代码规范
-
+###每个页面必须有完整的四个文件（.js、.wxml、.wxss和.json）
 ### 1. 文件行数限制
 遵循[全局代码规范](mdc:global-code-rules.mdc)中的规定：
 - 页面文件(.js/.ts)：建议500行内，最大800行

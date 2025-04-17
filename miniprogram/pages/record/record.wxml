@@ -1,45 +1,54 @@
+<!-- record.wxml - 练习记录页面 -->
 <view class="container">
+  <!-- 顶部标题 -->
   <view class="header">
-    <view class="title">记录</view>
+    <text class="title">练习记录</text>
   </view>
 
-  <view class="filter-tabs">
-    <view class="tab {{activeTab === 'reading' ? 'active' : ''}}" bindtap="switchTab" data-tab="reading">朗读</view>
-    <view class="tab {{activeTab === 'reciting' ? 'active' : ''}}" bindtap="switchTab" data-tab="reciting">背诵</view>
+  <!-- 标签切换 -->
+  <view class="tabs">
+    <view class="tab {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-tab="0">全部</view>
+    <view class="tab {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-tab="1">朗读</view>
+    <view class="tab {{currentTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-tab="2">背诵</view>
   </view>
 
-  <view class="record-list">
-    <block wx:if="{{recordList.length > 0}}">
-      <block wx:for="{{recordList}}" wx:key="id">
-        <view class="record-item">
-          <view class="record-info">
-            <view class="article-title">{{item.title}}</view>
-            <view class="article-meta">
-              <text class="lesson-tag">课文{{item.lessonNo}}</text>
-              <text class="language-tag">{{item.language}}</text>
-            </view>
-            <view class="practice-time">{{item.time}}</view>
-          </view>
-          <view class="record-score">
-            <text class="score-label">得分：</text>
-            <text class="score-value {{item.score >= 90 ? 'excellent' : ''}}">{{item.score}}</text>
-          </view>
-          <view class="record-actions">
-            <text class="action-btn" bindtap="viewRecordDetail" data-id="{{item.id}}">查看</text>
-            <text class="action-btn delete" bindtap="deleteRecord" data-id="{{item.id}}">删除</text>
+  <!-- 加载中 -->
+  <view class="loading-container" wx:if="{{isLoading}}">
+    <view class="loading">
+      <image class="loading-icon" src="/assets/icons/loading.gif" wx:if="{{false}}"></image>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 无数据提示 -->
+  <view class="no-data" wx:elif="{{noData}}">
+    <image class="no-data-image" src="/assets/icons/empty.png"></image>
+    <text class="no-data-text">暂无练习记录</text>
+    <text class="no-data-tip">快去练习吧！</text>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="records-list" wx:else>
+    <view wx:for="{{records}}" wx:key="id" class="record-item">
+      <view class="record-content" bindtap="viewRecordDetail" data-id="{{item.id}}">
+        <view class="record-info">
+          <view class="record-title">{{item.title || '未命名练习'}}</view>
+          <view class="record-meta">
+            <text class="practice-type {{item.practiceType === 'read' ? 'read' : 'recite'}}">{{item.practiceTypeText}}</text>
+            <text class="record-date">{{item.dateFormatted}}</text>
           </view>
         </view>
-      </block>
-    </block>
-  </view>
-
-  <view wx:if="{{!hasRecords}}" class="empty-state">
-    <image class="empty-icon" src="/assets/icons/empty.png" mode="aspectFit"></image>
-    <text class="empty-text">暂无练习记录</text>
-  </view>
-  
-  <view wx:if="{{isLoading}}" class="loading-state">
-    <view class="loading-icon"></view>
-    <text class="loading-text">加载中...</text>
+        <view class="record-stats">
+          <view class="score {{item.scoreClass}}">
+            <text>{{item.score}}</text>
+            <text class="score-unit">分</text>
+          </view>
+        </view>
+      </view>
+      <!-- 删除按钮 -->
+      <view class="delete-btn" catchtap="deleteRecord" data-id="{{item.id}}">
+        <text>删除</text>
+      </view>
+    </view>
   </view>
 </view> 

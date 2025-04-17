@@ -1,0 +1,82 @@
+<!-- 阅读练习页面 -->
+<view class="container">
+  <!-- 加载中显示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 文章内容区域 -->
+  <block wx:if="{{!loading}}">
+    <!-- 文章标题 -->
+    <view class="article-header">
+      <view class="article-title">{{article.title}}</view>
+      <view class="article-meta">
+        <text class="lesson-no">课文{{article.lessonNo}}</text>
+        <text class="language">{{article.language}}</text>
+      </view>
+    </view>
+
+    <!-- 原文区域 - 带有文本对比结果 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">原文</text>
+        <view class="play-btn" bindtap="playText">
+          <image class="play-icon" src="/assets/icons/play.png" mode="aspectFit"></image>
+          <text>播放</text>
+        </view>
+      </view>
+      <view class="text-box">
+        <!-- 如果有对比结果，显示带有颜色标记的对比文本 -->
+        <block wx:if="{{comparisonResult && comparisonResult.length > 0}}">
+          <view class="comparison-result">
+            <text 
+              wx:for="{{comparisonResult}}" 
+              wx:key="index"
+              class="char {{item.isCorrect ? 'correct' : 'incorrect'}}">{{item.char}}</text>
+          </view>
+        </block>
+        <!-- 否则显示原始文本 -->
+        <block wx:else>
+          <text class="text-content">{{article.content}}</text>
+        </block>
+      </view>
+    </view>
+
+    <!-- 识别结果区域 - 纯文本显示 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">识别结果</text>
+      </view>
+      <view class="text-box">
+        <block wx:if="{{!recognitionText}}">
+          <text class="text-content empty-text">未开始朗读，请点击下方麦克风按钮开始朗读</text>
+        </block>
+        <block wx:else>
+          <text class="text-content">{{recognitionText}}</text>
+        </block>
+      </view>
+    </view>
+
+    <!-- 得分区域 -->
+    <view class="score-section" wx:if="{{hasScore}}">
+      <view class="score-title">本次得分</view>
+      <view class="score-value">{{score}}</view>
+      <view class="score-comment">{{scoreComment}}</view>
+      
+      <!-- 底部按钮 -->
+      <view class="bottom-buttons">
+        <button class="btn btn-secondary" bindtap="resetReading">重新朗读</button>
+        <button class="btn btn-primary" bindtap="finishReading">完成练习</button>
+      </view>
+    </view>
+
+    <!-- 录音按钮 -->
+    <view class="record-container" wx:if="{{!hasScore}}">
+      <view class="mic-button {{isRecording ? 'recording' : ''}}" bindtap="toggleRecording">
+        <image class="mic-icon" src="{{isRecording ? '/assets/icons/record-active.png' : '/assets/icons/mic.png'}}" mode="aspectFit"></image>
+      </view>
+      <text class="record-tip">{{isRecording ? '点击停止朗读' : '点击麦克风开始朗读'}}</text>
+    </view>
+  </block>
+</view> 

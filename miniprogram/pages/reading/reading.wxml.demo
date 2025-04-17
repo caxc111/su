@@ -1,0 +1,44 @@
+<!-- 阅读练习页面 (使用语音识别组件) -->
+<view class="container">
+  <!-- 加载中显示 -->
+  <view class="loading-container" wx:if="{{loading}}">
+    <view class="loading-icon"></view>
+    <view class="loading-text">加载中...</view>
+  </view>
+
+  <!-- 文章内容区域 -->
+  <block wx:if="{{!loading}}">
+    <!-- 文章标题 -->
+    <view class="article-header">
+      <view class="article-title">{{article.title}}</view>
+      <view class="article-meta">
+        <text class="lesson-no">课文{{article.lessonNo}}</text>
+        <text class="language">{{article.language}}</text>
+      </view>
+    </view>
+
+    <!-- 原文区域 -->
+    <view class="section">
+      <view class="section-header">
+        <text class="section-title">原文</text>
+        <view class="play-btn" bindtap="playText">
+          <image class="play-icon" src="/assets/icons/play.png" mode="aspectFit"></image>
+          <text>播放</text>
+        </view>
+      </view>
+      <view class="text-box">
+        <text class="text-content">{{article.content}}</text>
+      </view>
+    </view>
+
+    <!-- 使用语音识别组件 -->
+    <speech-recognition
+      original-text="{{article.content}}"
+      practice-type="read"
+      show-comparison="{{true}}"
+      bind:score="handleRecognitionScore"
+      bind:reset="handleRecognitionReset"
+      bind:confirm="handleRecognitionConfirm">
+    </speech-recognition>
+  </block>
+</view> 

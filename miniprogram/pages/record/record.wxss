@@ -1,6 +1,23 @@
+/* miniprogram/pages/record/record.wxss (RECREATED Minimal Test) */
+/* No styles */ 
+
+/* record.wxss - 练习记录页面样式 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 0 30rpx;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
 .header {
-  padding: 30rpx;
-  background-color: #fff;
+  padding: 30rpx 0;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20rpx;
 }
 
 .title {
@@ -9,127 +26,52 @@
   color: #333;
 }
 
-.filter-tabs {
+/* 标签切换样式 */
+.tabs {
   display: flex;
-  padding: 20rpx 30rpx;
+  width: 100%;
+  height: 80rpx;
   background-color: #fff;
-  border-bottom: 1rpx solid #eee;
+  border-radius: 40rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .tab {
-  padding: 10rpx 30rpx;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   font-size: 28rpx;
   color: #666;
-  border-radius: 26rpx;
-  margin-right: 20rpx;
+  position: relative;
+  transition: all 0.3s;
 }
 
 .tab.active {
-  background-color: var(--brand-green, #8ce552);
   color: #fff;
-}
-
-.record-list {
-  padding: 20rpx;
-}
-
-.record-item {
-  background-color: #fff;
-  border-radius: 16rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.record-info {
-  flex: 1;
-}
-
-.article-title {
-  font-size: 32rpx;
+  background-color: #8ce552;
   font-weight: bold;
-  color: #333;
-  margin-bottom: 16rpx;
 }
 
-.article-meta {
+/* 加载中样式 */
+.loading-container {
   display: flex;
-  align-items: center;
-  gap: 16rpx;
-  margin-bottom: 12rpx;
-}
-
-.lesson-tag,
-.language-tag {
-  font-size: 24rpx;
-  color: #999;
-  padding: 4rpx 12rpx;
-  background-color: #f5f5f5;
-  border-radius: 8rpx;
-}
-
-.practice-time {
-  font-size: 24rpx;
-  color: #999;
-}
-
-.record-score {
-  text-align: right;
-}
-
-.score-label {
-  font-size: 28rpx;
-  color: #666;
-}
-
-.score-value {
-  font-size: 40rpx;
-  font-weight: bold;
-  color: var(--brand-orange, #f97316);
-}
-
-.score-value.excellent {
-  color: var(--brand-orange, #f97316);
-}
-
-/* 记录操作按钮样式 */
-.record-actions {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10rpx;
-  margin-left: 20rpx;
-}
-
-.action-btn {
-  font-size: 24rpx;
-  color: var(--brand-green, #8ce552);
-  padding: 6rpx 12rpx;
-  border-radius: 4rpx;
-}
-
-.action-btn.delete {
-  color: var(--error, #ff6b6b);
-}
-
-/* 加载状态样式 */
-.loading-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  padding: 60rpx 0;
+  align-items: center;
+  height: 500rpx;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .loading-icon {
-  width: 60rpx;
-  height: 60rpx;
-  border: 4rpx solid #eee;
-  border-top: 4rpx solid var(--brand-green, #8ce552);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
+  width: 80rpx;
+  height: 80rpx;
   margin-bottom: 20rpx;
 }
 
@@ -138,23 +80,183 @@
   color: #999;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* 无数据样式 */
+.no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100rpx 0;
 }
 
-.empty-state {
-  padding: 120rpx 0;
-  text-align: center;
-}
-
-.empty-icon {
+.no-data-image {
   width: 200rpx;
   height: 200rpx;
-  margin-bottom: 20rpx;
+  margin-bottom: 30rpx;
 }
 
-.empty-text {
+.no-data-text {
+  font-size: 32rpx;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.no-data-tip {
   font-size: 28rpx;
   color: #999;
-} 
+}
+
+/* 记录列表样式 */
+.records-list {
+  width: 100%;
+}
+
+/* 滑动删除动画效果 */
+.record-item {
+  width: 100%;
+  margin-bottom: 20rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.record-item:active {
+  transform: scale(0.98);
+}
+
+.record-content {
+  display: flex;
+  padding: 30rpx;
+  background-color: #fff;
+  position: relative;
+  z-index: 1;
+  transition: transform 0.3s ease;
+}
+
+.record-info {
+  flex: 3;
+}
+
+.record-title {
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400rpx;
+}
+
+.record-meta {
+  display: flex;
+  align-items: center;
+}
+
+.practice-type {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  margin-right: 16rpx;
+}
+
+.practice-type.read {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.practice-type.recite {
+  background-color: #f3e5f5;
+  color: #9c27b0;
+}
+
+.record-date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.record-stats {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.score {
+  font-size: 50rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: baseline;
+}
+
+.score-unit {
+  font-size: 24rpx;
+  margin-left: 4rpx;
+}
+
+.score-excellent {
+  color: #8ce552;
+}
+
+.score-good {
+  color: #4caf50;
+}
+
+.score-average {
+  color: #ff9800;
+}
+
+.score-poor {
+  color: #f44336;
+}
+
+/* 删除按钮 */
+.delete-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ff4b4b;
+  color: white;
+  width: 120rpx;
+  z-index: 0;
+}
+
+/* 添加下拉刷新动画 */
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-icon {
+  width: 80rpx;
+  height: 80rpx;
+  margin-bottom: 20rpx;
+  animation: rotate 1s linear infinite;
+}
+
+/* 添加滑入动画 */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.record-item {
+  animation: slideIn 0.3s ease forwards;
+}
+
+/* 为不同序号的项添加不同的动画延迟 */
+.record-item:nth-child(2) { animation-delay: 0.05s; }
+.record-item:nth-child(3) { animation-delay: 0.1s; }
+.record-item:nth-child(4) { animation-delay: 0.15s; }
+.record-item:nth-child(5) { animation-delay: 0.2s; }
+.record-item:nth-child(6) { animation-delay: 0.25s; }
+.record-item:nth-child(7) { animation-delay: 0.3s; }
+.record-item:nth-child(8) { animation-delay: 0.35s; }
+.record-item:nth-child(9) { animation-delay: 0.4s; }
+.record-item:nth-child(10) { animation-delay: 0.45s; } 

@@ -1,0 +1,67 @@
+<view class="speech-recognition">
+  <!-- 错误信息显示 -->
+  <view class="error-message" wx:if="{{errorMsg}}">
+    {{errorMsg}}
+  </view>
+
+  <!-- 等待服务准备时的提示 -->
+  <view class="loading-hint" wx:if="{{!isReady}}">
+    <text>语音服务正在准备中...</text>
+  </view>
+
+  <!-- 主内容区域 -->
+  <view class="recognition-content" wx:if="{{isReady}}">
+    <!-- 控制面板 -->
+    <view class="control-panel">
+      <view class="record-btn-container">
+        <button 
+          class="record-btn {{isRecording ? 'recording' : ''}} {{recordButtonDisabled ? 'disabled' : ''}}" 
+          bindtap="handleRecordButtonClick"
+          disabled="{{recordButtonDisabled}}">
+          <view class="btn-icon"></view>
+          <text>{{isRecording ? '停止录音' : '开始录音'}}</text>
+        </button>
+        <text class="record-duration" wx:if="{{isRecording}}">{{recordDuration}}s</text>
+      </view>
+      <view class="hint-text" wx:if="{{!isRecording && !recognitionText}}">
+        点击按钮开始录音
+      </view>
+      <view class="hint-text loading" wx:if="{{isRecognizing}}">
+        正在识别中...
+      </view>
+    </view>
+
+    <!-- 识别结果区域 -->
+    <view class="recognition-result" wx:if="{{recognitionText}}">
+      <view class="result-header">
+        <text class="title">识别结果</text>
+      </view>
+      <view class="result-content">
+        <text>{{recognitionText}}</text>
+      </view>
+    </view>
+
+    <!-- 得分区域 -->
+    <view class="score-section" wx:if="{{recognitionText}}">
+      <view class="score-title">正确率</view>
+      <view class="score-value">{{similarity}}%</view>
+    </view>
+
+    <!-- 文本对比区域 -->
+    <view class="text-comparison" wx:if="{{comparisonResult && comparisonResult.length > 0}}">
+      <view class="comparison-title">文本对比</view>
+      <view class="comparison-content">
+        <text 
+          wx:for="{{comparisonResult}}" 
+          wx:key="index"
+          class="char {{item.isCorrect ? 'correct' : 'incorrect'}}">{{item.char}}</text>
+      </view>
+    </view>
+
+    <!-- 操作按钮 -->
+    <view class="action-buttons" wx:if="{{recognitionText}}">
+      <button class="action-btn reset-btn" bindtap="handleReset">重新识别</button>
+      <button class="action-btn confirm-btn" bindtap="handleConfirm">确认完成</button>
+    </view>
+  </view>
+</view> 

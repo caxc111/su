@@ -1,612 +1,723 @@
-// 导入所需的依赖
-let speechService = null;
-let SPEECH_STATUS = { IDLE: 0, SPEAKING: 1, PAUSED: 2 };
-let SPEECH_RATE = { NORMAL: 1.0 };
-let SPEECH_EVENTS = { 
-  STATUS_CHANGE: 'STATUS_CHANGE',
-  PROGRESS_UPDATE: 'PROGRESS_UPDATE',
-  SENTENCE_CHANGE: 'SENTENCE_CHANGE',
-  ERROR: 'ERROR'
-};
-
-// 尝试导入语音服务，但添加防御性代码
-try {
-  const speechModule = require('../../services/speech.service');
-  speechService = speechModule.default || speechModule;
-  SPEECH_STATUS = speechModule.SPEECH_STATUS || SPEECH_STATUS;
-  SPEECH_RATE = speechModule.SPEECH_RATE || SPEECH_RATE;
-  SPEECH_EVENTS = speechModule.SPEECH_EVENTS || SPEECH_EVENTS;
-  console.log('[Index] 成功导入语音服务模块');
-} catch (e) {
-  console.error('[Index] 导入语音服务模块时出错:', e);
-  // 保持默认值
-}
-
-// 尝试导入灰蒙版修复函数
-let fixGrayOverlay = () => {
-  console.warn('[Index] fixGrayOverlay not available, using dummy function');
-};
-try {
-  const resetModule = require('../../reset-loading');
-  if (resetModule && typeof resetModule.fixGrayOverlay === 'function') {
-    fixGrayOverlay = resetModule.fixGrayOverlay;
-    console.log('[Index] 成功导入灰蒙版修复函数');
-  }
-} catch (e) {
-  console.error('[Index] 导入灰蒙版修复函数时出错:', e);
-  // 保持默认函数
-}
-
-const app = getApp();
+// miniprogram/pages/index/index.js
+import { PAGES, formatTime } from '../../utils/constant';
+const app = getApp(); // 获取应用实例
 
 Page({
+  /**
+   * 页面的初始数据
+   */
   data: {
-    currentTab: 'all', // 'all', 'chinese', 'english'
-    articles: [ // 示例数据，后续应从 storage 或 API 加载
+    isAppReady: false,    // 应用是否已准备好 (app.waitForReady 完成)
+    pageReady: false,     // 页面自身数据是否已加载完成
+    loadingError: '',     // 加载错误信息
+    
+    // 文章相关
+    currentTab: 'all',    // 当前选中的 Tab ('all', 'chinese', 'english')
+    articles: [],         // 文章列表
+    isLoading: false,     // 是否正在加载文章
+
+    // 语音相关
+    isSpeaking: false,         // 是否正在播放语音
+    speechProgress: 0,          // 语音播放进度
+    currentSentence: '',        // 当前朗读的句子
+    currentPlayingArticleId: '', // 当前播放的文章ID
+    speechRate: 1.0,            // 语音播放速度
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   * @param {object} options 页面加载时传入的参数
+   */
+  async onLoad(options) {
+    console.log('[Index] onLoad triggered with options:', options);
+    this.setData({ 
+      isAppReady: false, 
+      pageReady: false, 
+      loadingError: '' 
+    }); // 初始化页面状态
+
+    try {
+      // 直接等待 app 初始化完成 (包括 speechService.init())
+      const appReadyStatus = await app.waitForReady(); 
+      console.log('[Index] app.waitForReady completed with status:', appReadyStatus);
+
+      if (appReadyStatus) {
+        // App 初始化成功 (即使语音服务可能失败，app 本身也标记为 ready)
+        console.log('[Index] App is ready. Proceeding with page initialization.');
+        this.setData({ isAppReady: true }); 
+
+        // *** 在这里添加登录状态检查 ***
+        if (!app.globalData.userInfo) { // 假设用 userInfo 判断登录状态
+          console.log('[Index] User not logged in, redirecting to login page...');
+          wx.redirectTo({
+            url: '/pages/login/login',
+            fail: (err) => {
+              console.error('[Index] Failed to redirect to login page:', err);
+              // 如果重定向失败，可能需要显示错误提示
+              this.setData({ loadingError: '无法跳转到登录页' });
+            }
+          });
+          return; // 重定向后，不再执行后续的 initPageData
+        } 
+        // *** 登录状态检查结束 ***
+        
+        // 如果已登录，继续初始化页面数据
+        await this.initPageData(options); 
+
+      } else {
+        // App 初始化流程完成，但可能有内部错误（例如语音服务初始化失败）
+        console.error('[Index] App initialization finished but indicated failure (e.g., speech service failed).');
+        this.setData({ 
+          isAppReady: false, // 或者 true，根据是否要显示部分内容
+          loadingError: '应用核心服务初始化失败，部分功能可能受限',
+          pageReady: false 
+        });
+        // 可以在这里决定是否仍然尝试加载页面的非核心部分
+        // await this.initPageData(options); 
+      }
+
+    } catch (error) {
+      // 等待 app.waitForReady() 或 initPageData 时发生异常
+      console.error('[Index] Error during onLoad:', error);
+      this.setData({ 
+        isAppReady: false,
+        loadingError: '页面加载过程中发生错误，请稍后重试',
+        pageReady: false 
+      });
+      // 可以在这里上报错误日志
+    } finally {
+        // 可以在这里停止下拉刷新动画等，如果需要的话
+        // wx.stopPullDownRefresh();
+    }
+  },
+
+  /**
+   * 初始化页面数据
+   * @param {object} options onLoad 传入的参数
+   */
+  async initPageData(options) {
+    console.log('[Index] Initializing page data...');
+    this.setData({ isLoading: true });
+
+    try {
+      // 获取语音服务 (需要检查是否可用, 因为 init 可能失败)
+      const speech = app.getSpeechService();
+      if (speech) {
+        console.log('[Index] Speech service is available.');
+        this.setupSpeechListeners(); // 设置语音监听器
+        
+        // 提前请求麦克风权限
+        this.requestRecordAuth();
+      } else {
+        console.warn('[Index] Speech service is not available.');
+        // 可能需要禁用语音相关功能或显示提示
+      }
+      
+        // 加载文章列表
+      await this.loadArticles(); 
+      
+      // 数据加载完成
+      this.setData({ pageReady: true });
+      console.log('[Index] Page data initialization complete.');
+
+    } catch (error) {
+      console.error('[Index] Error during initPageData:', error);
+      this.setData({ 
+        loadingError: '加载页面数据时出错',
+        pageReady: false 
+      });
+    } finally {
+      this.setData({ isLoading: false });
+    }
+  },
+
+  /**
+   * 请求麦克风授权
+   */
+  requestRecordAuth: function() {
+    wx.getSetting({
+      success: (res) => {
+        // 检查是否已经授权录音功能
+        if (!res.authSetting['scope.record']) {
+          wx.authorize({
+            scope: 'scope.record',
+            success: () => {
+              console.log('[Index] 麦克风授权成功');
+            },
+            fail: (err) => {
+              console.error('[Index] 麦克风授权失败', err);
+              // 保持静默，避免频繁弹窗影响用户体验
+              // 用户将在实际使用录音功能时再次收到授权提示
+            }
+          });
+        } else {
+          console.log('[Index] 已授权麦克风权限');
+        }
+      }
+    });
+  },
+
+  /**
+   * 生命周期函数--监听页面显示
+   */
+  onShow: function () {
+    console.log('[Index] onShow - 页面显示');
+    if (this.data.isAppReady) {
+      console.log('[Index] onShow - App is ready, can refresh data if needed.');
+      // 刷新文章列表
+      if (this.data.pageReady) {
+        this.loadArticles();
+      }
+    } else {
+       console.log('[Index] onShow - App not ready yet.');
+    }
+  },
+
+  /**
+   * 生命周期函数--监听页面初次渲染完成
+   */
+  onReady: function () {
+    console.log('[Index] onReady - 页面初次渲染完成');
+  },
+
+  /**
+   * 生命周期函数--监听页面隐藏
+   */
+  onHide: function () {
+    console.log('[Index] onHide - 页面隐藏');
+    // 停止语音活动
+    if (this.data.isAppReady) {
+    const speech = app.getSpeechService();
+      if (speech) {
+        this.handleStopSpeech();
+      }
+    }
+  },
+
+  /**
+   * 生命周期函数--监听页面卸载
+   */
+  onUnload: function () {
+    console.log('[Index] onUnload - 页面卸载');
+    // 清理事件监听器
+    this.removeSpeechListeners(); 
+  },
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh: async function () {
+    console.log('[Index] onPullDownRefresh triggered');
+    if (this.data.isAppReady) {
+        await this.loadArticles(); // 重新加载文章
+    } else {
+        console.log('[Index] onPullDownRefresh - App not ready, cannot refresh.');
+    }
+    wx.stopPullDownRefresh(); // 停止下拉刷新动画
+  },
+
+  /**
+   * 页面上拉触底事件的处理函数
+   */
+  onReachBottom: function () {
+    console.log('[Index] onReachBottom triggered');
+    // 加载更多文章，目前不做分页处理
+  },
+
+  /**
+   * 用户点击右上角分享
+   */
+  onShareAppMessage: function () {
+    console.log('[Index] onShareAppMessage triggered');
+    return {
+      title: '顺口成章 - 快来一起练习朗读和背诵吧！',
+      path: '/pages/index/index'
+    }
+  },
+
+  /**
+   * 切换 Tab
+   */
+  switchTab: function(event) {
+    const tab = event.currentTarget.dataset.tab;
+    if (tab !== this.data.currentTab) {
+      console.log('[Index] Switching tab to:', tab);
+      this.setData({ currentTab: tab });
+      this.loadArticles(); // 重新加载文章
+    }
+  },
+
+  /**
+   * 加载文章列表
+   */
+  loadArticles: async function() {
+    console.log('[Index] Loading articles for tab:', this.data.currentTab);
+    this.setData({ isLoading: true });
+
+    try {
+      // 从本地存储获取文章
+      let articles = wx.getStorageSync('articles') || [];
+      
+      // 根据当前选中的标签过滤文章
+      if (this.data.currentTab !== 'all') {
+        articles = articles.filter(article => 
+          article.language === (this.data.currentTab === 'chinese' ? '中文' : '英文')
+        );
+      }
+      
+      // 为每篇文章生成预览内容
+      articles = articles.map(article => ({
+        ...article,
+        preview: article.content.substring(0, 50) + (article.content.length > 50 ? '...' : '')
+      }));
+      
+      this.setData({ articles, isLoading: false });
+      
+      if (articles.length === 0) {
+        console.log('[Index] No articles found, adding demo articles');
+        // 如果没有文章，可以添加一些示例文章（首次使用）
+        this.addDemoArticles();
+      }
+    } catch (error) {
+      console.error('[Index] Failed to load articles:', error);
+      wx.showToast({ title: '加载文章失败', icon: 'none' });
+      this.setData({ isLoading: false });
+    }
+  },
+
+  /**
+   * 添加示例文章（首次使用）
+   */
+  addDemoArticles: function() {
+    const demoArticles = [
       {
-        id: 'CH3-001',
-        title: '村居[清]高鼎',
-        preview: '草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早...',
-        content: '草长莺飞二月天，拂堤杨柳醉春烟。儿童散学归来早，忙趁东风放纸鸢。', // 添加完整内容
-        lessonNo: '1',
+        id: 'demo1',
+        title: '春晓',
+        content: '春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。',
         language: '中文',
-        level: '初级',
-        wordCount: 32
+        level: '入门',
+        lessonNo: '1',
+        wordCount: 24,
+        timestamp: Date.now()
       },
       {
-        id: 'CH3-002',
-        title: '咏柳[唐]贺知章',
-        preview: '碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出...',
-        content: '碧玉妆成一树高，万条垂下绿丝绦。不知细叶谁裁出，二月春风似剪刀。', // 添加完整内容
-        lessonNo: '2',
-        language: '中文',
+        id: 'demo2',
+        title: 'Hello World',
+        content: 'Hello world! This is a sample English article for practice. Let\'s read it together.',
+        language: '英文',
         level: '初级',
-        wordCount: 32
+        lessonNo: '1',
+        wordCount: 15,
+        timestamp: Date.now()
       }
-    ],
-    // 语音相关状态
-    isSpeaking: false,
-    speechProgress: 0,
-    currentSentence: '',
-    speechRate: SPEECH_RATE.NORMAL,
-    // 页面和数据状态
-    pageReady: false, // 控制页面主要内容是否渲染
-    loadingError: null, // 存储加载错误信息
-    currentPlayingArticleId: null // 记录当前正在播放范读的文章ID
+    ];
+    
+    // 添加到本地存储
+    wx.setStorageSync('articles', demoArticles);
+    
+    // 更新页面数据
+       this.setData({
+      articles: demoArticles.map(article => ({
+        ...article,
+        preview: article.content.substring(0, 50) + (article.content.length > 50 ? '...' : '')
+      }))
+    });
   },
 
-  async onLoad(options) {
-    console.log('[Index] onLoad - 页面加载', options);
+  /**
+   * 处理添加文章
+   */
+  handleAddArticle: function() {
+    console.log('[Index] handleAddArticle');
+    wx.showActionSheet({
+      itemList: ['输入新文章', '选择预设课文'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          // 输入新文章
+          this.showAddArticleModal();
+        } else if (res.tapIndex === 1) {
+          // 选择预设课文
+          this.showPresetTextsModal();
+        }
+      }
+    });
+  },
+
+  /**
+   * 显示添加文章的模态框
+   */
+  showAddArticleModal: function() {
+    wx.showModal({
+      title: '添加新文章',
+      content: '请输入文章标题和内容',
+      showCancel: true,
+      cancelText: '取消',
+      confirmText: '继续',
+      success: (res) => {
+        if (res.confirm) {
+          wx.navigateTo({
+            url: '/pages/article-edit/article-edit'
+          });
+        }
+      }
+    });
+  },
+
+  /**
+   * 显示预设课文选择框
+   */
+  showPresetTextsModal: function() {
+    console.log('[Index] showPresetTextsModal');
     
-    // 紧急清除灰蒙版
-    wx.hideLoading();
-    wx.hideToast();
-    try { wx.hideModal && wx.hideModal(); } catch (e) {}
+    // 预设文章列表
+    const presetTexts = [
+      {
+        title: '春晓',
+        content: '春眠不觉晓，处处闻啼鸟。夜来风雨声，花落知多少。',
+        language: '中文',
+        level: '入门',
+        lessonNo: '1'
+      },
+      {
+        title: '静夜思',
+        content: '床前明月光，疑是地上霜。举头望明月，低头思故乡。',
+        language: '中文',
+        level: '入门',
+        lessonNo: '2'
+      },
+      {
+        title: 'The Road Not Taken (节选)',
+        content: 'Two roads diverged in a wood, and I—\nI took the one less traveled by,\nAnd that has made all the difference.',
+        language: '英文',
+        level: '中级',
+        lessonNo: '3'
+      },
+      {
+        title: '登鹳雀楼',
+        content: '白日依山尽，黄河入海流。欲穷千里目，更上一层楼。',
+        language: '中文',
+        level: '入门',
+        lessonNo: '4'
+      },
+      {
+        title: '悯农',
+        content: '锄禾日当午，汗滴禾下土。谁知盘中餐，粒粒皆辛苦。',
+        language: '中文',
+        level: '入门',
+        lessonNo: '5'
+      }
+    ];
     
-    // 优先使用专门的灰蒙版修复函数
-    fixGrayOverlay();
-    
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    try {
-      // 检查app对象是否完全初始化
-      if (!app || !app.globalData) {
-        console.error('[Index] onLoad - app对象或globalData未就绪');
-        this.setData({ 
-          loadingError: 'app对象未初始化完成，请返回重试',
-          pageReady: false
+    // 显示预设文章列表
+    wx.showActionSheet({
+      itemList: presetTexts.map(item => item.title),
+      success: (res) => {
+        const selectedText = presetTexts[res.tapIndex];
+        
+        // 确认添加
+        wx.showModal({
+          title: '添加预设课文',
+          content: `确认添加《${selectedText.title}》到您的文章列表?`,
+          success: (modalRes) => {
+            if (modalRes.confirm) {
+              // 添加到本地存储
+              this.addArticleToStorage(selectedText);
+            }
+          }
         });
-        return;
       }
-      
-      // 检查app.waitForReady是否可用
-      if (typeof app.waitForReady !== 'function') {
-        console.error('[Index] onLoad - app.waitForReady方法不可用');
-        // 如果waitForReady不可用，我们直接检查globalData.isReady
-        if (!app.globalData.isReady) {
-          console.warn('[Index] onLoad - 应用未就绪，但继续尝试加载');
-          // 继续加载但做好出错准备
-        }
-      } else {
-        // 等待应用初始化完成
-        try {
-          await app.waitForReady();
-          console.log('[Index] onLoad - 应用初始化已完成');
-        } catch (waitError) {
-          console.error('[Index] onLoad - 等待应用初始化时出错:', waitError);
-          // 继续执行，尝试加载页面
-        }
-      }
-      
-      console.log('[Index] onLoad - 检查登录状态');
-      // 检查登录状态
-      if (app.globalData && !app.globalData.isLoggedIn) {
-        console.log('[Index] onLoad - 用户未登录，跳转到登录页');
-        wx.redirectTo({ url: '/pages/login/login' });
-        return;
-      }
-      console.log('[Index] onLoad - 用户已登录或状态未知，继续加载');
-
-      // 设置页面就绪状态，并在回调中执行后续操作
-      this.setData({ pageReady: true, loadingError: null }, () => {
-        console.log('[Index] onLoad - 页面状态设置为 Ready');
-        // 再次尝试清除灰蒙版
-        fixGrayOverlay();
-        try {
-        // 注册语音事件监听
-        this.setupSpeechListeners();
-        // 加载文章列表
-        this.loadArticles();
-        } catch (setupError) {
-          console.error('[Index] onLoad - 设置监听器或加载文章时出错:', setupError);
-        }
-      });
-    } catch (e) {
-      console.error('[Index] onLoad - 页面初始化过程中发生错误:', e);
-      this.setData({ loadingError: '页面加载失败，请下拉刷新重试' });
-    } finally {
-      // 确保关闭所有加载提示和模态框
-      this.hideAllLoadingAndModal();
-      // 最后再次清除灰蒙版
-      fixGrayOverlay();
-    }
-  },
-
-  onShow() {
-    console.log('[Index] onShow - 页面显示');
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    // 可以在这里刷新数据或检查状态
-  },
-
-  onReady() {
-    console.log('[Index] onReady - 页面初次渲染完成');
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    // 可以在这里执行需要依赖DOM的操作
-  },
-
-  onHide() {
-    console.log('[Index] onHide - 页面隐藏');
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    // 检查app和getSpeechService是否可用
-    if (!app || typeof app.getSpeechService !== 'function') {
-      console.warn('[Index] onHide - getSpeechService方法不可用');
-      return;
-    }
-    
-    // 可以在这里暂停活动，例如语音播放
-    try {
-    const speech = app.getSpeechService();
-      if (speech && speech.getStatus) {
-        const status = speech.getStatus();
-        if (status === SPEECH_STATUS.SPEAKING) {
-      console.log('[Index] onHide - 暂停语音播放');
-      speech.pause();
-        }
-      }
-    } catch (e) {
-      console.error('[Index] onHide - 暂停语音时出错:', e);
-    }
-  },
-
-  onUnload() {
-    console.log('[Index] onUnload - 页面卸载');
-    
-    try {
-    // 清理语音事件监听
-    this.cleanupSpeechListeners();
-    } catch (e) {
-      console.error('[Index] onUnload - 清理语音监听时出错:', e);
-    }
-
-    // 检查app和getSpeechService是否可用
-    if (!app || typeof app.getSpeechService !== 'function') {
-      console.warn('[Index] onUnload - getSpeechService方法不可用');
-    } else {
-      // 尝试停止可能正在进行的朗读
-      try {
-        const speech = app.getSpeechService();
-        if (speech && typeof speech.getStatus === 'function' && speech.getStatus() !== SPEECH_STATUS.IDLE) {
-          console.log('[Index] onUnload - 停止语音播放');
-          speech.stop();
-        }
-      } catch (e) {
-        console.error('[Index] onUnload - 停止语音时出错:', e);
-      }
-    }
-    
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
+    });
   },
   
-  // 关闭所有加载提示和模态框
-  hideAllLoadingAndModal() {
-    try {
-      // 关闭loading提示
-      wx.hideLoading();
-      // 关闭toast提示
-      wx.hideToast();
-      
-      // 关闭所有可能的模态对话框，API可能不存在，忽略错误
-      wx.hideModal && wx.hideModal();
-      
-      // 关闭操作菜单，API可能不存在，忽略错误
-      wx.hideActionSheet && wx.hideActionSheet();
-    } catch (e) {
-      console.error('[Index] hideAllLoadingAndModal error:', e);
-    }
+  /**
+   * 添加文章到本地存储
+   */
+  addArticleToStorage: function(articleData) {
+    // 从本地存储获取现有文章
+    const articles = wx.getStorageSync('articles') || [];
+    
+    // 创建新文章对象
+    const newArticle = {
+      ...articleData,
+      id: 'article_' + Date.now(),
+      wordCount: articleData.content.length,
+      timestamp: Date.now()
+    };
+    
+    // 添加到文章列表
+    articles.push(newArticle);
+    
+    // 保存到本地存储
+    wx.setStorageSync('articles', articles);
+    
+    // 刷新文章列表
+    this.loadArticles();
+    
+    // 显示成功提示
+    wx.showToast({
+      title: '添加成功',
+      icon: 'success'
+    });
   },
 
-  // 加载文章列表（示例，应替换为实际逻辑）
-  loadArticles() {
-    console.log('[Index] loadArticles - 开始加载文章列表...');
-    // 这里可以从本地存储或API获取文章数据
-    // wx.getStorage({ key: 'userArticles', ... })
-    // 或 wx.request({ url: '...', ... })
-
-    // 暂时使用 data 中的示例数据
-    // 如果是从异步加载，需要在成功回调中 setData
-    console.log('[Index] loadArticles - 文章列表加载完成 (使用示例数据)');
-    // this.setData({ articles: loadedArticles });
-    
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-  },
-
-  // 设置语音服务事件监听
-  setupSpeechListeners() {
-    // 检查app和getSpeechService是否可用
-    if (!app || typeof app.getSpeechService !== 'function') {
-      console.warn('[Index] setupSpeechListeners - getSpeechService方法不可用，使用直接导入的speechService');
-      // 如果app.getSpeechService不可用，尝试使用直接导入的speechService
-      if (!speechService || !speechService.on) {
-        console.error('[Index] setupSpeechListeners - speechService也不可用');
-        return;
-      }
-      
-      this._setupSpeechEventListeners(speechService);
-      return;
-    }
-    
-    const speech = app.getSpeechService();
-    if (!speech) {
-      console.error('[Index] setupSpeechListeners - 尝试设置监听器时，语音服务未就绪');
-      // 尝试使用直接导入的speechService
-      if (speechService && speechService.on) {
-        console.log('[Index] setupSpeechListeners - 使用直接导入的speechService');
-        this._setupSpeechEventListeners(speechService);
-      }
-      return;
-    }
-    
-    this._setupSpeechEventListeners(speech);
+  /**
+   * 设置语音相关监听器
+   */
+  setupSpeechListeners: function() {
+    console.log('[Index] Setting up speech listeners');
+    // 在实际开发中，这里可以添加语音事件监听
   },
   
-  // 提取出实际设置监听器的方法
-  _setupSpeechEventListeners(speech) {
-    console.log('[Index] _setupSpeechEventListeners - 设置语音事件监听器');
+  /**
+   * 移除语音相关监听器
+   */
+  removeSpeechListeners: function() {
+    console.log('[Index] Removing speech listeners');
+    // 在实际开发中，这里可以移除语音事件监听
+  },
 
-    // 状态变化监听
-    speech.on(SPEECH_EVENTS.STATUS_CHANGE, (status) => {
-      console.log('[Index] event:STATUS_CHANGE - 语音状态:', status);
-      this.setData({
-        isSpeaking: status === SPEECH_STATUS.SPEAKING,
-        // 如果停止或结束，清除当前播放文章ID
-        currentPlayingArticleId: (status === SPEECH_STATUS.IDLE) ? null : this.data.currentPlayingArticleId
-      });
-      if (status === SPEECH_STATUS.IDLE) {
-         this.setData({ speechProgress: 0, currentSentence: '' }); // 重置进度和句子
-      }
-      
-      // 确保关闭所有加载提示和模态框
-      this.hideAllLoadingAndModal();
-    });
-
-    // 进度监听
-    speech.on(SPEECH_EVENTS.PROGRESS_UPDATE, (progress) => {
-      // 只有在播放时才更新进度条，避免停止后还更新
-      if (this.data.isSpeaking || speech.getStatus() === SPEECH_STATUS.SPEAKING) {
-         this.setData({ speechProgress: progress });
-      }
-    });
-
-    // 句子变化监听
-    speech.on(SPEECH_EVENTS.SENTENCE_CHANGE, (index, sentence) => {
-      console.log('[Index] event:SENTENCE_CHANGE - 当前句子索引:', index, '句子:', sentence ? sentence.substring(0, 10) + '...' : 'N/A');
-      if (sentence && (this.data.isSpeaking || speech.getStatus() === SPEECH_STATUS.SPEAKING)) {
-        this.setData({ currentSentence: sentence });
-      } else if (index === -1) {
-         this.setData({ currentSentence: '' }); // 清空句子显示
-      }
-    });
-
-    // 错误监听
-    speech.on(SPEECH_EVENTS.ERROR, (error) => {
-      console.error('[Index] event:ERROR - 语音服务错误回调:', error);
-      
-      // 确保关闭所有加载提示和模态框
-      this.hideAllLoadingAndModal();
-      
+  /**
+   * 处理语音测试
+   */
+  handleVoiceTest: function(e) {
+    console.log('[Index] handleVoiceTest');
+    const speechService = app.getSpeechService();
+    
+    if (!speechService) {
       wx.showToast({
-        title: `语音播放出错: ${error.message || '未知错误'}`,
+        title: '语音服务不可用',
         icon: 'none'
       });
-      // 出错后也重置状态
+      return;
+    }
+    
+    const articleId = e.currentTarget.dataset.articleid || '';
+    
+    // 如果当前正在播放，则停止播放
+    if (this.data.isSpeaking) {
+      this.handleStopSpeech();
+      return;
+    }
+    
+    // 获取要播放的文章内容
+    let textToSpeak = '欢迎使用顺口成章小程序，这是一个语音测试。';
+    
+    if (articleId) {
+      const article = this.data.articles.find(item => item.id === articleId);
+      if (article) {
+        textToSpeak = article.content;
+      }
+    }
+    
+    // 开始播放
+    this.setData({
+      isSpeaking: true,
+      speechProgress: 0,
+      currentSentence: textToSpeak.substring(0, 30) + (textToSpeak.length > 30 ? '...' : ''),
+      currentPlayingArticleId: articleId
+    });
+    
+    // 模拟语音进度（实际应用中应该使用语音服务的事件）
+    this.startProgressSimulation();
+    
+    // 获取当前语速设置
+    const speechRate = this.data.speechRate || 1.0;
+    console.log(`[Index] 使用语速: ${speechRate}x`);
+    
+    // 播放语音
+    speechService.textToSpeech(textToSpeak, speechRate)
+      .then(filePath => {
+        return speechService.playAudio(filePath, () => {
+          // 播放结束回调
+          this.setData({
+            isSpeaking: false,
+            speechProgress: 100,
+            currentPlayingArticleId: ''
+          });
+          // 清除进度模拟
+          this.clearProgressSimulation();
+        });
+      })
+      .catch(error => {
+        console.error('[Index] 播放失败:', error);
+      wx.showToast({
+          title: '播放失败',
+        icon: 'none'
+      });
        this.setData({
            isSpeaking: false,
            speechProgress: 0,
-           currentSentence: '',
-           currentPlayingArticleId: null
+          currentPlayingArticleId: ''
        });
+        // 清除进度模拟
+        this.clearProgressSimulation();
     });
   },
 
-  // 清理语音事件监听
-  cleanupSpeechListeners() {
-    // 检查直接导入的speechService是否可用
-    if (speechService && typeof speechService.off === 'function') {
-      try {
-        // 清理所有事件监听
-        Object.values(SPEECH_EVENTS).forEach(eventType => {
-          speechService.off(eventType);
+  /**
+   * 开始进度模拟（实际应用中应该使用语音服务的真实进度）
+   */
+  startProgressSimulation: function() {
+    // 清除可能存在的旧定时器
+    this.clearProgressSimulation();
+    
+    // 创建新定时器，每100ms更新一次进度
+    this.progressInterval = setInterval(() => {
+      if (this.data.speechProgress < 100) {
+        this.setData({
+          speechProgress: this.data.speechProgress + 1
         });
-        console.log('[Index] cleanupSpeechListeners - 已清理直接导入的speechService监听器');
-      } catch (e) {
-        console.error('[Index] 清理直接导入的speechService监听器时出错:', e);
-      }
-    }
-    
-    // 如果app.getSpeechService可用，也清理它的监听器
-    if (app && typeof app.getSpeechService === 'function') {
-    const speech = app.getSpeechService();
-      if (speech && typeof speech.off === 'function') {
-        try {
-          // 清理所有事件监听
-          Object.values(SPEECH_EVENTS).forEach(eventType => {
-            speech.off(eventType);
-          });
-          console.log('[Index] cleanupSpeechListeners - 已清理app.getSpeechService监听器');
-        } catch (e) {
-          console.error('[Index] 清理app.getSpeechService监听器时出错:', e);
-        }
-      }
-    }
-  },
-
-  // 切换文章分类 Tab
-  switchTab(e) {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    const tab = e.currentTarget.dataset.tab;
-    console.log('[Index] switchTab - 切换Tab:', tab);
-    this.setData({ currentTab: tab });
-    // TODO: 根据 tab 筛选文章列表
-  },
-
-  // 添加文章按钮点击处理
-  handleAddArticle() {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    console.log('[Index] handleAddArticle - 点击添加文章按钮');
-    wx.showActionSheet({
-      itemList: ['导入预设文章', '手动添加文章'],
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          // 导入预设文章
-          this.hideAllLoadingAndModal();
-          wx.showToast({ title: '导入功能开发中', icon: 'none' });
-        } else {
-          // 手动添加文章
-          this.hideAllLoadingAndModal();
-          wx.showToast({ title: '添加功能开发中', icon: 'none' });
-        }
-      }
-    });
-  },
-
-  // 范读功能：播放文章朗读
-  handleVoiceTest(e) {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    const articleId = e.currentTarget.dataset.id;
-    // 获取要朗读的文章
-    const article = this.data.articles.find(a => a.id === articleId);
-    
-    if (!article) {
-      console.error('[Index] handleVoiceTest - 未找到文章:', articleId);
-      return;
-    }
-    
-    // 获取语音服务
-    const speech = app.getSpeechService();
-    if (!speech) {
-      console.error('[Index] handleVoiceTest - 语音服务未就绪');
-      wx.showToast({ title: '语音服务未就绪', icon: 'none' });
-      return;
-    }
-
-    console.log('[Index] handleVoiceTest - 播放文章范读:', article.title);
-    
-    // 如果当前正在播放此文章，则暂停/恢复播放
-    if (this.data.currentPlayingArticleId === articleId) {
-      if (this.data.isSpeaking) {
-         speech.pause();
-        console.log('[Index] handleVoiceTest - 暂停朗读');
       } else {
-        speech.resume();
-        console.log('[Index] handleVoiceTest - 恢复朗读');
+        this.clearProgressSimulation();
       }
-      return;
+    }, 100);
+  },
+
+  /**
+   * 清除进度模拟
+   */
+  clearProgressSimulation: function() {
+    if (this.progressInterval) {
+      clearInterval(this.progressInterval);
+      this.progressInterval = null;
     }
+  },
+
+  /**
+   * 停止语音播放
+   */
+  handleStopSpeech: function() {
+    console.log('[Index] handleStopSpeech');
+    const speechService = app.getSpeechService();
     
-    // 播放新的文章
-    this.setData({ currentPlayingArticleId: articleId });
-    
-    // 准备朗读配置
-    const options = {
-      title: article.title,
-        rate: this.data.speechRate,
-      onStatusChange: (status) => {
-        // 在setupSpeechListeners中已处理
-      },
-      onProgress: (progress) => {
-        // 在setupSpeechListeners中已处理
-      },
-      onSentenceChange: (index, sentence) => {
-        // 在setupSpeechListeners中已处理
-      },
-      onError: (error) => {
-        // 在setupSpeechListeners中已处理
-      }
-    };
-    
-    // 开始朗读
-    const success = speech.speak(article.content, options);
-    if (success) {
-      console.log('[Index] handleVoiceTest - 开始朗读文章:', article.title);
-    } else {
-      console.error('[Index] handleVoiceTest - 开始朗读失败');
-      // 确保关闭所有加载提示和模态框
-      this.hideAllLoadingAndModal();
+    if (speechService && this.data.isSpeaking) {
+      speechService.stopAudio();
       
-      wx.showToast({ title: '开始朗读失败', icon: 'none' });
-      this.setData({ currentPlayingArticleId: null });
-    }
-  },
-
-  // 手动停止朗读
-  handleStopSpeech() {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    console.log('[Index] handleStopSpeech - 用户手动停止朗读');
-    const speech = app.getSpeechService();
-    if (speech) {
-      speech.stop();
       this.setData({
-        currentPlayingArticleId: null,
-        isSpeaking: false
+        isSpeaking: false,
+        speechProgress: 0,
+        currentPlayingArticleId: ''
       });
+      
+      // 清除进度模拟
+      this.clearProgressSimulation();
     }
   },
 
-  // 切换朗读速度
-  handleChangeRate() {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-
-    console.log('[Index] handleChangeRate - 切换朗读速度');
-    const rates = [
-      { name: '慢速', value: SPEECH_RATE.SLOW },
-      { name: '正常', value: SPEECH_RATE.NORMAL },
-      { name: '快速', value: SPEECH_RATE.FAST }
-    ];
-    
-    // 寻找当前速度
-    let currentIndex = rates.findIndex(r => r.value === this.data.speechRate);
-    if (currentIndex === -1) currentIndex = 1; // 默认正常速度
-    
-    // 切换到下一个速度
+  /**
+   * 改变语音速率
+   */
+  handleChangeRate: function() {
+    console.log('[Index] handleChangeRate');
+    const rates = [0.5, 0.75, 1.0, 1.25, 1.5];
+    const currentIndex = rates.indexOf(this.data.speechRate);
     const nextIndex = (currentIndex + 1) % rates.length;
-    const newRate = rates[nextIndex];
     
-    // 更新页面显示
-    this.setData({ speechRate: newRate.value });
-    
-    // 如果正在朗读，则应用新速度
-    const speech = app.getSpeechService();
-    if (speech) {
-      speech.setRate(newRate.value);
-    }
+    this.setData({
+      speechRate: rates[nextIndex]
+    });
     
     wx.showToast({
-      title: `朗读速度: ${newRate.name}`,
+      title: `语速: ${this.data.speechRate}x`,
       icon: 'none'
     });
   },
 
-  // 朗读练习按钮点击处理
-  handlePracticeReading(e) {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
+  /**
+   * 处理朗读练习
+   */
+  handlePracticeReading: function(e) {
     const articleId = e.currentTarget.dataset.id;
-    console.log('[Index] handlePracticeReading - 开始朗读练习:', articleId);
-    // TODO: 添加跳转到朗读练习页面的逻辑
-    wx.showToast({ title: '朗读练习功能开发中', icon: 'none' });
-  },
-
-  // 背诵练习按钮点击处理
-  handlePracticeReciting(e) {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
+    const article = this.data.articles.find(item => item.id === articleId);
     
-    const articleId = e.currentTarget.dataset.id;
-    console.log('[Index] handlePracticeReciting - 开始背诵练习:', articleId);
-    // TODO: 添加跳转到背诵练习页面的逻辑
-    wx.showToast({ title: '背诵练习功能开发中', icon: 'none' });
-  },
-
-  // 更多操作按钮点击处理
-  showMoreActions(e) {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    const articleId = e.currentTarget.dataset.id;
-    const article = this.data.articles.find(a => a.id === articleId);
-    
-    if (!article) {
-      console.error('[Index] showMoreActions - 未找到文章:', articleId);
-      return;
+    if (article) {
+      wx.navigateTo({
+        url: `/pages/reading/reading?id=${articleId}`
+      });
     }
+  },
+
+  /**
+   * 处理背诵练习
+   */
+  handlePracticeReciting: function(e) {
+    const articleId = e.currentTarget.dataset.id;
+    const article = this.data.articles.find(item => item.id === articleId);
     
-    console.log('[Index] showMoreActions - 显示更多操作:', article.title);
-    
+    if (article) {
+      wx.navigateTo({
+        url: `/pages/reciting/reciting?id=${articleId}`
+      });
+    }
+  },
+  
+  /**
+   * 显示更多操作菜单
+   */
+  showMoreActions: function(e) {
+    const articleId = e.currentTarget.dataset.id;
+
     wx.showActionSheet({
-      itemList: ['收藏', '删除', '分享'],
+      itemList: ['删除', '编辑', '分享'],
       success: (res) => {
         switch (res.tapIndex) {
-          case 0: // 收藏
-            this.hideAllLoadingAndModal();
-            wx.showToast({ title: '收藏功能开发中', icon: 'none' });
+          case 0: // 删除
+            this.handleDeleteArticle(articleId);
             break;
-          case 1: // 删除
-            this.confirmDelete(articleId, article.title);
+          case 1: // 编辑
+            this.handleEditArticle(articleId);
             break;
           case 2: // 分享
-            this.hideAllLoadingAndModal();
-            wx.showToast({ title: '分享功能开发中', icon: 'none' });
+            this.handleShareArticle(articleId);
             break;
+        }
+      }
+    });
+  },
+
+  /**
+   * 处理删除文章
+   */
+  handleDeleteArticle: function(articleId) {
+    wx.showModal({
+      title: '确认删除',
+      content: '确定要删除这篇文章吗？',
+      success: (res) => {
+        if (res.confirm) {
+          // 从本地存储中删除文章
+          const articles = wx.getStorageSync('articles') || [];
+          const updatedArticles = articles.filter(item => item.id !== articleId);
+          wx.setStorageSync('articles', updatedArticles);
+          
+          // 更新页面数据
+          this.loadArticles();
+          
+          wx.showToast({
+            title: '删除成功',
+            icon: 'success'
+          });
         }
       }
     });
   },
   
-  // 确认删除弹窗
-  confirmDelete(articleId, title) {
-    // 确保关闭所有加载提示和模态框
-    this.hideAllLoadingAndModal();
-    
-    wx.showModal({
-      title: '确认删除',
-      content: `确定要删除"${title}"吗？`,
-      success: (res) => {
-        if (res.confirm) {
-          console.log('[Index] confirmDelete - 确认删除文章:', articleId);
-          // TODO: 实现删除逻辑
-          this.hideAllLoadingAndModal();
-          wx.showToast({ title: '删除功能开发中', icon: 'none' });
-        }
-      }
+  /**
+   * 处理编辑文章
+   */
+  handleEditArticle: function(articleId) {
+    wx.navigateTo({
+      url: `/pages/article-edit/article-edit?id=${articleId}`
+    });
+  },
+  
+  /**
+   * 处理分享文章
+   */
+  handleShareArticle: function(articleId) {
+    // 由于小程序分享只能在onShareAppMessage中触发，这里只做提示
+    wx.showToast({
+      title: '点击右上角分享',
+      icon: 'none'
     });
   }
-}); 
+})

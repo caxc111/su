@@ -1,0 +1,276 @@
+/* record-detail.wxss - 练习记录详情页样式 */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #f8f8f8;
+}
+
+/* 加载中样式 */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 500rpx;
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 顶部信息 */
+.header {
+  margin-bottom: 30rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+}
+
+.practice-type {
+  font-size: 24rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  margin-right: 16rpx;
+}
+
+.practice-type.read {
+  background-color: #e1f5fe;
+  color: #0288d1;
+}
+
+.practice-type.recite {
+  background-color: #f3e5f5;
+  color: #9c27b0;
+}
+
+.date {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 得分卡片样式 */
+.score-card {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.score-container {
+  display: flex;
+  align-items: baseline;
+}
+
+.score {
+  font-size: 80rpx;
+  font-weight: bold;
+}
+
+.score-excellent {
+  color: #8ce552;
+}
+
+.score-good {
+  color: #4caf50;
+}
+
+.score-average {
+  color: #ff9800;
+}
+
+.score-poor {
+  color: #f44336;
+}
+
+.score-label {
+  font-size: 28rpx;
+  margin-left: 8rpx;
+  color: #999;
+}
+
+.score-detail {
+  display: flex;
+  flex-direction: column;
+}
+
+.similarity {
+  display: flex;
+  align-items: baseline;
+}
+
+.label {
+  font-size: 26rpx;
+  color: #999;
+  margin-right: 8rpx;
+}
+
+.value {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+/* 文本区域样式 */
+.text-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.text-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.text-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.play-btn {
+  font-size: 24rpx;
+  color: #8ce552;
+  background-color: rgba(140, 229, 82, 0.1);
+  padding: 8rpx 20rpx;
+  border-radius: 30rpx;
+}
+
+.play-btn.playing {
+  color: #ff4b4b;
+  background-color: rgba(255, 75, 75, 0.1);
+}
+
+.text-content {
+  font-size: 28rpx;
+  line-height: 1.6;
+  color: #333;
+  padding: 16rpx;
+  border-radius: 8rpx;
+  min-height: 100rpx;
+  word-wrap: break-word;
+}
+
+.original-text {
+  background-color: #f5f5f5;
+}
+
+.recognized-text {
+  background-color: #f9f9f9;
+}
+
+/* 对比分析样式 */
+.compare-section {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  margin-bottom: 30rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
+}
+
+.compare-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.compare-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+}
+
+.compare-toggle {
+  font-size: 24rpx;
+  color: #8ce552;
+}
+
+.compare-content {
+  margin-top: 20rpx;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 20rpx;
+}
+
+.compare-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.compare-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.compare-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: bold;
+}
+
+.compare-note {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 16rpx;
+  line-height: 1.5;
+}
+
+/* 操作按钮样式 */
+.action-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20rpx;
+}
+
+.action-btn {
+  flex: 1;
+  margin: 0 10rpx;
+  font-size: 28rpx;
+  padding: 16rpx 0;
+  border-radius: 40rpx;
+  line-height: 1.4;
+}
+
+.back-btn {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+.delete-btn {
+  background-color: #ffebee;
+  color: #f44336;
+}
+
+.share-btn {
+  background-color: #e8f5e9;
+  color: #4caf50;
+} 
